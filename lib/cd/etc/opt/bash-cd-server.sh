@@ -6,7 +6,7 @@ CD_PORT=7480
 #IT SHOULD BE INSTALLED AS A SYSTEM SERVICE BY env/setup.sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $DIR/lib/tools.sh
+source /opt/bash-cd/lib/tools.sh
 
 handle() {
     cd "$DIR"
@@ -34,9 +34,9 @@ handle() {
                 $DIR/env/setup.sh
                 git checkout $rollback_hash
                 continue $? "SYSTEM UPDATE FAILED"
-                ../../apply.sh install --rebuild
+                ../../../apply.sh install --rebuild
             else
-                ../../apply.sh install
+                ../../../apply.sh install
             fi
             continue $? "ENVIRONMENT INSTALL FAILED"
             rm $rollback_file
@@ -44,7 +44,7 @@ handle() {
             echo "No changes to apply."
         fi
     elif [[ "$in" == "POST /install"* ]]; then
-        ../../apply.sh install
+        ../../../apply.sh install
     else
         fail "$in"
     fi

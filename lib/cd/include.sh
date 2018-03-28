@@ -3,9 +3,7 @@
 APPLICABLE_SERVICES+=("cd")
 
 start_cd() {
-    #reboot -f
-
-    #cd service restart instead of stop-start because the running server.sh gets interrupted
+    #cd service restart instead of stop-start because the running /opt/bash-cd-server.sh gets interrupted
     restart -q cd
     start -q cd
 }
