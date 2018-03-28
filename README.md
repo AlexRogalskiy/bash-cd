@@ -51,7 +51,7 @@ critical is the deployment:
 ## How it works
 
 Whenever _any_ push event occurs on your bash-cd repository or any other git repos that are part of your build
-and configured with webhooks, the `./server.sh` receives a notification.
+and configured with webhooks, the `/opt/bash-cd/server.sh` receives a notification.
 
 
 For `POST /push` events which come only from bash-cd repostiory, the first the server does is to check whether the local 
@@ -86,9 +86,9 @@ Environment is described in `./env/var.sh` and must define specific variables an
     ./lib/ - reusable modules (PRs welcome!)
         tools.sh - a small toolset of functions used across the codebase 
         cd/ - the first module that installs bash-cd server as an upstart service
-            opt/bash-cd/server.sh - the bash-cd http server that listens for webhook events
             etc/init/bash-cd.conf - upstart config for the service
             include.sh - every module must have include.sh with specifically named functions, see below
+            server.sh - the bash-cd http server that listens for webhook events
         ../ - see contents of the directory for other available modules
     ./apply.sh - script that takes (build|install) argument - build does a dry build, install a real one
     ./deploy.sh - use this from your development machine if you will be using branch-per-environment strategy
