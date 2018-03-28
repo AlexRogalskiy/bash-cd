@@ -115,7 +115,7 @@ Modules are directories under 2 separate locations:
 There are specific bash variables which must be defined globally and any variable that can be used in the 
 *environment-templates* must also be *exported*.
 
-The best way is to checkout the example [`/env/var.sh`](env/var/sh) and try running `./apply.sh build --host HOST0`
+The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
 and then look at the `./build` output.
  
 ...
