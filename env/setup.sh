@@ -15,7 +15,7 @@ add-apt-repository -y "deb [arch=amd64] https://packages.confluent.io/deb/4.0 st
 add-apt-repository -y ppa:openjdk-r/ppa
 apt-get -y update
 
-apt-get install upstart #apt-get -y install upstart-sysv
+apt-get -y install upstart #apt-get -y install upstart-sysv
 
 update-initramfs -u
 apt-get -y purge systemd
