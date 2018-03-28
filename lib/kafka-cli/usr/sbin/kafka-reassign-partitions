@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/opt/kafka/current/bin/kafka-reassign-partitions.sh --zookeeper $ZOOKEEPER_CONNECTION $@

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/opt/kafka/current/bin/zookeeper-shell.sh $ZOOKEEPER_CONNECTION

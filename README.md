@@ -51,7 +51,7 @@ critical is the deployment:
 ## How it works
 
 Whenever _any_ push event occurs on your bash-cd repository or any other git repos that are part of your build
-and configured with webhooks, the `/opt/bash-cd/server.sh` receives a notification.
+and configured with webhooks, the `/opt/bash-cd/lib/cd/server.sh` receives a notification.
 
 
 For `POST /push` events which come only from bash-cd repostiory, the first the server does is to check whether the local 
