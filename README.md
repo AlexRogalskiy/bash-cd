@@ -3,6 +3,8 @@
 Incremental Continuous Deployment server which listens on port 7480 for HTTP webhook events.
 
 It can be used to __build__ deployment recipes on most UNIX-like systems that can run Bash Version 3+ 
+So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to simulate how the build will
+manifest on a particular machine and inspect `./build` directory. 
 
 The __install__ phase currently requires Bash Version 4 and was tested on Ubuntu but should work on most
 Linux distributions but the `env/setup.sh` script has to be modified appropriately.  
@@ -26,9 +28,6 @@ On the bash-cd github repository, under settings, add a webhook for each target 
 defaults for push-events-only and the following URL:
 
     http://<target-machine-public-hostname>:7480/push
-
-On your development machine, you can always run `./apply.sh build <HOST-VAR>` to simulate how the build will
-manifest on a particular machine and inspect `./build` directory. 
 
 There are different branching strategies you can use, depending on how many environments you have and how
 critical is the deployment:
