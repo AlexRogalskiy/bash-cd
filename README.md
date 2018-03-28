@@ -57,9 +57,8 @@ and configured with webhooks, the `/opt/bash-cd/lib/cd/server.sh` receives a not
 For `POST /push` events which come only from bash-cd repostiory, the first the server does is to check whether the local 
 branch is behind its remote - if not nothing happens, if yes it invokes `./apply.sh install`
 
-For `POST /install` events which come from your applictaions that you want to deploy from sources, this step is 
-not executed and `./apply.sh install` is invoked unconditionally - this way any changes to appliction repostiory
-will still trigger deployment.
+For `POST /install` events which come from your applictaions that you want to deploy from sources, the check for branch updates is skipped and `./apply.sh install` is invoked unconditionally - this way any changes to appliction repostiory
+will still trigger deployment. The build is still incremental so only affected services get installed.
 
 Once `./apply.sh install` is triggered, it first compiles a list of APPLICABLE_SERVICES which are attached to the 
 current host - for this reasons it is best to identify the hosts by primary ip addresses, i.e. the most stable
@@ -95,16 +94,19 @@ Environment is described in `./env/var.sh` and must define specific variables an
 - `./ssh.sh                      ` - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
 
 
-## What makes up a service module
+## What makes up a service
 
-Modules are directories under 2 separate locations:
+Services are defined as modules directories under 2 separate locations:
 - `./lib/<service>/..` - see examples in [`/lib`](lib) - these are fully reusable 
 - `./env/<service>/..` - see [`/env/example-app`](env/example-app) - these are your additional modules
  
-1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host
-2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target
-3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
+Structure of the module:
 
+1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host
+
+2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
+
+3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
 - `stop_<service>()` - how the service is stopped on a target machine
 - `build_<service>()` - this method must output everything into `$BUILD_DIR` which will differ for `build` and `install` 
 - `install_<service>()` - this function will do everything after a service was selected for installation by the build
@@ -118,8 +120,4 @@ There are specific bash variables which must be defined globally and any variabl
 The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
 and then look at the `./build` output.
  
-...
-
-## Rolling Upgrades
-
 ...
