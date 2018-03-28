@@ -94,24 +94,25 @@ Environment is described in `./env/var.sh` and must define specific variables an
     ./deploy.sh - use this from your development machine if you will be using branch-per-environment strategy
     ./ssh.sh - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
 
-(lib/<module>`) or a custom module under '
 
-There are specific bash variables that 
+## What makes up a service module
 
-The server listens for 2 kinds of POST requests:
-    
-    **POST /push** - is for the bash-cd repo webhooks
-    **POST /install** - is for applications in other repositories that are built and deployed by bash-cd
+Modules are directories under `./lib/<service>/..` or `./env/<service>/..`. 
+1. Module must have an `include.sh` file that defines the requirements, see examples
+2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target
+3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
 
-## What makes up a module
-
-...
+`stop_<service>()` - how the service is stopped on a target machine
+`build_<service>()` - this method must output everything into `$BUILD_DIR` which will be different for `build` and `install` 
+`install_<service>()` - this function will do everything after a service was selected for installation by the build
+`stop_<service>()` - how the service is started on a target machine
 
 ## Environment Configuration Model
 
+There are specific bash variables which must be defined globally and any variable that can be used in the 
+*environment-templates* must also be *exported*. 
+
 ...
-
-
 
 ## Rolling Upgrades
 
