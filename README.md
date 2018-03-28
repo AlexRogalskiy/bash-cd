@@ -102,7 +102,7 @@ Services are defined as modules directories under 2 separate locations:
  
 Structure of the module:
 
-1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host
+1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host. Any exported variables for use in templates or other modules must be exported in this file.
 
 2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
 
@@ -111,6 +111,8 @@ Structure of the module:
 - `build_<service>()` - this method must output everything into `$BUILD_DIR` which will differ for `build` and `install` 
 - `install_<service>()` - this function will do everything after a service was selected for installation by the build
 - `stop_<service>()` - how the service is started on a target machine
+
+Modules can depend on other modules, e.g. an `example-app` requires KAFKA_CONNECTION which is defined and exported in the `lib/kafka/include.sh` so that any module or template may use it.
 
 ## Environment Configuration Model
 
