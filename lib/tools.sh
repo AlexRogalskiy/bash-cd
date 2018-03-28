@@ -90,29 +90,32 @@ expand() {
         for a in ${params[@]}; do
             if [[ $line = *"$a"* ]]; then
                 v="${!a}"
-                #FIXME there are issues here for example with xmls like logback.xml
                 line=$( echo $line | sed -e "s^\$$a^$v^g" )
             fi
         done
-        #TODO there might be other cases when printf is not a good idea
-        if [[ $line == *"%"* ]]; then
-            echo "$line"
-        else
-            printf "$line\n"
-        fi
+        printf "%s\n" "$line"
     }
     IFS=''; while read line; do IFS=$'\n'; expand_line; IFS=''; done; IFS=$'\n'; expand_line
 }
 
 expand_dir() {
+    artifacts=(".sh" ".jar" ".tar" ".war" ".so" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx")
     for file in $1/$2/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then
             mkdir -p "$BUILD_DIR/$2"
-            echo "$2/$filename"
-            cat "$file" | expand > "$BUILD_DIR/$2/$filename"
+            is_artifact=0
+            for a in "${artifacts[@]}"; do if [[ $filename == *"$a" ]]; then is_artifact=1; break; fi; done
+            if [[ is_artifact -eq 1 ]]; then
+                echo "[ARTIFACT] $2/$filename"
+                cat "$file" > "$BUILD_DIR/$2/$filename"
+            else
+                echo "[TEMPLATE] $2/$filename"
+                cat "$file" | expand > "$BUILD_DIR/$2/$filename"
+            fi
             continue $? "Could process file $FILE"
-            if [ "$1" == "/" ]; then chmod --reference="$file" "$BUILD_DIR/$2/$filename"; fi
+            #the chmod with reference file works only in POSIX so muting for OSX
+            chmod --reference="$file" "$BUILD_DIR/$2/$filename" > /dev/null 2>&1
         elif [ -d "$file" ]; then
             expand_dir "$1" "$2/$filename"
         fi
