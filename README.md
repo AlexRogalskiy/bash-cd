@@ -12,7 +12,7 @@ Linux distributions but the `env/setup.sh` script has to be modified appropriate
 
 # Quick Start 
  
-To try bash-cd, fork it and modify the contents of [`/env`](env) directory.
+To try bash-cd, fork it and modify the contents of [`/env`](env) directory. (Remeber that forks are public so may want to mirror the repo instead.)
 
 On the target machines you will have to have `git` command available and you must enable the root account
 to be able to programmatically pull the changes from bash-cd and any other application that you will be 
