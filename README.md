@@ -23,6 +23,7 @@ On each target machine clone bash-cd it into `/opt/bash-cd` and inside run the f
  
     sudo ./env/setup.sh
     sudo ./apply.sh install
+    #You may need to REBOOT at this point, depnding what you did in setup.sh
     
 On the bash-cd github repository, under settings, add a webhook for each target machine, using
 defaults for push-events-only and the following URL:
