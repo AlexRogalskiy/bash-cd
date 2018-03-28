@@ -97,8 +97,11 @@ Environment is described in `./env/var.sh` and must define specific variables an
 
 ## What makes up a service module
 
-Modules are directories under `./lib/<service>/..` or `./env/<service>/..`. 
-1. Module must have an `include.sh` file that defines the requirements, see examples
+Modules are directories under 2 separate locations:
+- `./lib/<service>/..` - see examples in [`/lib`](lib) - these are fully reusable 
+- `./env/<service>/..` - see [`/env/example-app`](env/example-app) - these are your additional modules
+ 
+1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host
 2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target
 3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
 
@@ -110,8 +113,11 @@ Modules are directories under `./lib/<service>/..` or `./env/<service>/..`.
 ## Environment Configuration Model
 
 There are specific bash variables which must be defined globally and any variable that can be used in the 
-*environment-templates* must also be *exported*. 
+*environment-templates* must also be *exported*.
 
+The best way is to checkout the example [`/env/var.sh`](env/var/sh) and try running `./apply.sh build --host HOST0`
+and then look at the `./build` output.
+ 
 ...
 
 ## Rolling Upgrades
