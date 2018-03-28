@@ -105,10 +105,10 @@ Modules are directories under 2 separate locations:
 2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target
 3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
 
-`stop_<service>()` - how the service is stopped on a target machine
-`build_<service>()` - this method must output everything into `$BUILD_DIR` which will be different for `build` and `install` 
-`install_<service>()` - this function will do everything after a service was selected for installation by the build
-`stop_<service>()` - how the service is started on a target machine
+- `stop_<service>()` - how the service is stopped on a target machine
+- `build_<service>()` - this method must output everything into `$BUILD_DIR` which will be different for `build` and `install` 
+- `install_<service>()` - this function will do everything after a service was selected for installation by the build
+- `stop_<service>()` - how the service is started on a target machine
 
 ## Environment Configuration Model
 
