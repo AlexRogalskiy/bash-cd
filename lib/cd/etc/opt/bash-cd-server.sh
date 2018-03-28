@@ -5,11 +5,10 @@ CD_PORT=7480
 #THIS IS A SIMPLE BASH SERVER FOR GITHUB WEBHOOK
 #IT SHOULD BE INSTALLED AS A SYSTEM SERVICE BY env/setup.sh
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source /opt/bash-cd/lib/tools.sh
 
 handle() {
-    cd "$DIR"
+    cd /opt/bash-cd
     read in
     echo "$in"
     if [[ "$in" == "POST /push"* ]]; then
@@ -25,18 +24,18 @@ handle() {
             echo $(git rev-parse HEAD) > $rollback_file
         fi
         if [ $changed -eq 1 ]; then
-            setup_checksum_before=$(checksum "$DIR/env/setup.sh")
+            setup_checksum_before=$(checksum "env/setup.sh")
             git pull
             continue $? "COULD NOT PULL THE LATEST ENVIRONMENT CHANGES"
-            setup_checksum_after=$(checksum "$DIR/env/setup.sh")
+            setup_checksum_after=$(checksum "env/setup.sh")
             if [ "$setup_checksum_before" != "$setup_checksum_after" ]; then
                 warn "SYSTEM UPDATE DETECTED"
-                $DIR/env/setup.sh
+                ./env/setup.sh
                 git checkout $rollback_hash
                 continue $? "SYSTEM UPDATE FAILED"
-                ../../../apply.sh install --rebuild
+                ./apply.sh install --rebuild
             else
-                ../../../apply.sh install
+                ./apply.sh install
             fi
             continue $? "ENVIRONMENT INSTALL FAILED"
             rm $rollback_file
@@ -44,7 +43,7 @@ handle() {
             echo "No changes to apply."
         fi
     elif [[ "$in" == "POST /install"* ]]; then
-        ../../../apply.sh install
+        ./apply.sh install
     else
         fail "$in"
     fi
