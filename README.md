@@ -2,10 +2,10 @@
 
 Incremental Continuous Deployment server which listens on port 7480 for HTTP webhook events.
 
-It can be used to build deployments on most UNIX-like systems that can run Bash Version 3+ 
+It can be used to __build__ deployment recipes on most UNIX-like systems that can run Bash Version 3+ 
 
-The installation step currently requires Bash Version 4. and is meant to be run specifically 
-on Linux machines - the `env/setup.sh` script comes pre-built for Ubuntu. 
+The __install__ phase currently requires Bash Version 4 and was tested on Ubuntu but should work on most
+Linux distributions but the `env/setup.sh` script has to be modified appropriately.  
 
 
 # Quick Start 
