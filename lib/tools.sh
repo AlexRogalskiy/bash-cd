@@ -51,6 +51,17 @@ checkvar() {
     if [ -z "$value" ]; then fail "$1 variable not specified"; fi
 }
 
+required() {
+    module="$1"
+    if [ ! -z "$2" ]; then
+        value="$(eval $expr)"
+        if [ ! -z "$value" ]; then module=""; fi
+    fi
+    if [ ! -z "$module" ]; then
+        source "$( dirname "${BASH_SOURCE[0]}" )/$module/include.sh"
+    fi
+}
+
 checksum() {
     if [ -d "$1" ]; then
         if [ -z "$(command -v md5sum)" ]; then
