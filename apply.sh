@@ -115,9 +115,9 @@ case $PHASE in
     install*)
         declare DIFF="true"
         declare -a AFFECTED_SERVICES
-        rm -rf $DIR/lib/build && cp -r $DIR/build $DIR/lib/
+        cp -r $DIR/build $DIR/lib/
         build
-        cp -r $DIR/lib/build $DIR
+        rm -rf $DIR/build/* && mv $DIR/lib/build/* $DIR/build
         if [ ! -z "$AFFECTED_SERVICES" ]; then
             install
         else

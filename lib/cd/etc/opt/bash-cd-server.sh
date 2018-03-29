@@ -11,6 +11,7 @@ handle() {
     cd /opt/bash-cd
     read in
     echo "$in"
+
     if [[ "$in" == "POST /push"* ]]; then
         git remote update
         rollback_file="$DIR/unclean"
