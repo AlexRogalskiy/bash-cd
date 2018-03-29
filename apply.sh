@@ -104,7 +104,7 @@ install() {
         continue $? "FAILED TO START $service"
 
     done
-    highlight "APPLIED IN /"
+    success "APPLIED IN /"
 }
 
 case $PHASE in
