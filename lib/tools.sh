@@ -52,8 +52,15 @@ checkvar() {
 }
 
 checksum() {
-    target="$1"
-    find $target -type f -exec md5sum {} \; | sort -k 2 | md5sum
+    if [ -d "$1" ]; then
+        if [ -z "$(command -v md5sum)" ]; then
+            find $1 -type f -exec md5 {} \; | sort -k 2 | md5
+        else
+            find $1 -type f -exec md5sum {} \; | sort -k 2 | md5sum
+        fi
+    else
+        if [ -z "$(command -v md5sum)" ]; then cat $1 | md5; else cat $1 | md5sum; fi
+    fi
 }
 
 download() {
@@ -122,17 +129,19 @@ expand_dir() {
     done
 }
 
+
 diff_cp() {
-    SRC="$1"
-    DEST="$2"
-    for src_file in $SRC/*; do
+    for src_file in $1/*; do
         filename=$(basename "$src_file")
-        dest_file="$DEST/$filename"
+        dest_file="$2/$filename"
         if [ -d "$src_file" ]; then
-            diff_cp "$SRC/$filename" "$dest_file"
+            mkdir -p "$dest_file"
+            diff_cp "$src_file" "$dest_file"
         elif [ -f "$src_file" ]; then
-            if [ ! -f "$dest_file" ] || [ "$(checksum "$src_file")" != "$(checksum "$dest_file")" ]; then
-                cp -r "$src_file" "$dest_file"
+            src_checksum=$(checksum $src_file)
+            dest_checksum=$(checksum $dest_file)
+            if [ ! -f "$dest_file" ] || [ "$src_checksum" != "$dest_checksum" ]; then
+                cp -f "$src_file" "$dest_file"
             fi
         fi
     done
