@@ -132,7 +132,7 @@ diff_cp() {
             diff_cp "$SRC/$filename" "$dest_file"
         elif [ -f "$src_file" ]; then
             if [ ! -f "$dest_file" ] || [ "$(checksum "$src_file")" != "$(checksum "$dest_file")" ]; then
-                echo "copying changed $src_file to $dest_file"
+                cp -r "$src_file" "$dest_file"
             fi
         fi
     done
