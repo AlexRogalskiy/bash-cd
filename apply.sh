@@ -6,6 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $DIR/lib/tools.sh
 
 PHASE="$1"
+OPTION="$2"
 HOST="$3"
 
 if [ -z "$PHASE" ] ; then
@@ -36,13 +37,12 @@ if [ -z "$APPLICABLE_SERVICES" ]; then
     exit 0;
 fi
 
-declare BUILD_DIR="$DIR/build"
-if [[ "$2" == "--rebuild" ]]; then rm -r "$DIR/build"; fi
-mkdir -p $BUILD_DIR
-continue $? "Could not create build dir: $BUILD_DIR"
-
 build() {
     checkvar DIFF
+    checkvar BUILD_DIR
+    mkdir -p $BUILD_DIR
+    continue $? "Could not create build dir: $BUILD_DIR"
+    if [[ "$OPTION" == "--rebuild" ]] && [[ "$BUILD_DIR" != "/" ]]; then rm -r "$BUILD_DIR/*"; fi
     for service in "${APPLICABLE_SERVICES[@]}"
     do
         info "BUILDING SERVICE $service"
@@ -74,26 +74,17 @@ install() {
     do
         warn "INSTALLING SERVICE $service"
 
-        #first run a dry build - this happens before start to minimize down time
-        #it cannot happen after stop because some services use reboot or restart
-        #cd so the resuming of the build would enter a loop
-        BUILD_DIR="$DIR/build"
-        if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
-        continue $? "FAILED TO BUILD SERVICE $servie"
-        if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-        if [ -d "$DIR/env/$service" ]; then expand_dir "$DIR/env/$service"; fi
-        continue $? "FAILED TO UPDATE BUILD FOOTPRINT: $servie"
-
         #service must be stopped before the real build into / becuase jars or other runtime artifact may be modified
         if [ "$(type -t stop_$service)" == "function" ]; then "stop_$service"; fi
 
         #now run a real build applying to the root of the filesystem
-        BUILD_DIR="/"
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
         continue $? "FAILED TO BUILD SERVICE $servie"
         if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
         if [ -d "$DIR/env/$service" ]; then expand_dir "$DIR/env/$service"; fi
         continue $? "FAILED TO EXPAND SERVICE $servie"
+
+        diff_cp "$BUILD_DIR" /
 
         #call install hooks on all modules
         if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
@@ -110,15 +101,19 @@ install() {
 case $PHASE in
     build*)
         declare DIFF="false"
+        declare BUILD_DIR="$DIR/build"
         build
     ;;
     install*)
         declare DIFF="true"
+        declare BUILD_DIR="$DIR/build"
         declare -a AFFECTED_SERVICES
-        cp -r $DIR/build $DIR/lib/
+        mkdir -p $DIR/env/build
+        diff_cp $BUILD_DIR $DIR/env/build
+        BUILD_DIR="$DIR/env/build"
         build
-        rm -rf $DIR/build/* && mv $DIR/lib/build/* $DIR/build
         if [ ! -z "$AFFECTED_SERVICES" ]; then
+            BUILD_DIR="$DIR/build"
             install
         else
             echo "NO SERVICES ON THIS HOST WERE AFFECTED"
