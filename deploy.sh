@@ -14,7 +14,7 @@ fi
 cd $DIR
 git checkout $BRANCH
 continue $? "failed to checkout $BRANCH"
-git merge master
+git merge --no-edit master
 continue $? "failed to merge master into $BRANCH"
 git push
 continue $? "failed to push to remote $BRANCH"

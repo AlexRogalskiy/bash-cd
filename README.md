@@ -47,6 +47,9 @@ critical is the deployment:
     You can use `./deploy.sh <environment>` script which simply merges master into a branch identified by `<environment>`
     and switches back to master - WARN: run this script only from outside the environment because you want
     your environment bash-cd clones to stay on their branches.
+    
+    NOTE: set your `git config --global merge.ours.driver true` - this will preserve the `env/var.sh` file untouched
+    by merges. 
 
 ## How it works
 
