@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-required "kafka-distro"
-
 checkvar PRIMARY_IP
 checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_PROTOCOL
@@ -14,6 +12,7 @@ for i in "${!KAFKA_SERVERS[@]}"
 do
    server="${KAFKA_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
+    required "kafka-distro"
     APPLICABLE_SERVICES+=("kafka")
     let KAFKA_BROKER_ID=i+1
    fi
@@ -24,7 +23,6 @@ do
     KAFKA_CONNECTION="$KAFKA_CONNECTION,$listener"
    fi
 done
-checkvar KAFKA_CONNECTION
 
 build_kafka() {
     checkvar KAFKA_BROKER_ID

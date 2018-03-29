@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 
-required "kafka" KAFKA_CONNECTION
-
 checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 
 export SCHEMA_REGISTRY_URL="http://$SCHEMA_REGISTRY_HOST:$SCHEMA_REGISTRY_PORT"
+
 if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
+    required "kafka" KAFKA_CONNECTION
     APPLICABLE_SERVICES+=("schema-registry")
 fi
-checkvar SCHEMA_REGISTRY_URL
-
 
 start_schema-registry() {
     start -q schema-registry
