@@ -138,7 +138,7 @@ diff_cp() {
             mkdir -p "$dest_file"
             diff_cp "$src_file" "$dest_file"
         elif [ -f "$src_file" ]; then
-            if [ ! -f "$dest_file" ] || [ $(checksum $src_file) != $(checksum $dest_file) ]; then
+            if [ ! -f "$dest_file" ] || [ "$(checksum $src_file)" != "$(checksum $dest_file)" ]; then
                 cp -f "$src_file" "$dest_file"
             fi
         fi
