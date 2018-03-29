@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+required "kafka-distro"
+
 checkvar PRIMARY_IP
 checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_PROTOCOL

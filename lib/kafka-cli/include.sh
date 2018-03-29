@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-checkvar PRIMARY_IP
-checkvar ZOOKEEPER_CONNECTION
-checkvar KAFKA_CONNECTION
+required "zookeeper"    ZOOKEEPER_CONNECTION
+required "kafka"        KAFKA_CONNECTION
 
 APPLICABLE_SERVICES+=("kafka-cli")
 

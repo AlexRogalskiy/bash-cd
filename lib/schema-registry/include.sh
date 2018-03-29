@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-checkvar KAFKA_CONNECTION
+required "kafka" KAFKA_CONNECTION
+
 checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 
@@ -21,5 +22,5 @@ stop_schema-registry() {
 
 install_schema-registry() {
     #TODO schema registry should be built from sources (but probably the amient fork which has auto-build fixes)
-    apt-get install -y confluent-schema-registry
+    apt-get -y install confluent-schema-registry
 }
