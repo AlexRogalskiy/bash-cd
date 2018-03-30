@@ -18,7 +18,7 @@ source $DIR/env/var.sh
 export PRIMARY_IP
 if [ -z "$HOST" ]; then
     PRIMARY_IP="$(hostname --ip-address)"
-else
+elif [ -z "$PRIMARY_IP" ]; then
     PRIMARY_IP="${!HOST}"
 fi
 checkvar PRIMARY_IP
@@ -42,10 +42,13 @@ build() {
     checkvar BUILD_DIR
     mkdir -p $BUILD_DIR
     continue $? "Could not create build dir: $BUILD_DIR"
-    if [[ "$OPTION" == "--rebuild" ]] && [[ "$BUILD_DIR" != "/" ]]; then rm -r "$BUILD_DIR/*"; fi
+    if [ "$OPTION" == "--rebuild" ] && [ "$BUILD_DIR" != "/" ]; then
+        echo "--REBUILD PURGING $BUILD_DIR"
+        rm -rf $BUILD_DIR/*
+    fi
     for service in "${APPLICABLE_SERVICES[@]}"
     do
-        info "BUILDING SERVICE $service"
+        info "BUILDING SERVICE $service IN ($BUILD_DIR)"
         if [ "$DIFF" == "true" ]; then chk1=$(checksum $BUILD_DIR); fi
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
 
@@ -84,7 +87,7 @@ install() {
         if [ -d "$DIR/env/$service" ]; then expand_dir "$DIR/env/$service"; fi
         continue $? "FAILED TO EXPAND SERVICE $servie"
 
-        diff_cp "$BUILD_DIR" /
+        diff_cp "$BUILD_DIR" / warn
 
         #call install hooks on all modules
         if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
@@ -105,13 +108,12 @@ case $PHASE in
         build
     ;;
     install*)
-        declare DIFF="true"
-        declare BUILD_DIR="$DIR/build"
         declare -a AFFECTED_SERVICES
-        mkdir -p $DIR/env/build
-        diff_cp $BUILD_DIR $DIR/env/build
-        BUILD_DIR="$DIR/env/build"
+        cp -rf $DIR/build $DIR/env
+        declare DIFF="true"
+        declare BUILD_DIR="$DIR/env/build"
         build
+        rm -rf $DIR/env/build
         if [ ! -z "$AFFECTED_SERVICES" ]; then
             BUILD_DIR="$DIR/build"
             install

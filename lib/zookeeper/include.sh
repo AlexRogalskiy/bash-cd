@@ -25,10 +25,17 @@ do
    fi
 done
 
+install_zookeeper() {
+    systemctl daemon-reload
+    systemctl enable zookeeper.service
+}
+
 start_zookeeper() {
-    start -q zookeeper
+    #start -q zookeeper
+    systemctl start -q zookeeper.service
 }
 
 stop_zookeeper() {
-    stop -q zookeeper
+    #stop -q zookeeper
+    systemctl stop -q zookeeper.service
 }

@@ -69,7 +69,7 @@ checksum() {
         else
             find $1 -type f -exec md5sum {} \; | sort -k 2 | md5sum
         fi
-    else
+    elif [ -f "$1" ]; then
         if [ -z "$(command -v md5sum)" ]; then cat $1 | md5; else cat $1 | md5sum; fi
     fi
 }
@@ -150,6 +150,7 @@ diff_cp() {
             diff_cp "$src_file" "$dest_file"
         elif [ -f "$src_file" ]; then
             if [ ! -f "$dest_file" ] || [ "$(checksum $src_file)" != "$(checksum $dest_file)" ]; then
+                if [ "$3" == "warn" ]; then warn "$dest_file"; fi
                 cp -f "$src_file" "$dest_file"
             fi
         fi

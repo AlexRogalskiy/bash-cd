@@ -6,8 +6,10 @@ It can be used to __build__ deployment recipes on most UNIX-like systems that ca
 So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to simulate how the build will
 manifest on a particular machine and inspect `./build` directory. 
 
-The __install__ phase currently requires Bash Version 4 and was tested on Ubuntu but should work on most
-Linux distributions but the `env/setup.sh` script has to be modified appropriately.  
+The __install__ phase currently requires Bash Version 4 and was pre-made for Ubuntu 16.04 and the modules
+use systemd. It is possible to make it run on other Linux distributions, in such case modify `env/setup.sh` 
+script and if you need to use upstart, most of the modules have init scripts prepared, you just need to switch
+the install/stop/start functions.  
 
 
 # Quick Start 
@@ -87,14 +89,15 @@ Environment is described in `./env/var.sh` and must define specific variables an
 - `./env/../       ` - custom modules for you applications and services can be added here 
 - `./lib/          ` - reusable modules (PRs welcome!)
 - `./lib/tools.sh  ` - a small toolset of functions used across the codebase 
-- `./lib/cd/       ` - the first module that installs bash-cd server as an upstart service
-- `./lib/cd/include.sh              ` - every module must have include.sh with specifically named functions, see below
-- `./lib/cd/etc/init/bash-cd.conf   ` - upstart config for the service
+- `./lib/cd/       ` - the first module that installs bash-cd server
+- `./lib/cd/include.sh                      ` - every module must have include.sh with specifically named functions, see below
+- `./lib/cd/etc/init/bash-cd.conf           ` - upstart config for the service (unused)
+- `./lib/cd/etc/systemd/system/cd.service   ` - systemd config for the service
 - `./lib/cd/opt/bash-cd-server.sh   ` - the bash-cd http server that listens for webhook events
-- `./lib/../                        ` - see contents of the directory for other available modules
-- `./apply.sh                       ` - script that takes (build|install) argument - build does a dry build, install a real one
-- `./deploy.sh                      ` - use this from your development machine if you will be using branch-per-environment strategy
-- `./ssh.sh                         ` - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
+- `./lib/../       ` - see contents of the directory for other available modules
+- `./apply.sh      ` - script that takes (build|install) argument - build does a dry build, install a real one
+- `./deploy.sh     ` - use this from your development machine if you will be using branch-per-environment strategy
+- `./ssh.sh        ` - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
 
 
 ## What makes up a service

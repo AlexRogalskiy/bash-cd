@@ -29,11 +29,18 @@ build_kafka() {
     checkvar KAFKA_REPL_FACTOR
 }
 
+install_kafka() {
+    systemctl daemon-reload
+    systemctl enable kafka.service
+}
+
 start_kafka() {
-    start -q kafka
+    #start -q kafka
+    systemctl start kafka.service
 }
 
 stop_kafka() {
-    stop -q kafka
+    #stop -q kafka
+    systemctl stop kafka.service
 }
 

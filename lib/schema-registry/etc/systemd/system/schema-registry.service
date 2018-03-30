@@ -1,0 +1,13 @@
+[Unit]
+Description=Confluent Schema Registry
+After=syslog.target network.target
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RestartSec=3
+ExecStart=/bin/bash /usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
+
+[Install]
+WantedBy=multi-user.target

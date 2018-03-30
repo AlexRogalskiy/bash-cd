@@ -1,0 +1,14 @@
+[Unit]
+Description=Apache Kafka Broker
+After=syslog.target network.target
+#Conflicts=
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RestartSec=3
+ExecStart=/bin/bash /opt/kafka/current/bin/kafka-server-start.sh /etc/kafka/server.properties
+
+[Install]
+WantedBy=multi-user.target

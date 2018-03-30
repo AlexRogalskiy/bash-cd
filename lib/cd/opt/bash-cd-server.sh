@@ -7,11 +7,13 @@ CD_PORT=7480
 
 source /opt/bash-cd/lib/tools.sh
 
+exec >> /var/log/bash-cd.log
+exec 2>&1
+
 handle() {
     cd /opt/bash-cd
     read in
     echo "$in"
-
     if [[ "$in" == "POST /push"* ]]; then
         git remote update
         rollback_file="$DIR/unclean"
