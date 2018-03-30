@@ -6,10 +6,10 @@ It can be used to __build__ deployment recipes on most UNIX-like systems that ca
 So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to simulate how the build will
 manifest on a particular machine and inspect `./build` directory. 
 
-The __install__ phase currently requires Bash Version 4 and was pre-made for Ubuntu 16.04 and the modules
-use systemd. It is possible to make it run on other Linux distributions, in such case modify `env/setup.sh` 
-script and if you need to use upstart, most of the modules have init scripts prepared, you just need to switch
-the install/stop/start functions.  
+The __install__ phase currently requires can run on Ubuntu 16.04 out of the box. The modules
+use systemd and aptitude. It is possible to make it run on other Linux distributions and Unix systems, 
+but it requires the setup/install/stop/start functions of each module to be modified to use appropriate 
+package manager and init system.  
 
 
 # Quick Start 
@@ -23,9 +23,9 @@ deploy keys or machine users and configure the root account for it.
 
 On each target machine clone bash-cd it into `/opt/bash-cd` and inside run the following sripts: 
  
-    sudo ./env/setup.sh
+    sudo ./apply.sh setup
     sudo ./apply.sh install
-    #You may need to REBOOT at this point, depnding what you did in setup.sh
+    #You may need to REBOOT at this point, depnding on what the setup has done 
     
 On the bash-cd github repository, under settings, add a webhook for each target machine, using
 defaults for push-events-only and the following URL:
@@ -68,14 +68,13 @@ will still trigger deployment. The build is still incremental so only affected s
 Once `./apply.sh install` is triggered, it first compiles a list of APPLICABLE_SERVICES which are attached to the 
 current host - for this reasons it is best to identify the hosts by primary ip addresses, i.e. the most stable
 ip addresses which are visible on the whole enivronment, e.g. your environment's private network.  
-The next thing it does, it uses a dry build and checksum to determine which services are __actually affected__
+
+For all APPLICABLE_SERVICES it checks whether the setup_ function has been modified and if it did, it applies
+the new setup to the system.
+
+The next thing it does, it uses a dry build and checksum the output diff to determine which services are __actually affected__
 and need to be built and re-installed. When it has the list of AFFECTED_SERVICES, it  builds them again but 
 this time against the root of the filesystem `/` followed by invoking the install_ function for each service.
-
-Each target machine has to be configured first time with the `./env/setup.sh` which you can modify to install 
-required system packages that you will be using for your builds. Whenever this script is modified, the webhook
-will run it again automatically afterwards if you need to evolve your setup. When this happens, a clean install
-is also triggered without incrementailiy - everything is fully built and installed again.
 
 Environment is described in `./env/var.sh` and must define specific variables and arrays to describe the hosts,
  services and which hosts are the individual services attached to. 
@@ -84,7 +83,6 @@ Environment is described in `./env/var.sh` and must define specific variables an
 
 - `./build/        ` - this is the dry-built target directory used by the `./apply.sh build` phase
 - `./env/          ` - this is the directory that describes your environment and any additional custom modules
-- `./env/setup.sh  ` - this is the installation script which is also executed whenever modified automatically
 - `./env/var.sh    ` - environment definition variables
 - `./env/../       ` - custom modules for you applications and services can be added here 
 - `./lib/          ` - reusable modules (PRs welcome!)
@@ -113,6 +111,7 @@ Structure of the module:
 2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
 
 3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
+- `setup_<service>()` - how the os needs to be configured before it can be built and installed 
 - `stop_<service>()` - how the service is stopped on a target machine
 - `build_<service>()` - this method must output everything into `$BUILD_DIR` which will differ for `build` and `install` 
 - `install_<service>()` - this function will do everything after a service was selected for installation by the build

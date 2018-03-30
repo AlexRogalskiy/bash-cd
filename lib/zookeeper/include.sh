@@ -18,6 +18,7 @@ do
    fi
    ZK_PEERS="${ZK_PEERS}server.${server_id}=$server:2888:3888\\\\n"
    if [ "$server" == "$PRIMARY_IP" ]; then
+    required "openjdk8"
     required "kafka-distro"
     required "kafka-cli"
     APPLICABLE_SERVICES+=("zookeeper")

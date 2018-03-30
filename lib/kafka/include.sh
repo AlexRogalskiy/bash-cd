@@ -12,6 +12,7 @@ for i in "${!KAFKA_SERVERS[@]}"
 do
    server="${KAFKA_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
+    required "openjdk8"
     required "kafka-distro"
     APPLICABLE_SERVICES+=("kafka")
     let KAFKA_BROKER_ID=i+1

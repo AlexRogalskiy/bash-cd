@@ -111,6 +111,7 @@ expand() {
                 line=$( echo $line | sed -e "s^\$$a^$v^g" )
             fi
         done
+        #FIXME lines containing \" are processed as ", so they either need to be replaced for \\\" or different print function used
         printf "%s\n" "$line"
     }
     IFS=''; while read line; do IFS=$'\n'; expand_line; IFS=''; done; IFS=$'\n'; expand_line
@@ -147,9 +148,11 @@ diff_cp() {
         dest_file="$2/$filename"
         if [ -d "$src_file" ]; then
             mkdir -p "$dest_file"
-            diff_cp "$src_file" "$dest_file"
+            diff_cp "$src_file" "$dest_file" "$3"
         elif [ -f "$src_file" ]; then
+            #TODO if [ -L "$src_file" ]; then create ln and calculate the target path instead cp; fi
             if [ ! -f "$dest_file" ] || [ "$(checksum $src_file)" != "$(checksum $dest_file)" ]; then
+                if [ "$3" == "info" ]; then info "$dest_file"; fi
                 if [ "$3" == "warn" ]; then warn "$dest_file"; fi
                 cp -f "$src_file" "$dest_file"
             fi

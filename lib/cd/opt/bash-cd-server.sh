@@ -27,20 +27,10 @@ handle() {
             echo $(git rev-parse HEAD) > $rollback_file
         fi
         if [ $changed -eq 1 ]; then
-            setup_checksum_before=$(checksum "env/setup.sh")
             git pull
             continue $? "COULD NOT PULL THE LATEST ENVIRONMENT CHANGES"
-            setup_checksum_after=$(checksum "env/setup.sh")
-            if [ "$setup_checksum_before" != "$setup_checksum_after" ]; then
-                warn "SYSTEM UPDATE DETECTED"
-                ./env/setup.sh
-                git checkout $rollback_hash
-                continue $? "SYSTEM UPDATE FAILED"
-                ./apply.sh install --rebuild
-            else
-                ./apply.sh install
-            fi
-            continue $? "ENVIRONMENT INSTALL FAILED"
+            ./apply.sh setup
+            ./apply.sh install
             rm $rollback_file
         else
             echo "No changes to apply."

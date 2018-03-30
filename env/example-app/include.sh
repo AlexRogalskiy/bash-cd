@@ -9,6 +9,7 @@ for i in "${!EXAMPLE_APP_SERVERS[@]}"
 do
    server="${EXAMPLE_APP_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
+    required "openjdk8"
     APPLICABLE_SERVICES+=("example-app")
    fi
 done
