@@ -1,0 +1,16 @@
+[Unit]
+Description=Exmple Scala App
+After=syslog.target network.target
+#Conflicts=
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RestartSec=3
+ExecStart=/usr/bin/java -jar -Dlogback.configurationFile=/etc/example-app/logback.xml \
+            /opt/example-api/build/libs/example-app-1.0.0-all.jar \
+            /etc/example-app/akka.confs
+
+[Install]
+WantedBy=multi-user.target

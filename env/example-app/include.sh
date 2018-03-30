@@ -32,13 +32,17 @@ build_example-app() {
 install_example-app() {
     cd "/opt/example-app"
     #./gradlew --no-daemon -q shadowJar --exclude-task test
+    systemctl daemon-reload
+    systemctl enable example-app.service
 }
 
 start_example-app() {
-    start -q example-app
+    #start -q example-app
+	systemctl start example-app.service
 }
 
 stop_example-app() {
-    stop -q example-app
+    #stop -q example-app
+    systemctl stop example-app.service
 }
 
