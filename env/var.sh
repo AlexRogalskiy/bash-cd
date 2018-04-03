@@ -20,7 +20,9 @@ export ZOOKEEPER_PORT="2181"
 
 #required by kafka services
 KAFKA_SERVERS=($HOST1 $HOST2)
+export KAFKA_LOG_DIRS="/data/kafka"
 export KAFKA_PROTOCOL="PLAINTEXT"
 export KAFKA_REPL_FACTOR=2
 export KAFKA_PORT="9092"
-
+#export KAFKA_SASL_MECHANISM=PLAIN
+#export KAFKA_AUTHORIZER_CLASS_NAME=kafka.security.auth.SimpleAclAuthorizer

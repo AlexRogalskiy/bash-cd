@@ -2,6 +2,7 @@
 
 checkvar PRIMARY_IP
 checkvar ZOOKEEPER_CONNECTION
+checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
