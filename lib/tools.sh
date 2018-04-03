@@ -70,6 +70,7 @@ checksum() {
             find $1 -type f -exec md5sum {} \; | sort -k 2 | md5sum
         fi
     elif [ -f "$1" ]; then
+        #TODO add file permissions to the hash (and use it recursively for directory)
         if [ -z "$(command -v md5sum)" ]; then cat $1 | md5; else cat $1 | md5sum; fi
     fi
 }

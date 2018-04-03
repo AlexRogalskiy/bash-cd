@@ -121,7 +121,7 @@ case $PHASE in
                     prev_hash=$(cat "$def_hash_file")
                 fi
                 if [ "$def_hash" != "$prev_hash" ]; then
-                    warn "SERVICE SESTUP MODIFIED: $service"
+                    warn "SERVICE SETUP MODIFIED: $service"
                     setup_$service
                     continue $? "SETUP FAILED, SERVICE: $service"
                     echo "$def_hash" > "$def_hash_file"

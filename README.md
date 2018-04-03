@@ -2,6 +2,8 @@
 
 Incremental Continuous Deployment server which listens on port 7480 for HTTP webhook events.
 
+https://github.com/amient/bash-cd
+
 It can be used to __build__ deployment recipes on most UNIX-like systems that can run Bash Version 3+ 
 So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to simulate how the build will
 manifest on a particular machine and inspect `./build` directory. 
@@ -111,7 +113,7 @@ Structure of the module:
 2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
 
 3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
-- `setup_<service>()` - how the os needs to be configured before it can be built and installed 
+- `setup_<service>()` - how the os needs to be configured before it can be built and installed
 - `stop_<service>()` - how the service is stopped on a target machine
 - `build_<service>()` - this method must output everything into `$BUILD_DIR` which will differ for `build` and `install` 
 - `install_<service>()` - this function will do everything after a service was selected for installation by the build
