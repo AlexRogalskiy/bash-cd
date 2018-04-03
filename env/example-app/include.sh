@@ -21,9 +21,9 @@ build_example-app() {
     fi
     cd "/opt/example-app"
     git pull
-    info "Compiling example-app from sources"
-    #./gradlew --no-daemon -q compileScala --exclude-task test
     if [ "$BUILD_DIR" != "/" ]; then
+        info "Compiling example-app from sources"
+        #./gradlew --no-daemon -q compileScala --exclude-task test
         mkdir -p "$BUILD_DIR/opt/example-app/build"
         #cp -r /opt/example-app/build/classes "$BUILD_DIR/opt/example-app/build"
         #cp -r /opt/example-app/*.gradle "$BUILD_DIR/opt/example-app"
