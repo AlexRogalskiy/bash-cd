@@ -5,6 +5,8 @@ checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_CONNECTION
 checkvar EXAMPLE_APP_SERVERS
 
+EXAMPLE_APP_HOME="/opt/example-app"
+
 for i in "${!EXAMPLE_APP_SERVERS[@]}"
 do
    server="${EXAMPLE_APP_SERVERS[$i]}"
@@ -15,24 +17,19 @@ do
 done
 
 build_example-app() {
-    if [ ! -d "/opt/example-app" ]; then
-        mkdir -p $BUILD_DIR/opt
-        #git clone ...
-    fi
-    cd "/opt/example-app"
-    git pull
-    if [ "$BUILD_DIR" != "/" ]; then
-        info "Compiling example-app from sources"
-        #./gradlew --no-daemon -q compileScala --exclude-task test
-        mkdir -p "$BUILD_DIR/opt/example-app/build"
-        #cp -r /opt/example-app/build/classes "$BUILD_DIR/opt/example-app/build"
-        #cp -r /opt/example-app/*.gradle "$BUILD_DIR/opt/example-app"
+
+    git_clone_or_update https://github.com/my-organizaion/example-app.git $EXAMPLE_APP_HOME
+    if [ $? -ne 0 ]; then
+        info "COMPILING FROM SOURCES.."
+        ./gradlew --no-daemon -q compileScala --exclude-task test
+        echo "APPLYING CHANGES TO $BUILD_DIR/$EXAMPLE_APP_HOME ... "
+        diff_cp $EXAMPLE_APP_HOME/build $BUILD_DIR/$EXAMPLE_APP_HOME/build
     fi
 }
 
 install_example-app() {
-    cd "/opt/example-app"
-    #./gradlew --no-daemon -q shadowJar --exclude-task test
+    cd $EXAMPLE_APP_HOME
+    ./gradlew --no-daemon -q shadowJar --exclude-task test
     systemctl daemon-reload
     systemctl enable example-app.service
 }

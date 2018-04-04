@@ -128,5 +128,11 @@ There are specific bash variables which must be defined globally and any variabl
 
 The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
 and then look at the `./build` output.
- 
-...
+
+## Rolling Upgrades
+
+It is possible to also do rolling upgrades. Each service that consists of multiple instances has 
+typically an array of hosts defined in var.sh. Each individual host is detected from the `hostname --ip-address`.
+When this selection is done, the service may also store the index of the host in the array and 
+multiply it by arbitrary number of seconds to sleep. This way a very simple rolling upgrade 
+can be done automatically without complicated coordination. 

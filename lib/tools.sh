@@ -64,7 +64,9 @@ required() {
 
 checksum() {
     if [ -d "$1" ]; then
-        if [ -z "$(command -v md5sum)" ]; then
+        if [ "$1" == ".git" ]; then
+            echo "0"
+        elif [ -z "$(command -v md5sum)" ]; then
             find $1 -type f -exec md5 {} \; | sort -k 2 | md5
         else
             find $1 -type f -exec md5sum {} \; | sort -k 2 | md5sum
@@ -148,8 +150,10 @@ diff_cp() {
         filename=$(basename "$src_file")
         dest_file="$2/$filename"
         if [ -d "$src_file" ]; then
-            mkdir -p "$dest_file"
-            diff_cp "$src_file" "$dest_file" "$3"
+            if [ "$src_file" != ".git" ]; then
+                mkdir -p "$dest_file"
+                diff_cp "$src_file" "$dest_file" "$3"
+            fi
         elif [ -f "$src_file" ]; then
             #TODO if [ -L "$src_file" ]; then create ln and calculate the target path instead cp; fi
             if [ ! -f "$dest_file" ] || [ "$(checksum $src_file)" != "$(checksum $dest_file)" ]; then
@@ -159,4 +163,35 @@ diff_cp() {
             fi
         fi
     done
+}
+
+git_local_revision() {
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    git rev-parse $branch
+}
+
+git_remote_revision() {
+    git remote update &> /dev/null
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    git rev-parse origin/$branch
+}
+
+
+git_clone_or_update() {
+    GIT_URL="$1"
+    LOCAL_DIR="$2"
+    if [ ! -d "$LOCAL_DIR/.git" ]; then
+        mkdir -p "$LOCAL_DIR"
+        git clone $GIT_URL $LOCAL_DIR
+        cd "$LOCAL_DIR"
+        return 1
+    else
+        cd "$LOCAL_DIR"
+        echo "Checking for updates in: $LOCAL_DIR"
+        if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
+            return 2
+        else
+            return 0
+        fi
+    fi
 }

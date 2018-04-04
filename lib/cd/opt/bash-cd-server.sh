@@ -2,8 +2,9 @@
 
 CD_PORT=7480
 
-#THIS IS A SIMPLE BASH SERVER FOR GITHUB WEBHOOK
-#IT SHOULD BE INSTALLED AS A SYSTEM SERVICE BY env/setup.sh
+#THIS IS A SIMPLE BASH HTTP SERVER FOR GITHUB WEBHOOK
+#IT CAN ALSO BEHAVE AS GIT REPO WATCHER IF HTTP TRAFFIC IS NOT ALLOWED
+#IT WILL BE INSTALLED AS A SYSTEM SERVICE WHEN CALLING FIRST TIME  ./apply.sh install
 
 source /opt/bash-cd/lib/tools.sh
 
@@ -14,17 +15,13 @@ handle() {
     cd /opt/bash-cd
     read in
     if [[ "$in" == "POST /push"* ]]; then
-        branch=$(git rev-parse --abbrev-ref HEAD)
-        local_revision=$(git rev-parse $branch)
-        git remote update &> /dev/null
-        remote_revision=$(git rev-parse origin/$branch)
         rollback_file="$DIR/unclean"
         declare changed=0
         if [ -f "$rollback_file" ]; then
             warn "RESUMING INCOMPLETE BUILD: $(cat $rollback_file)"
             changed=1
-        elif [ $local_revision != $remote_revision ]; then
-            highlight "ENVIRONMENT CHANGE DETECTED ($in), LOCAL: $local_revision, REMOTE: $remote_revision"
+        elif [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
+            highlight "CODEBASE CHANGE DETECTED LOCAL: ${in}"
             changed=1
             echo $(git rev-parse HEAD) > $rollback_file
         fi
