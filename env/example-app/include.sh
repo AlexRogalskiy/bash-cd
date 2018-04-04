@@ -17,14 +17,12 @@ do
 done
 
 build_example-app() {
-
     git_clone_or_update https://github.com/my-organizaion/example-app.git $EXAMPLE_APP_HOME
     if [ $? -ne 0 ]; then
         info "COMPILING FROM SOURCES.."
         ./gradlew --no-daemon -q compileScala --exclude-task test
-        echo "APPLYING CHANGES TO $BUILD_DIR/$EXAMPLE_APP_HOME ... "
-        diff_cp $EXAMPLE_APP_HOME/build $BUILD_DIR/$EXAMPLE_APP_HOME/build
     fi
+    diff_cp $EXAMPLE_APP_HOME/build $BUILD_DIR/$EXAMPLE_APP_HOME/build
 }
 
 install_example-app() {
