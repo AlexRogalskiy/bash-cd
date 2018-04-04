@@ -8,6 +8,7 @@ User=root
 Type=simple
 Restart=always
 RestartSec=3
+#Environment=KAFKA_OPTS=-Djava.security.auth.login.config=/etc/zookeeper/jaas.conf
 ExecStart=/bin/bash /opt/kafka/current/bin/zookeeper-server-start.sh /etc/zookeeper/zoo.cfg
 
 [Install]
