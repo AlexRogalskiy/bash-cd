@@ -182,13 +182,16 @@ git_clone_or_update() {
     LOCAL_DIR="$2"
     if [ ! -d "$LOCAL_DIR/.git" ]; then
         mkdir -p "$LOCAL_DIR"
-        git clone $GIT_URL $LOCAL_DIR
+        git clone "$GIT_URL" "$LOCAL_DIR"
+        continue $? "COULD NOT EXECUTE: git clone \"$GIT_URL\"  \"$LOCAL_DIR\""
         cd "$LOCAL_DIR"
         return 1
     else
         cd "$LOCAL_DIR"
-        echo "Checking for updates in: $LOCAL_DIR"
+        echo "CHECKING FOR UPDATES IN: $LOCAL_DIR"
         if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
+            git pull
+            continue $? "COULD NOT PULL LATEST CHANGES FROM $GIT_URL INTO $LOCAL_DIR"
             return 2
         else
             return 0
