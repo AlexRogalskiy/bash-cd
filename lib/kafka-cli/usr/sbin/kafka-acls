@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/opt/kafka/current/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=$ZOOKEEPER_CONNECTION $@
