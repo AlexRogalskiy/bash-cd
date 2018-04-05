@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+required "openjdk8"
+
 kafka_version="1.0.1"
 kafka_package="kafka_2.11-$kafka_version"
 APPLICABLE_SERVICES+=("kafka-distro")

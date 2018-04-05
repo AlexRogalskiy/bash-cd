@@ -26,8 +26,9 @@ checkvar PRIMARY_IP
 
 for service in "${SERVICES[@]}"
 do
-    if [ -f "$DIR/lib/$service/include.sh" ]; then source "$DIR/lib/$service/include.sh"; fi
-    if [ -f "$DIR/env/$service/include.sh" ]; then source "$DIR/env/$service/include.sh"; fi
+    if [ -f "$DIR/lib/$service/include.sh" ]; then
+     source "$DIR/lib/$service/include.sh"
+    fi
 done
 
 if [ -z "$APPLICABLE_SERVICES" ]; then
@@ -56,7 +57,6 @@ build() {
         if [ "$DIFF" == "true" ]; then chk1=$(checksum $BUILD_DIR); fi
 
         if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-        if [ -d "$DIR/env/$service" ]; then expand_dir "$DIR/env/$service"; fi
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
 
         if [ "$DIFF" == "true" ]; then
@@ -86,7 +86,6 @@ install() {
 
         #now run a real build applying to the root of the filesystem
         if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-        if [ -d "$DIR/env/$service" ]; then expand_dir "$DIR/env/$service"; fi
         continue $? "FAILED TO EXPAND SERVICE $servie"
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
         continue $? "FAILED TO BUILD SERVICE $servie"

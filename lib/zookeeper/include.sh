@@ -4,9 +4,10 @@ checkvar PRIMARY_IP
 checkvar ZK_SERVERS
 checkvar ZOOKEEPER_PORT
 
-export ZOOKEEPER_CONNECTION
+export ZOOKEEPER_CONNECTION=""
 export ZK_MY_ID
 export ZK_PEERS
+
 for i in "${!ZK_SERVERS[@]}"
 do
    let server_id=(i+1)
@@ -18,9 +19,7 @@ do
    fi
    ZK_PEERS="${ZK_PEERS}server.${server_id}=$server:2888:3888\\\\n"
    if [ "$server" == "$PRIMARY_IP" ]; then
-    required "openjdk8"
     required "kafka-distro"
-    required "kafka-cli"
     APPLICABLE_SERVICES+=("zookeeper")
     ZK_MY_ID="$server_id"
    fi
