@@ -1,3 +1,3 @@
-env/var.sh merge=ours
+env/* merge=ours
 
 # git config --global merge.ours.driver true
