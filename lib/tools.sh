@@ -54,6 +54,7 @@ checkvar() {
 required() {
     module="$1"
     if [ ! -z "$2" ]; then
+        expr="echo \$$2"
         value="$(eval $expr)"
         if [ ! -z "$value" ]; then module=""; fi
     fi
