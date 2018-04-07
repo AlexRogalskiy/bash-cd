@@ -79,29 +79,29 @@ install() {
 
     for service in "${AFFECTED_SERVICES[@]}"
     do
-        warn "INSTALLING SERVICE $service"
+        warn "[$(date)] INSTALLING SERVICE $service"
 
         #service must be stopped before the real build into / becuase jars or other runtime artifact may be modified
         if [ "$(type -t stop_$service)" == "function" ]; then "stop_$service"; fi
 
         #now run a real build applying to the root of the filesystem
         if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-        continue $? "FAILED TO EXPAND SERVICE $servie"
+        continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
-        continue $? "FAILED TO BUILD SERVICE $servie"
+        continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
 
         diff_cp "$BUILD_DIR" "/" "warn"
 
         #call install hooks on all modules
         if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
-        continue $? "FAILED TO INSTALL SERVICE $servie"
+        continue $? "[$(date)] FAILED TO INSTALL SERVICE $servie"
 
         #finally start the services
         if [ "$(type -t start_$service)" == "function" ]; then "start_$service"; fi
-        continue $? "FAILED TO START $service"
+        continue $? "[$(date)] FAILED TO START $service"
 
     done
-    success "APPLIED IN /"
+    success "[$(date)] APPLIED IN /"
 }
 
 case $PHASE in
@@ -120,9 +120,9 @@ case $PHASE in
                     prev_hash=$(cat "$def_hash_file")
                 fi
                 if [ "$def_hash" != "$prev_hash" ]; then
-                    warn "SERVICE SETUP MODIFIED: $service"
+                    warn "[$(date)] SERVICE SETUP MODIFIED: $service"
                     setup_$service
-                    continue $? "SETUP FAILED, SERVICE: $service"
+                    continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
                     echo "$def_hash" > "$def_hash_file"
                 fi
             fi
@@ -144,7 +144,7 @@ case $PHASE in
             BUILD_DIR="$DIR/build"
             install
         else
-            success "NO SERVICES ON THIS HOST WERE AFFECTED"
+            success "[$(date)] NO SERVICES ON THIS HOST WERE AFFECTED"
         fi
     ;;
     *)
