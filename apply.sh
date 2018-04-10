@@ -36,11 +36,12 @@ if [ -z "$APPLICABLE_SERVICES" ]; then
     exit 0;
 fi
 
-#deduplicate applicable services before executing the phase
-DEDUPLICATED_APPLICABLE_SERVICES=$( tr ' ' '\n' <<< "${APPLICABLE_SERVICES[@]}" | sort -u | tr '\n' ' ' )
+DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
 
 highlight "APPLYING TO HOST $PRIMARY_IP: $PHASE"
+
+echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
 build() {
     checkvar DIFF

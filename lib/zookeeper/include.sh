@@ -17,7 +17,7 @@ do
    else
     ZOOKEEPER_CONNECTION="$ZOOKEEPER_CONNECTION,$server:$ZOOKEEPER_PORT"
    fi
-   ZK_PEERS="${ZK_PEERS}server.${server_id}=$server:2888:3888\\\\n"
+   ZK_PEERS="${ZK_PEERS}server.${server_id}=$server:2888:3888\n"
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
     APPLICABLE_SERVICES+=("zookeeper")

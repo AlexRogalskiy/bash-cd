@@ -102,6 +102,12 @@ Environment is described in `./env/var.sh` and must define specific variables an
 - `./deploy.sh     ` - use this from your development machine if you will be using branch-per-environment strategy
 - `./ssh.sh        ` - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
 
+## What order are services applied
+
+Services are iterated over in the order as they are declared in the SERVICES array.
+Each service may declare dependencies on other services using the `required` function. 
+All required dependencies must be declared before the service adds itself to the list 
+of APPLICABLE_SERVICES to ensure that its dependencies are installed first.
 
 ## What makes up a service
 

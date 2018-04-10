@@ -111,14 +111,13 @@ expand() {
     expand_line() {
         for a in ${params[@]}; do
             if [[ $line = *"$a"* ]]; then
-                v="${!a}"
-                line=$( echo $line | sed -e "s^\$$a^$v^g" )
+                v="${!a//\\/_=|=_}" #backslashes in variables need to be masked before the replacement
+                line="$( echo "$line" | sed -e "s^\$$a^$v^g" | sed "s/_=|=_/\\`echo -e '\\'`/g")"
             fi
         done
-        #FIXME lines containing \" are processed as ", so they either need to be replaced for \\\" or different print function used
-        printf "%s\n" "$line"
+        echo -e "$line"
     }
-    IFS=''; while read line; do IFS=$'\n'; expand_line; IFS=''; done; IFS=$'\n'; expand_line
+    while IFS= read -r line; do expand_line; done; expand_line
 }
 
 expand_dir() {
