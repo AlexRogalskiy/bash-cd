@@ -13,6 +13,6 @@ install_kafka-topics() {
     if [ -f /etc/kafka/topic-assignments.json ]; then
         kafka-reassign-partitions --reassignment-json-file /etc/kafka/topic-assignments.json --execute
     fi
-    opt/kafka/acls.sh
-    opt/kafka/quotas.sh
+    /opt/kafka/acls.sh
+    /opt/kafka/quotas.sh
 }

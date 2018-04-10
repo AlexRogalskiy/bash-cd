@@ -113,7 +113,7 @@ expand() {
         for varname in ${params[@]}; do
             if [[ $line = *"$varname"* ]]; then
                 value="${!varname//\\/_=|=_}" #backslashes in variables need to be masked before the replacement
-                line="$( echo "$line" | sed -e 's^'$leadsymbol$varname'^'$value'^g' | sed "s/_=|=_n/\\`echo -e '\n\r'`/g" | sed "s/_=|=_/\\`echo -e '\\'`/g")"
+                line="$( echo "$line" | sed -e "s^$leadsymbol$varname^$value^g" | sed "s/_=|=_n/\\`echo -e '\n\r'`/g" | sed "s/_=|=_/\\`echo -e '\\'`/g")"
             fi
         done
         printf "%s\n" "$line"
@@ -133,13 +133,13 @@ expand_dir() {
             is_shell=0
             for a in "${shells[@]}"; do if [[ $filename == *"$a" ]]; then is_shell=1; break; fi; done
             if [[ is_artifact -eq 1 ]]; then
-                echo "[ARCHIVE] $2/$filename"
+                echo "[ARCHIVE ] $2/$filename"
                 cat "$file" > "$BUILD_DIR/$2/$filename"
             elif [[ is_shell -eq 1 ]]; then
-                echo "[SHELL-SCRIPT TEMPLATE] $2/$filename"
+                echo "[ SCRIPT ] $2/$filename"
                 cat "$file" | expand '\$\$' > "$BUILD_DIR/$2/$filename"
             else
-                echo "[TEMPLATE ] $2/$filename"
+                echo "[TEMPLATE] $2/$filename"
                 cat "$file" | expand '\$' > "$BUILD_DIR/$2/$filename"
             fi
             continue $? "Could process file $FILE"
