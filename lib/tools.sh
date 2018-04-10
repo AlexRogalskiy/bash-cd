@@ -113,10 +113,10 @@ expand() {
         for varname in ${params[@]}; do
             if [[ $line = *"$varname"* ]]; then
                 value="${!varname//\\/_=|=_}" #backslashes in variables need to be masked before the replacement
-                line="$( echo "$line" | sed -e "s^$leadsymbol$varname^$value^g" | sed "s/_=|=_/\\`echo -e '\\'`/g")"
+                line="$( echo "$line" | sed -e 's^'$leadsymbol$varname'^'$value'^g' | sed "s/_=|=_n/\\`echo -e '\n\r'`/g" | sed "s/_=|=_/\\`echo -e '\\'`/g")"
             fi
         done
-        echo -e "$line"
+        printf "%s\n" "$line"
     }
     while IFS= read -r line; do expand_line; done; expand_line
 }
