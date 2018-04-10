@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export KAFKA_OPTS="-Djava.security.auth.login.config=/usr/sbin/jaas.conf"
+#kinit connect.service -k -t /home/connect.service/keytab
+/opt/kafka/current/bin/kafka-console-consumer.sh --new-consumer  \
+    --consumer.config /usr/sbin/consumer.properties \
+    --bootstrap-server $KAFKA_CONNECTION \
+    --property schema.registry.url=$SCHEMA_REGISTRY_URL "$@"

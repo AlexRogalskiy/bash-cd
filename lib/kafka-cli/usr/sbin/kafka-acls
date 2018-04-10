@@ -1,3 +1,5 @@
 #!/bin/bash
 
-/opt/kafka/current/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=$ZOOKEEPER_CONNECTION $@
+echo "Applying ACLs: $@"
+
+/opt/kafka/current/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=$ZOOKEEPER_CONNECTION "$@"
