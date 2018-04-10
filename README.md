@@ -135,6 +135,21 @@ Modules can depend on other modules, e.g. an `example-app` requires KAFKA_CONNEC
 There are specific bash variables which must be declared globally and any variable that can be used in the
 *environment-templates* must also be *exported*.
 
+
+### Templates
+
+Modules are defined under `./lib`. Each module can have subdirectories containing template files which will be expanded
+and copied to the target system root directory.
+
+Most text files will be treated as templates and any string prepended with a single dollar symbol $ will be 
+replaced for any environment variable, e.g. $PRIMARY_IP. 
+
+Shell scripts (`.sh`, `.bash`, `.bat`) are also treated as templates but  variables to be expanded must have leading 
+dobule dollar sing, e.g. $$KAFKA_REPL_FACTOR    
+
+Archive files will not be expanded - the list of file types can be extended in the function `expand_dir()` in `lib/tools.sh`.
+
+
 The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
 and then look at the `./build` output.
 
