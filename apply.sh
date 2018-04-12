@@ -52,6 +52,8 @@ build() {
         echo "--REBUILD PURGING $BUILD_DIR"
         rm -rf $BUILD_DIR/*
     fi
+    info "EXPANDING ENVIRONMENT-SPECIFIC FILES"
+    expand_dir "$DIR/env/**"
     for service in "${APPLICABLE_SERVICES[@]}"
     do
         info "BUILDING SERVICE $service INTO $BUILD_DIR"
