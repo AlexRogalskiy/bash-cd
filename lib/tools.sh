@@ -78,6 +78,29 @@ checksum() {
     fi
 }
 
+func_modified() {
+    checkvar BUILD_DIR
+    func_name="$1"
+    clear_flag="$2"
+    if [ "$(type -t $func_name)" == "function" ]; then
+        if [ -z "$(command -v md5sum)" ]; then
+            def_hash=$(type $func_name | md5)
+        else
+            def_hash=$(type $func_name | md5sum)
+        fi
+        def_hash_file="$BUILD_DIR/_$func_name"
+        if [ -f "$def_hash_file" ]; then
+            prev_hash=$(cat "$def_hash_file")
+        fi
+        if [ ! -z "$clear_flag" ]; then
+            echo "$def_hash" > "$def_hash_file"
+        elif [ "$def_hash" != "$prev_hash" ]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
 download() {
     url=$1
     file_name="$(basename $1)"

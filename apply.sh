@@ -50,17 +50,21 @@ build() {
     continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
     if [ "$OPTION" == "--rebuild" ] && [ "$BUILD_DIR" != "/" ]; then
         echo "--REBUILD PURGING $BUILD_DIR"
-        rm -rf $BUILD_DIR/*
+        rm -rf $BUILD_DIR/**
     fi
     info "EXPANDING ENVIRONMENT-SPECIFIC FILES"
     expand_dir "$DIR/env"
     for service in "${APPLICABLE_SERVICES[@]}"
     do
         info "BUILDING SERVICE $service INTO $BUILD_DIR"
+
         if [ "$DIFF" == "true" ]; then chk1=$(checksum $BUILD_DIR); fi
 
         if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
+        func_modified "build_$service" "clear"
+        func_modified "start_$service" "clear"
+        func_modified "stop_$service" "clear"
 
         if [ "$DIFF" == "true" ]; then
             chk2=$(checksum $BUILD_DIR)
@@ -109,25 +113,15 @@ install() {
 
 case $PHASE in
     setup*)
-        mkdir -p "$DIR/build"
+        declare BUILD_DIR="$DIR/build"
+        mkdir -p $BUILD_DIR
         for service in "${APPLICABLE_SERVICES[@]}"
         do
-            if [ "$(type -t setup_$service)" == "function" ]; then
-                if [ -z "$(command -v md5sum)" ]; then
-                    def_hash=$(type "setup_$service" | md5)
-                else
-                    def_hash=$(type "setup_$service" | md5sum)
-                fi
-                def_hash_file="$DIR/build/_setup_$service"
-                if [ -f "$def_hash_file" ]; then
-                    prev_hash=$(cat "$def_hash_file")
-                fi
-                if [ "$def_hash" != "$prev_hash" ]; then
-                    warn "[$(date)] SERVICE SETUP MODIFIED: $service"
-                    setup_$service
-                    continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
-                    echo "$def_hash" > "$def_hash_file"
-                fi
+            if (func_modified "setup_$service") ; then
+                warn "[$(date)] SERVICE SETUP MODIFIED: $service"
+                setup_$service
+                continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
+                func_modified "setup_$service" "clear"
             fi
         done
     ;;

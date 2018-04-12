@@ -109,6 +109,7 @@ Each service may declare dependencies on other services using the `required` fun
 All required dependencies must be declared before the service adds itself to the list 
 of APPLICABLE_SERVICES to ensure that its dependencies are installed first.
 
+
 ## What makes up a service
 
 Services are defined as modules directories under `./lib/<service>/..` - see examples in [`/lib`](lib)  - these should
@@ -129,6 +130,19 @@ Structure of the module:
 - `start_<service>()` - how the service is started on a target machine
 
 Modules can depend on other modules, e.g. an `example-app` requires KAFKA_CONNECTION which is defined and exported in the `lib/kafka/include.sh` so that any module or template may use it.
+
+## How are changes to service detected
+
+Installation is triggered for any applicable service when either of the following occurs:
+
+- any of the service templates are modified
+- build_<service> function is modified
+- start_<service> function is modified
+- stop_<service> function is modified
+
+Whenever `setup_<servie>` function is modified, before installation it is invoked to apply any changes
+to the os that are required for the service installation.
+
 
 ## Environment Configuration Model
 
