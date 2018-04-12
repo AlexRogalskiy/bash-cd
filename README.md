@@ -166,7 +166,7 @@ dobule dollar sing, e.g. $$KAFKA_REPL_FACTOR
 Archive files will not be expanded - the list of file types can be extended in the function `expand_dir()` in `lib/tools.sh`.
 
 
-*Environment-specific templates can be places in `./env/..`* These are files which vary fully between enivironments or
+*Environment-specific templates can be placed in `./env/..`* These are files which vary fully between enivironments or
 exist only in some environments. Environment-specifc templates and will be expanded according to the same rules
 as described above.
 
