@@ -4,6 +4,7 @@ checkvar PRIMARY_IP
 checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_CONNECTION
 checkvar EXAMPLE_APP_SERVERS
+checkvar EXAMPLE_APP_BRANCH
 
 EXAMPLE_APP_HOME="/opt/example-app"
 
@@ -13,16 +14,13 @@ do
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "openjdk8"
     APPLICABLE_SERVICES+=("example-app")
+    warn "CLONING EXAMPLE APP BRANCH $EXAMPLE_APP_BRANCH INTO $EXAMPLE_APP_HOME"
+    #git_clone_or_update https://github.com/my-organizaion/example-app.git "$EXAMPLE_APP_HOME" "$EXAMPLE_APP_BRANCH"
    fi
 done
 
 build_example-app() {
-    git_clone_or_update https://github.com/my-organizaion/example-app.git $EXAMPLE_APP_HOME
-    if [ $? -ne 0 ]; then
-        info "COMPILING FROM SOURCES.."
-        ./gradlew --no-daemon -q compileScala --exclude-task test
-    fi
-    diff_cp $EXAMPLE_APP_HOME/build $BUILD_DIR/$EXAMPLE_APP_HOME/build
+    diff_cp "$EXAMPLE_APP_HOME" "$BUILD_DIR/$EXAMPLE_APP_HOME"
 }
 
 install_example-app() {

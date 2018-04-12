@@ -13,6 +13,7 @@ HOST2="172.31.5.41"
 
 #required by the example-app
 EXAMPLE_APP_SERVERS=($HOST0)
+EXAMPLE_APP_BRANCH=master
 
 #required by zookeeper service
 ZK_SERVERS=($HOST0)

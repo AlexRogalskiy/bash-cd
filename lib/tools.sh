@@ -188,14 +188,23 @@ git_remote_revision() {
 git_clone_or_update() {
     GIT_URL="$1"
     LOCAL_DIR="$2"
+    BRANCH="$3"
+    checkvar BRANCH
+    checkbranch() {
+        cd "$LOCAL_DIR"
+        if [ $BRANCH != "$(git rev-parse --abbrev-ref HEAD)" ]; then
+            git checkout $BRANCH
+            continue $? "COULD NOT EXECUTE: git checkout \"$BRANCH\""
+        fi
+    }
     if [ ! -d "$LOCAL_DIR/.git" ]; then
         mkdir -p "$LOCAL_DIR"
         git clone "$GIT_URL" "$LOCAL_DIR"
         continue $? "COULD NOT EXECUTE: git clone \"$GIT_URL\"  \"$LOCAL_DIR\""
-        cd "$LOCAL_DIR"
+        checkbranch
         return 1
     else
-        cd "$LOCAL_DIR"
+        checkbranch
         echo "CHECKING FOR UPDATES IN: $LOCAL_DIR"
         if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
             git pull
