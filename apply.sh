@@ -53,7 +53,7 @@ build() {
         rm -rf $BUILD_DIR/*
     fi
     info "EXPANDING ENVIRONMENT-SPECIFIC FILES"
-    expand_dir "$DIR/env/**"
+    expand_dir "$DIR/env"
     for service in "${APPLICABLE_SERVICES[@]}"
     do
         info "BUILDING SERVICE $service INTO $BUILD_DIR"
@@ -109,7 +109,7 @@ install() {
 
 case $PHASE in
     setup*)
-        mkdir -p "$DIR/lib/build"
+        mkdir -p "$DIR/build"
         for service in "${APPLICABLE_SERVICES[@]}"
         do
             if [ "$(type -t setup_$service)" == "function" ]; then
@@ -118,7 +118,7 @@ case $PHASE in
                 else
                     def_hash=$(type "setup_$service" | md5sum)
                 fi
-                def_hash_file="$DIR/lib/build/_setup_$service"
+                def_hash_file="$DIR/build/_setup_$service"
                 if [ -f "$def_hash_file" ]; then
                     prev_hash=$(cat "$def_hash_file")
                 fi
@@ -138,11 +138,11 @@ case $PHASE in
     ;;
     install*)
         declare -a AFFECTED_SERVICES
-        cp -rf $DIR/build $DIR/env
+        cp -rf $DIR/build $DIR/lib
         declare DIFF="true"
-        declare BUILD_DIR="$DIR/env/build"
+        declare BUILD_DIR="$DIR/lib/build"
         build
-        rm -rf $DIR/env/build
+        rm -rf $DIR/lib/build
         if [ ! -z "$AFFECTED_SERVICES" ]; then
             BUILD_DIR="$DIR/build"
             install
