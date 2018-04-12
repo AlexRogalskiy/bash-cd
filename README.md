@@ -8,7 +8,7 @@ It can be used to __build__ deployment recipes on most UNIX-like systems that ca
 So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to simulate how the build will
 manifest on a particular machine and inspect `./build` directory. 
 
-The __install__ phase currently requires can run on Ubuntu 16.04 out of the box. The modules
+The __install__ phase can run on Ubuntu 16.04 out of the box. The modules
 use systemd and aptitude. It is possible to make it run on other Linux distributions and Unix systems, 
 but it requires the setup/install/stop/start functions of each module to be modified to use appropriate 
 package manager and init system.  
@@ -135,6 +135,8 @@ Modules can depend on other modules, e.g. an `example-app` requires KAFKA_CONNEC
 There are specific bash variables which must be declared globally and any variable that can be used in the
 *environment-templates* must also be *exported*.
 
+The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
+and then look at the `./build` output.
 
 ### Templates
 
@@ -148,10 +150,6 @@ Shell scripts (`.sh`, `.bash`, `.bat`) are also treated as templates but  variab
 dobule dollar sing, e.g. $$KAFKA_REPL_FACTOR    
 
 Archive files will not be expanded - the list of file types can be extended in the function `expand_dir()` in `lib/tools.sh`.
-
-
-The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
-and then look at the `./build` output.
 
 ## Rolling Upgrades
 
