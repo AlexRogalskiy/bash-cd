@@ -16,5 +16,5 @@ build_kafka-distro() {
 }
 
 install_kafka-distro() {
-    ln -fs "$BUILD_DIR/opt/kafka/$kafka_package" "$BUILD_DIR/opt/kafka/current"
+    ln -fs "/opt/kafka/$kafka_package" "/opt/kafka/current"
 }

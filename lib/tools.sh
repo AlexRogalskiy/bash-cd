@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-fail() {
+function fail() {
     message="$1"
     red='\033[0;31m'
     nc='\033[0m'
@@ -9,49 +9,68 @@ fail() {
     exit 1;
 }
 
-warn() {
+function warn() {
     message="$1"
     blue='\033[93m'
     nc='\033[0m'
     echo -e "${blue}$message $nc"
 }
 
-info() {
+function info() {
     message="$1"
     blue='\033[96m'
     nc='\033[0m'
     echo -e "${blue}$message $nc"
 }
 
-success() {
+function success() {
     message="$1"
     green='\033[92m'
     nc='\033[0m'
     echo -e "${green}$message $nc"
 }
 
-highlight() {
+function highlight() {
     message="$1"
     bold='\033[01m'
     nc='\033[0m'
     echo -e "${bold}$message $nc"
 }
 
-continue() {
+function continue() {
     result="$1"
     message="$2"
     if [ $result -ne 0 ]; then
-        fail "$message"
+        get_stack
+        fail "$message in: $STACK"
     fi
 }
 
-checkvar() {
+function checkvar() {
     expr="echo \$$1"
     value="$(eval $expr)"
-    if [ -z "$value" ]; then fail "$1 variable not specified"; fi
+    get_stack
+    if [ -z "$value" ]; then fail "$1 variable not specified in: $STACK"; fi
 }
 
-required() {
+function get_stack() {
+   STACK=""
+   local i message="${1:-""}"
+   local stack_size=${#FUNCNAME[@]}
+   # to avoid noise we start with 1 to skip the get_stack function
+   for (( i=1; i<$stack_size; i++ )); do
+      local func="${FUNCNAME[$i]}"
+      [ x$func = x ] && func=MAIN
+      local linen="${BASH_LINENO[$(( i - 1 ))]}"
+      local src="${BASH_SOURCE[$i]}"
+      [ x"$src" = x ] && src=non_file_source
+
+      STACK+=$'\n'"   at: "$func" "$src" "$linen
+   done
+   STACK="${message}${STACK}"
+}
+
+function required() {
     module="$1"
     if [ ! -z "$2" ]; then
         expr="echo \$$2"
@@ -63,7 +82,7 @@ required() {
     fi
 }
 
-checksum() {
+function checksum() {
     if [ -d "$1" ]; then
         if [ "$1" == ".git" ]; then
             echo "0"
@@ -78,7 +97,7 @@ checksum() {
     fi
 }
 
-func_modified() {
+function func_modified() {
     checkvar BUILD_DIR
     func_name="$1"
     clear_flag="$2"
@@ -101,33 +120,7 @@ func_modified() {
     return 1
 }
 
-download() {
-    url=$1
-    file_name="$(basename $1)"
-    dest_dir=$2
-    local_tarball="$dest_dir/$(basename $url)"
-    local="$dest_dir/$file_name"
-    if [ ! -f "$local" ]; then
-        info "Downloading $(basename $url)..."
-        mkdir -p $(dirname $local)
-        curl -s "$url" > "${local}.tmp"
-        mv "${local}.tmp" "$local"
-    fi
-}
-
-clone() {
-    url=$1
-    dest_dir=$2
-    branch=$3
-    if [ ! -d "$dest_dir" ]; then
-        git clone "$url" $dest_dir
-    fi
-    cd "$dest_dir"
-    git checkout "$branch"
-
-}
-
-expand() {
+function expand() {
     leadsymbol="$1"
     env=`printenv | cut -d= -f1 | paste -sd "," -`
     params=$(echo $env | tr "," "\n")
@@ -144,7 +137,7 @@ expand() {
     while IFS= read -r line; do expand_line; done; expand_line
 }
 
-expand_dir() {
+function expand_dir() {
     shells=(".sh" ".bat" ".bash" ".zsh")
     artifacts=(".jar" ".tar" ".war" ".so" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx")
     for file in $1/$2/*; do
@@ -175,7 +168,7 @@ expand_dir() {
 }
 
 
-diff_cp() {
+function diff_cp() {
     for src_file in $1/*; do
         filename=$(basename "$src_file")
         dest_file="$2/$filename"
@@ -184,7 +177,7 @@ diff_cp() {
                 mkdir -p "$dest_file"
                 diff_cp "$src_file" "$dest_file" "$3"
             fi
-        elif [ -f "$src_file" ]; then
+        elif [ -f "$src_file" ] && [[ "$dest_file" != //_* ]]; then
             #TODO if [ -L "$src_file" ]; then create ln and calculate the target path instead cp; fi
             if [ ! -f "$dest_file" ] || [ "$(checksum $src_file)" != "$(checksum $dest_file)" ]; then
                 if [ "$3" == "info" ]; then info "$dest_file"; fi
@@ -196,42 +189,67 @@ diff_cp() {
     done
 }
 
-git_local_revision() {
+function download() {
+    url=$1
+    file_name="$(basename $1)"
+    dest_dir=$2
+    local_tarball="$dest_dir/$(basename $url)"
+    local="$dest_dir/$file_name"
+    if [ ! -f "$local" ]; then
+        info "Downloading $(basename $url)..."
+        mkdir -p $(dirname $local)
+        curl -s "$url" > "${local}.tmp"
+        mv "${local}.tmp" "$local"
+    fi
+}
+
+function clone() {
+    url=$1
+    dest_dir=$2
+    branch=$3
+    if [ ! -d "$dest_dir" ]; then
+        git clone "$url" $dest_dir
+    fi
+    cd "$dest_dir"
+    git checkout "$branch"
+
+}
+
+function git_local_revision() {
     branch=$(git rev-parse --abbrev-ref HEAD)
     git rev-parse $branch
 }
 
-git_remote_revision() {
+function git_remote_revision() {
     git remote update &> /dev/null
     branch=$(git rev-parse --abbrev-ref HEAD)
     git rev-parse origin/$branch
 }
 
 
-git_clone_or_update() {
-    GIT_URL="$1"
-    LOCAL_DIR="$2"
-    BRANCH="$3"
-    checkvar BRANCH
+function git_clone_or_update() {
+    git_url="$1"
+    local_dir="$2"
+    branch="$3"
     checkbranch() {
-        cd "$LOCAL_DIR"
-        if [ $BRANCH != "$(git rev-parse --abbrev-ref HEAD)" ]; then
-            git checkout $BRANCH
-            continue $? "COULD NOT EXECUTE: git checkout \"$BRANCH\""
-        fi
+        checkvar branch
+        cd "$local_dir"
+        git fetch
+        git checkout $branch
+        continue $? "COULD NOT EXECUTE: git checkout \"$branch\""
     }
-    if [ ! -d "$LOCAL_DIR/.git" ]; then
-        mkdir -p "$LOCAL_DIR"
-        git clone "$GIT_URL" "$LOCAL_DIR"
-        continue $? "COULD NOT EXECUTE: git clone \"$GIT_URL\"  \"$LOCAL_DIR\""
+    if [ ! -d "$local_dir/.git" ]; then
+        mkdir -p "$local_dir"
+        git clone "$git_url" "$local_dir"
+        continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
         checkbranch
         return 1
     else
         checkbranch
-        echo "CHECKING FOR UPDATES IN: $LOCAL_DIR"
+        echo "CHECKING FOR UPDATES IN: $local_dir"
         if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
             git pull
-            continue $? "COULD NOT PULL LATEST CHANGES FROM $GIT_URL INTO $LOCAL_DIR"
+            continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
             return 2
         else
             return 0

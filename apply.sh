@@ -2,9 +2,6 @@
 
 # THIS SCRIPTS EXPECTS env/var.sh TO PROVIDE CORRECT CONFIGURATION, SEE EXAMPLE FOR DOCUMENTATION
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $DIR/lib/tools.sh
-
 PHASE="$1"
 OPTION="$2"
 HOST="$3"
@@ -13,8 +10,11 @@ if [ -z "$PHASE" ] ; then
     fail "Usage: (build|install) [--host <host>] [--rebuild]"
 fi
 
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/lib/tools.sh
 source $DIR/env/var.sh
-checkvar SERVICES
+BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
 
 export PRIMARY_IP
 if [ -z "$HOST" ]; then
@@ -24,6 +24,7 @@ elif [ -z "$PRIMARY_IP" ]; then
 fi
 checkvar PRIMARY_IP
 
+checkvar SERVICES
 for service in "${SERVICES[@]}"
 do
     if [ -f "$DIR/lib/$service/include.sh" ]; then
@@ -39,7 +40,7 @@ fi
 DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
 
-highlight "APPLYING TO HOST $PRIMARY_IP: $PHASE"
+highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"
 
 echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
@@ -63,8 +64,6 @@ build() {
         if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
         func_modified "build_$service" "clear"
-        func_modified "start_$service" "clear"
-        func_modified "stop_$service" "clear"
 
         if [ "$DIFF" == "true" ]; then
             chk2=$(checksum $BUILD_DIR)
@@ -96,6 +95,7 @@ install() {
         continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
         if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
         continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
+        func_modified "build_$service" "clear"
 
         diff_cp "$BUILD_DIR" "/" "warn"
 
