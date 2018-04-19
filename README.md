@@ -9,13 +9,13 @@ So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to si
 manifest on a particular machine and inspect `./build` directory. 
 
 The __install__ phase can run on Ubuntu 16.04 out of the box. The modules
-use systemd and aptitude. It is possible to make it run on other Linux distributions and Unix systems, 
-but it requires the setup/install/stop/start functions of each module to be modified to use appropriate 
-package manager and init system.  
+use systemd and aptitude. It is possible to make it run on other Linux distributions and Unix systems,
+but it requires the setup/install/stop/start functions of each module to be modified to use appropriate
+package manager and init system.
 
 
-# Quick Start 
- 
+# Quick Start
+
 To try bash-cd, fork it and modify the contents of [`/env/var.sh`](env/var.sh) file - this file describes
 your environment and which components are installed where. Remeber that forks are public so may want to mirror the repo instead.
 
@@ -105,8 +105,8 @@ Environment is described in `./env/var.sh` and must define specific variables an
 ## What order are services applied
 
 Services are iterated over in the order as they are declared in the SERVICES array.
-Each service may declare dependencies on other services using the `required` function. 
-All required dependencies must be declared before the service adds itself to the list 
+Each service may declare dependencies on other services using the `required` function.
+All required dependencies must be declared before the service adds itself to the list
 of APPLICABLE_SERVICES to ensure that its dependencies are installed first.
 
 
@@ -120,7 +120,7 @@ Structure of the module:
 
 1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host. Any exported variables for use in templates or other modules must be exported in this file.
 
-2. Module can have any subdirectories, containing *environment-templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
+2. Module can have any subdirectories, containing *templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
 
 3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
 - `setup_<service>()` - how the os needs to be configured before it can be built and installed
@@ -146,8 +146,8 @@ to the os that are required for the service installation.
 
 ## Environment Configuration Model
 
-There are specific bash variables which must be declared globally and any variable that can be used in the
-*environment-templates* must also be *exported*.
+There are specific bash variables which must be declared globally and any variable that are used in *templates* must
+also be *exported*.
 
 The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
 and then look at the `./build` output.
@@ -157,24 +157,20 @@ and then look at the `./build` output.
 Modules are defined under `./lib`. Each module can have subdirectories containing template files which will be expanded
 and copied to the target system root directory.
 
-Most text files will be treated as templates and any string prepended with a single dollar symbol $ will be 
-replaced for any environment variable, e.g. $PRIMARY_IP. 
+Most text files will be treated as templates and any string prepended with a single dollar symbol $ will be
+replaced for any environment variable, e.g. $PRIMARY_IP.
 
-Shell scripts (`.sh`, `.bash`, `.bat`) are also treated as templates but  variables to be expanded must have leading 
-dobule dollar sing, e.g. $$KAFKA_REPL_FACTOR    
+Shell scripts (`.sh`, `.bash`, `.bat`) are also treated as templates but  variables to be expanded must have leading
+dobule dollar sing, e.g. $$KAFKA_REPL_FACTOR
 
 Archive files will not be expanded - the list of file types can be extended in the function `expand_dir()` in `lib/tools.sh`.
 
 
-*Environment-specific templates can be placed in `./env/..`* These are files which vary fully between enivironments or
-exist only in some environments. Environment-specifc templates and will be expanded according to the same rules
-as described above.
-
-
 ## Rolling Upgrades
 
-It is possible to also do rolling upgrades. Each service that consists of multiple instances has 
+It is possible to also do rolling upgrades. Each service that consists of multiple instances has
 typically an array of hosts defined in var.sh. Each individual host is detected from the `hostname --ip-address`.
-When this selection is done, the service may also store the index of the host in the array and 
-multiply it by arbitrary number of seconds to sleep. This way a very simple rolling upgrade 
-can be done automatically without complicated coordination. 
+When this selection is done, the service may also store the index of the host in the array and
+multiply it by arbitrary number of seconds to sleep. This way a very simple rolling upgrade
+can be done automatically without complicated coordination.
+

@@ -44,76 +44,12 @@ highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"
 
 echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
-build() {
-    checkvar DIFF
-    checkvar BUILD_DIR
-    mkdir -p $BUILD_DIR
-    continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
-    if [ "$OPTION" == "--rebuild" ] && [ "$BUILD_DIR" != "/" ]; then
-        echo "--REBUILD PURGING $BUILD_DIR"
-        rm -rf $BUILD_DIR/**
-    fi
-    info "EXPANDING ENVIRONMENT-SPECIFIC FILES"
-    expand_dir "$DIR/env"
-    for service in "${APPLICABLE_SERVICES[@]}"
-    do
-        info "BUILDING SERVICE $service INTO $BUILD_DIR"
-
-        if [ "$DIFF" == "true" ]; then chk1=$(checksum $BUILD_DIR); fi
-
-        if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-        if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
-        func_modified "build_$service" "clear"
-
-        if [ "$DIFF" == "true" ]; then
-            chk2=$(checksum $BUILD_DIR)
-            if [ "$chk1" != "$chk2" ]; then
-              echo "SERVICE MODIFIED ($chk1 > $chk2)"
-              AFFECTED_SERVICES+=($service)
-            else
-              echo "NO DIFF ($chk2)"
-            fi
-        fi
-    done
-    if [ "$DIFF" != "true" ]; then
-        AFFECTED_SERVICES=$APPLICABLE_SERVICES
-    fi
-    highlight "APPLIED IN $BUILD_DIR"
-}
-
-install() {
-
-    for service in "${AFFECTED_SERVICES[@]}"
-    do
-        warn "[$(date)] INSTALLING SERVICE $service"
-
-        #service must be stopped before the real build into / becuase jars or other runtime artifact may be modified
-        if [ "$(type -t stop_$service)" == "function" ]; then "stop_$service"; fi
-
-        #now run a real build applying to the root of the filesystem
-        if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-        continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
-        if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
-        continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
-        func_modified "build_$service" "clear"
-
-        diff_cp "$BUILD_DIR" "/" "warn"
-
-        #call install hooks on all modules
-        if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
-        continue $? "[$(date)] FAILED TO INSTALL SERVICE $servie"
-
-        #finally start the services
-        if [ "$(type -t start_$service)" == "function" ]; then "start_$service"; fi
-        continue $? "[$(date)] FAILED TO START $service"
-
-    done
-    success "[$(date)] APPLIED IN /"
-}
+declare BUILD_DIR="$DIR/build"
+mkdir -p $BUILD_DIR
+continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
 
 case $PHASE in
     setup*)
-        declare BUILD_DIR="$DIR/build"
         mkdir -p $BUILD_DIR
         for service in "${APPLICABLE_SERVICES[@]}"
         do
@@ -126,27 +62,66 @@ case $PHASE in
         done
     ;;
     build*)
-        declare DIFF="false"
-        declare BUILD_DIR="$DIR/build"
-        build
+        if [ "$OPTION" == "--rebuild" ] && [ "$BUILD_DIR" != "/" ]; then
+            echo "--REBUILD PURGING $BUILD_DIR"
+            rm -rf $BUILD_DIR/**
+        fi
+        for service in "${APPLICABLE_SERVICES[@]}"
+        do
+            info "BUILDING SERVICE $service INTO $BUILD_DIR"
+
+            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
+            if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
+            func_modified "build_$service" "clear"
+
+        done
+        highlight "APPLIED IN $BUILD_DIR"
     ;;
     install*)
-        declare -a AFFECTED_SERVICES
-        cp -rf $DIR/build $DIR/lib
-        declare DIFF="true"
-        declare BUILD_DIR="$DIR/lib/build"
-        build
-        rm -rf $DIR/lib/build
-        if [ ! -z "$AFFECTED_SERVICES" ]; then
-            BUILD_DIR="$DIR/build"
-            install
-        else
+        let num_services_affected=0
+        for service in "${APPLICABLE_SERVICES[@]}"
+        do
+            #build and determine the whether the service was affected
+            info "BUILDING SERVICE: $service"
+            chk1=$(checksum $BUILD_DIR)
+            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
+            continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
+
+            if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
+            continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
+
+            func_modified "build_$service" "clear"
+
+            chk2=$(checksum $BUILD_DIR)
+            if [ "$chk1" == "$chk2" ]; then
+                info "- no diff: $chk2"
+            else
+                let num_services_affected=(num_services_affected+1)
+                warn "[$(date)] INSTALLING SERVICE $service ($chk1 -> $chk2)"
+
+                #service must be stopped before the real build into / becuase jars or other runtime artifact may be modified
+                if [ "$(type -t stop_$service)" == "function" ]; then "stop_$service"; fi
+
+                #now apply the build result to the root of the filesystem
+                diff_cp "$BUILD_DIR" "/" "warn"
+
+                #call install hooks on all modules
+                if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
+                continue $? "[$(date)] FAILED TO INSTALL SERVICE $servie"
+
+                #finally start the services
+                if [ "$(type -t start_$service)" == "function" ]; then "start_$service"; fi
+                continue $? "[$(date)] FAILED TO START $service"
+            fi
+        done
+        if [ "$num_services_affected" == "0" ]; then
             success "[$(date)] NO SERVICES ON THIS HOST WERE AFFECTED"
+        else
+            success "[$(date)] APPLIED IN /"
         fi
     ;;
     *)
         fail "POSSIBLE PHASES: build, install"
     ;;
 esac
-
 
