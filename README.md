@@ -88,14 +88,9 @@ Environment is described in `./env/var.sh` and must define specific variables an
 
 - `./env/var.sh    ` - environment definitions - this file will vary between environments
 - `./build/        ` - this is the dry-build target directory used by the `./apply.sh build` phase
-- `./lib/          ` - reusable modules (PRs welcome!)
+- `./lib/          ` - reusable modules - see the section below about the structure that service modules have
 - `./lib/tools.sh  ` - a small toolset of functions used across the codebase
-- `./lib/cd/       ` - the first module that installs bash-cd server
-- `./lib/cd/include.sh                      ` - every module must have include.sh with specifically named functions, see below
-- `./lib/cd/etc/init/bash-cd.conf           ` - upstart config for the service (unused)
-- `./lib/cd/etc/systemd/system/cd.service   ` - systemd config for the service
-- `./lib/cd/opt/bash-cd-server.sh   ` - the bash-cd http server that listens for webhook events
-- `./lib/../       ` - see contents of the directory for other available modules
+- `./lib/cd/       ` - the service module that installs bash-cd service
 - `./apply.sh      ` - script that takes (build|install) argument - build does a dry build, install a real one
 - `./deploy.sh     ` - use this from your development machine if you will be using branch-per-environment strategy
 - `./ssh.sh        ` - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
