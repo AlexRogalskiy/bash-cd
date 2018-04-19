@@ -86,10 +86,8 @@ Environment is described in `./env/var.sh` and must define specific variables an
 
 **Project Structure**
 
-- `./build/        ` - this is the dry-built target directory used by the `./apply.sh build` phase
-- `./env/          ` - this is the directory that describes your environment
-- `./env/var.sh    ` - environment definition variables
-- `./env/etc/../   ` - environment file overrides - these are files that are specific for a concrete environment
+- `./env/var.sh    ` - environment definitions - this file will vary between environments
+- `./build/        ` - this is the dry-build target directory used by the `./apply.sh build` phase
 - `./lib/          ` - reusable modules (PRs welcome!)
 - `./lib/tools.sh  ` - a small toolset of functions used across the codebase
 - `./lib/cd/       ` - the first module that installs bash-cd server
