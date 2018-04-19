@@ -91,8 +91,8 @@ Environment is described in `./env/var.sh` and must define specific variables an
 - `./lib/          ` - reusable modules - see the section below about the structure that service modules have
 - `./lib/tools.sh  ` - a small toolset of functions used across the codebase
 - `./lib/cd/       ` - the service module that installs bash-cd service
-- `./apply.sh      ` - script that takes (build|install) argument - build does a dry build, install a real one
-- `./deploy.sh     ` - use this from your development machine if you will be using branch-per-environment strategy
+- `./apply.sh      ` - script that takes (setup|build|install) argument and applies the changes to the local environment
+- `./deploy.sh     ` - helper script for simplified triggering of deployment when using branch-per-environment strategy
 - `./ssh.sh        ` - helper script that takes <HOST-VAR> and opens an ssh session to the target machine
 
 ## What order are services applied
