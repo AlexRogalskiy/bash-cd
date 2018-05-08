@@ -2,7 +2,7 @@
 
 Connection String
 
-    $KAFKA_CONNECTION
+    $ZOOKEEPER_CONNECTION
 
 Start Zookeeper Service
 
