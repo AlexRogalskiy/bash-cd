@@ -118,7 +118,7 @@ Structure of the module:
 3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
 - `setup_<service>()` - how the os needs to be configured before it can be built and installed
 - `stop_<service>()` - how the service is stopped on a target machine
-- `build_<service>()` - this method must output everything into `$BUILD_DIR` which will differ for `build` and `install`
+- `build_<service>()` - this method may outupt additional files into `$BUILD_DIR` which will contribute to the checksum diff besides the service templates
 - `install_<service>()` - this function will do everything after a service was selected for installation by the build
 - `start_<service>()` - how the service is started on a target machine
 

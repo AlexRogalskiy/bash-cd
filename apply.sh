@@ -91,11 +91,26 @@ case $PHASE in
             continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
 
             func_modified "build_$service" "clear"
+            func_modified "install_$service" "clear"
 
             chk2=$(checksum $BUILD_DIR)
             if [ "$chk1" == "$chk2" ]; then
                 info "- no diff: $chk2"
+                if [ "$(type -t stop_$service)" == "function" ]; then
+                    if (func_modified "stop_$service") ; then
+                        warn "stop_$service"
+                        func_modified "stop_$service" "clear"
+                        "stop_$service"
+                    fi
+                fi
+                if [ "$(type -t start_$service)" == "function" ]; then
+                    if (func_modified "start_$service") ; then
+                        warn "start_$service"
+                        func_modified "start_$service" "clear"
+                    fi
+                fi
             else
+
                 let num_services_affected=(num_services_affected+1)
                 warn "[$(date)] INSTALLING SERVICE $service ($chk1 -> $chk2)"
 
