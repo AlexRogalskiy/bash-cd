@@ -98,6 +98,7 @@ case $PHASE in
                 info "- no diff: $chk2"
                 if [ "$(type -t stop_$service)" == "function" ]; then
                     if (func_modified "stop_$service") ; then
+                        let num_services_affected=(num_services_affected+1)
                         warn "stop_$service"
                         func_modified "stop_$service" "clear"
                         "stop_$service"
@@ -105,6 +106,7 @@ case $PHASE in
                 fi
                 if [ "$(type -t start_$service)" == "function" ]; then
                     if (func_modified "start_$service") ; then
+                        let num_services_affected=(num_services_affected+1)
                         warn "start_$service"
                         func_modified "start_$service" "clear"
                     fi
