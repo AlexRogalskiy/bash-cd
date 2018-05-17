@@ -9,13 +9,17 @@ fi
 
 setup_web-server() {
     sudo apt-get -y install apache2
-    #apt-get -y install libapache2-mod-php5
     apt-get -y install libapache2-mod-php
     apt-get install php-gd
     apt-get install php-curl
     apt-get install libssh2-php
     apt-get install php-ssh2
     a2enmod ssl
+    a2enmod proxy
+    a2enmod proxy_http
+    a2enmod proxy_wstunnel
+    a2enmod proxy_balancer
+    a2enmod lbmethod_byrequests
 }
 
 build_web-server() {
