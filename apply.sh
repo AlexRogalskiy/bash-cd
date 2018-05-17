@@ -115,7 +115,10 @@ case $PHASE in
                 warn "[$(date)] INSTALLING SERVICE $service ($chk1 -> $chk2)"
 
                 #service must be stopped before the real build into / becuase jars or other runtime artifact may be modified
-                if [ "$(type -t stop_$service)" == "function" ]; then "stop_$service"; fi
+                if [ "$(type -t stop_$service)" == "function" ]; then
+                    func_modified "stop_$service" "clear"
+                    "stop_$service";
+                fi
 
                 #now apply the build result to the root of the filesystem
                 diff_cp "$BUILD_DIR" "/" "warn"
@@ -125,7 +128,10 @@ case $PHASE in
                 continue $? "[$(date)] FAILED TO INSTALL SERVICE $servie"
 
                 #finally start the services
-                if [ "$(type -t start_$service)" == "function" ]; then "start_$service"; fi
+                if [ "$(type -t start_$service)" == "function" ]; then
+                    func_modified "start_$service" "clear"
+                    "start_$service";
+                fi
                 continue $? "[$(date)] FAILED TO START $service"
             fi
         done
