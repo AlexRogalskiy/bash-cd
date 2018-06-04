@@ -211,6 +211,8 @@ function clone() {
         git clone "$url" $dest_dir
     fi
     cd "$dest_dir"
+    git fetch
+    git reset --hard
     git checkout "$branch"
 
 }
@@ -235,6 +237,7 @@ function git_clone_or_update() {
         checkvar branch
         cd "$local_dir"
         git fetch
+        git reset --hard
         git checkout $branch
         continue $? "COULD NOT EXECUTE: git checkout \"$branch\""
     }
