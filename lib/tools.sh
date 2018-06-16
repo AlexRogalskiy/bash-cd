@@ -246,16 +246,12 @@ function git_clone_or_update() {
         git clone "$git_url" "$local_dir"
         continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
         checkbranch
-        return 1
     else
         checkbranch
         echo "CHECKING FOR UPDATES IN: $local_dir"
         if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
             git pull
             continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
-            return 2
-        else
-            return 0
         fi
     fi
 }
