@@ -127,7 +127,7 @@ case $PHASE in
 
                 #call install hooks on all modules
                 if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
-                continue $? "[$(date)] FAILED TO INSTALL SERVICE $servie"
+                continue $? "[$(date)] FAILED TO INSTALL SERVICE $service"
 
                 #finally start the services
                 if [ "$(type -t start_$service)" == "function" ]; then
