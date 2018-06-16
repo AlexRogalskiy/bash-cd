@@ -4,6 +4,7 @@ SERVICES=(
     "cd"
     "zookeeper"
     "kafka"
+    "kafka-cli"
     "example-app"
 )
 

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+$AFFINITY_HOME/cli/bin/affinity-cli timelog /usr/sbin/consumer.properties "$@"
