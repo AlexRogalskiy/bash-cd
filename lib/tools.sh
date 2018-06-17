@@ -255,3 +255,24 @@ function git_clone_or_update() {
         fi
     fi
 }
+
+wait_for_endpoint() {
+    URL=$1
+    EXPECTED=$2
+    MAX_WAIT=$3
+    while [  $MAX_WAIT -gt 0 ]; do
+         echo -en "\r$URL $MAX_WAIT";
+         RESPONSE_STATUS=$(curl --stderr /dev/null -X GET -i "$URL" | head -1 | cut -d' ' -f2)
+         if [ ! -z $RESPONSE_STATUS ] ; then
+            if [ $RESPONSE_STATUS == $EXPECTED ]; then
+                return 1
+            else
+                echo "UNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
+                return 0
+            fi
+         fi
+         let MAX_WAIT=MAX_WAIT-1
+         sleep 1
+    done
+    return 2
+}
