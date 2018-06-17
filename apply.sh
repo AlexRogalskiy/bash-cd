@@ -96,20 +96,21 @@ case $PHASE in
             chk2=$(checksum $BUILD_DIR)
             if [ "$chk1" == "$chk2" ]; then
                 info "- no diff: $chk2"
+                should_restart=0
                 if [ "$(type -t stop_$service)" == "function" ]; then
-                    if (func_modified "stop_$service") ; then
-                        let num_services_affected=(num_services_affected+1)
-                        warn "stop_$service"
-                        func_modified "stop_$service" "clear"
-                        "stop_$service"
-                    fi
+                    if (func_modified "stop_$service") ; then should_restart=1; fi
                 fi
                 if [ "$(type -t start_$service)" == "function" ]; then
-                    if (func_modified "start_$service") ; then
-                        let num_services_affected=(num_services_affected+1)
-                        warn "start_$service"
-                        func_modified "start_$service" "clear"
-                    fi
+                    if (func_modified "start_$service") ; then should_restart=1; fi
+                fi
+                if [ $should_restart -eq 1 ]; then
+                    let num_services_affected=(num_services_affected+1)
+                    warn "stop_$service"
+                    func_modified "stop_$service" "clear"
+                    "stop_$service"
+                    warn "start_$service"
+                    func_modified "start_$service" "clear"
+                    "start_$service"
                 fi
             else
 
