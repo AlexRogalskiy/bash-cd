@@ -237,16 +237,18 @@ function git_clone_or_update() {
         checkvar branch
         cd "$local_dir"
         git fetch
+        continue $? "COULD NOT EXECUTE: git fetch"
         git reset --hard
+        continue $? "COULD NOT EXECUTE: git reset --hard"
         git checkout $branch
         continue $? "COULD NOT EXECUTE: git checkout \"$branch\""
     }
 
     if [[ $branch == v* ]]; then
-        echo "CLONING TAG $branch"
+        echo "CLONING TAG $branch INTO $local_dir"
         clone "$git_url" "$local_dir" "$branch"
     else
-        echo "CLONING BRANCH $branch"
+        echo "CLONING BRANCH $branch INTO $local_dir"
         if [ ! -d "$local_dir/.git" ]; then
             mkdir -p "$local_dir"
             git clone "$git_url" "$local_dir"
