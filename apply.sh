@@ -70,9 +70,10 @@ case $PHASE in
         do
             info "BUILDING SERVICE $service INTO $BUILD_DIR"
 
-            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
             if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
             func_modified "build_$service" "clear"
+
+            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
 
         done
         highlight "APPLIED IN $BUILD_DIR"
@@ -84,14 +85,15 @@ case $PHASE in
             #build and determine the whether the service was affected
             info "BUILDING SERVICE: $service"
             chk1=$(checksum $BUILD_DIR)
-            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-            continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
 
             if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
             continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
 
             func_modified "build_$service" "clear"
             func_modified "install_$service" "clear"
+
+            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
+            continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
 
             chk2=$(checksum $BUILD_DIR)
             if [ "$chk1" == "$chk2" ]; then
