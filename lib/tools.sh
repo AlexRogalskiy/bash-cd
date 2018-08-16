@@ -244,7 +244,8 @@ function git_clone_or_update() {
         continue $? "COULD NOT EXECUTE: git checkout \"$branch\""
     }
 
-    if [[ $branch == v* ]]; then
+    git rev-parse -q --verify "refs/tags/$branch" &> /dev/null;
+    if [ $? -eq 0 ]; then
         echo "CLONING TAG $branch INTO $local_dir"
         clone "$git_url" "$local_dir" "$branch"
     else
