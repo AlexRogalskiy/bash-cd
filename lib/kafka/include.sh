@@ -7,9 +7,7 @@ checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
 checkvar KAFKA_VERSION
-checkvar KAFKA_PACKAGE
 
-export KAFKA_PACKAGE
 export KAFKA_BROKER_ID
 export KAFKA_CONNECTION=""
 export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
@@ -36,6 +34,8 @@ done
 build_kafka() {
     checkvar KAFKA_BROKER_ID
     checkvar KAFKA_REPL_FACTOR
+    checkvar KAFKA_PACKAGE
+    export KAFKA_PACKAGE
 }
 
 install_kafka() {
