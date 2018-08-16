@@ -24,7 +24,7 @@ setup_web-server() {
 
 build_web-server() {
     mkdir -p $BUILD_DIR/etc/apache2/sites-enabled
-    ln -sf $BUILD_DIR/etc/apache2/sites-available/default.conf $BUILD_DIR/etc/apache2/sites-enabled/
+    ln -sfn $BUILD_DIR/etc/apache2/sites-available/default.conf $BUILD_DIR/etc/apache2/sites-enabled/
 }
 
 start_web-server() {

@@ -13,8 +13,8 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
 fi
 
 setup_schema-registry() {
-    wget -qO - https://packages.confluent.io/deb/4.0/archive.key | sudo apt-key add -
-    add-apt-repository -y "deb [arch=amd64] https://packages.confluent.io/deb/4.0 stable main"
+    wget -qO - https://packages.confluent.io/deb/5.0/archive.key | sudo apt-key add -
+    add-apt-repository -y "deb [arch=amd64] https://packages.confluent.io/deb/5.0 stable main"
     add-apt-repository -y ppa:openjdk-r/ppa
     apt-get -y update
 }
