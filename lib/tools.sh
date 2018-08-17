@@ -233,9 +233,11 @@ function git_clone_or_update() {
     git_url="$1"
     local_dir="$2"
     branch="$3"
+
+    cd "$local_dir"
+
     checkbranch() {
         checkvar branch
-        cd "$local_dir"
         git fetch
         continue $? "COULD NOT EXECUTE: git fetch"
         git reset --hard
