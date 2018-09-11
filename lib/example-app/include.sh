@@ -6,20 +6,18 @@ checkvar KAFKA_CONNECTION
 checkvar EXAMPLE_APP_SERVERS
 checkvar EXAMPLE_APP_BRANCH
 
-EXAMPLE_APP_HOME="/opt/example-app"
-
 for i in "${!EXAMPLE_APP_SERVERS[@]}"
 do
    server="${EXAMPLE_APP_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "openjdk8"
     APPLICABLE_SERVICES+=("example-app")
-    warn "CLONING EXAMPLE APP BRANCH $EXAMPLE_APP_BRANCH INTO $EXAMPLE_APP_HOME"
-    #git_clone_or_update https://github.com/my-organizaion/example-app.git "$EXAMPLE_APP_HOME" "$EXAMPLE_APP_BRANCH"
    fi
 done
 
 build_example-app() {
+    export EXAMPLE_APP_HOME="/opt/example-app"
+    #git_clone_or_update https://github.com/my-organizaion/example-app.git "$EXAMPLE_APP_HOME" "$EXAMPLE_APP_BRANCH"
     diff_cp "$EXAMPLE_APP_HOME" "$BUILD_DIR/$EXAMPLE_APP_HOME"
 }
 

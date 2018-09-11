@@ -6,9 +6,14 @@ checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
+checkvar KAFKA_VERSION
 
 export KAFKA_BROKER_ID
 export KAFKA_CONNECTION=""
+export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
+export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION:0:3}
+
+KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 
 for i in "${!KAFKA_SERVERS[@]}"
 do
@@ -16,7 +21,7 @@ do
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
     APPLICABLE_SERVICES+=("kafka")
-    let KAFKA_BROKER_ID=i+1
+    let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
    fi
    listener="$KAFKA_PROTOCOL://$server:$KAFKA_PORT"
    if [ -z "$KAFKA_CONNECTION" ]; then
@@ -29,6 +34,8 @@ done
 build_kafka() {
     checkvar KAFKA_BROKER_ID
     checkvar KAFKA_REPL_FACTOR
+    checkvar KAFKA_PACKAGE
+    export KAFKA_PACKAGE
 }
 
 install_kafka() {

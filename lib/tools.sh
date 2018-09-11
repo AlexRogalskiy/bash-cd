@@ -211,6 +211,8 @@ function clone() {
         git clone "$url" $dest_dir
     fi
     cd "$dest_dir"
+    git fetch
+    git reset --hard
     git checkout "$branch"
 
 }
@@ -231,28 +233,58 @@ function git_clone_or_update() {
     git_url="$1"
     local_dir="$2"
     branch="$3"
+
+    cd "$local_dir"
+
     checkbranch() {
         checkvar branch
-        cd "$local_dir"
         git fetch
+        continue $? "COULD NOT EXECUTE: git fetch"
+        git reset --hard
+        continue $? "COULD NOT EXECUTE: git reset --hard"
         git checkout $branch
         continue $? "COULD NOT EXECUTE: git checkout \"$branch\""
     }
-    if [ ! -d "$local_dir/.git" ]; then
-        mkdir -p "$local_dir"
-        git clone "$git_url" "$local_dir"
-        continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
-        checkbranch
-        return 1
+
+    git rev-parse -q --verify "refs/tags/$branch" &> /dev/null;
+    if [ $? -eq 0 ]; then
+        echo "CLONING TAG $branch INTO $local_dir"
+        clone "$git_url" "$local_dir" "$branch"
     else
-        checkbranch
-        echo "CHECKING FOR UPDATES IN: $local_dir"
-        if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
-            git pull
-            continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
-            return 2
+        echo "CLONING BRANCH $branch INTO $local_dir"
+        if [ ! -d "$local_dir/.git" ]; then
+            mkdir -p "$local_dir"
+            git clone "$git_url" "$local_dir"
+            continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
+            checkbranch
         else
-            return 0
+            checkbranch
+            echo "CHECKING FOR UPDATES IN: $local_dir"
+            if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
+                git pull
+                continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
+            fi
         fi
     fi
+}
+
+wait_for_endpoint() {
+    URL=$1
+    EXPECTED=$2
+    MAX_WAIT=$3
+    while [  $MAX_WAIT -gt 0 ]; do
+         echo -en "\r$URL $MAX_WAIT";
+         RESPONSE_STATUS=$(curl --stderr /dev/null -X GET -i "$URL" | head -1 | cut -d' ' -f2)
+         if [ ! -z $RESPONSE_STATUS ] ; then
+            if [ $RESPONSE_STATUS == $EXPECTED ]; then
+                return 1
+            else
+                echo "UNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
+                return 0
+            fi
+         fi
+         let MAX_WAIT=MAX_WAIT-1
+         sleep 1
+    done
+    return 2
 }

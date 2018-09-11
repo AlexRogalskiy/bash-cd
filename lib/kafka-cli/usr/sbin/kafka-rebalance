@@ -1,0 +1,3 @@
+#!/bin/bash
+
+$AFFINITY_HOME/cli/bin/affinity-cli rebalance --zookeeper $ZOOKEEPER_CONNECTION "$@"

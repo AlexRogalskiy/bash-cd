@@ -109,16 +109,18 @@ Services are defined as modules directories under `./lib/<service>/..` - see exa
 be fully reusable but may need modifying if the configuration you require is very different
 from the ones provided.
 
-Structure of the module:
+Structure of the module and how it is applied:
 
 1. Module must have an `include.sh` file that defines the requirements and decides whether the service is attached to target host. Any exported variables for use in templates or other modules must be exported in this file.
 
-2. Module can have any subdirectories, containing *templates* that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
-
-3. Module can optionally define any of the following functions which will be triggered by the `apply.sh`
+2. Module may define build and setup functions which will be called first depending on the phase being executed:
 - `setup_<service>()` - how the os needs to be configured before it can be built and installed
-- `stop_<service>()` - how the service is stopped on a target machine
 - `build_<service>()` - this method may outupt additional files into `$BUILD_DIR` which will contribute to the checksum diff besides the service templates
+
+3. Module can provide *templates* in its subdirectories that will be mapped to `/` on the target, all the files will pass through `expand()` function which will replace all exported environment variables for their values.
+
+4. If the module was selected for installation during build phase (2.) installation will be executed by a combination of the following methods:
+- `stop_<service>()` - how the service is stopped on a target machine
 - `install_<service>()` - this function will do everything after a service was selected for installation by the build
 - `start_<service>()` - how the service is started on a target machine
 

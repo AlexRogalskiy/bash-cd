@@ -70,9 +70,10 @@ case $PHASE in
         do
             info "BUILDING SERVICE $service INTO $BUILD_DIR"
 
-            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
             if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
             func_modified "build_$service" "clear"
+
+            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
 
         done
         highlight "APPLIED IN $BUILD_DIR"
@@ -84,8 +85,6 @@ case $PHASE in
             #build and determine the whether the service was affected
             info "BUILDING SERVICE: $service"
             chk1=$(checksum $BUILD_DIR)
-            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-            continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
 
             if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
             continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
@@ -93,21 +92,27 @@ case $PHASE in
             func_modified "build_$service" "clear"
             func_modified "install_$service" "clear"
 
+            if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
+            continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
+
             chk2=$(checksum $BUILD_DIR)
             if [ "$chk1" == "$chk2" ]; then
                 info "- no diff: $chk2"
+                should_restart=0
                 if [ "$(type -t stop_$service)" == "function" ]; then
-                    if (func_modified "stop_$service") ; then
-                        warn "stop_$service"
-                        func_modified "stop_$service" "clear"
-                        "stop_$service"
-                    fi
+                    if (func_modified "stop_$service") ; then should_restart=1; fi
                 fi
                 if [ "$(type -t start_$service)" == "function" ]; then
-                    if (func_modified "start_$service") ; then
-                        warn "start_$service"
-                        func_modified "start_$service" "clear"
-                    fi
+                    if (func_modified "start_$service") ; then should_restart=1; fi
+                fi
+                if [ $should_restart -eq 1 ]; then
+                    let num_services_affected=(num_services_affected+1)
+                    warn "stop_$service"
+                    func_modified "stop_$service" "clear"
+                    "stop_$service"
+                    warn "start_$service"
+                    func_modified "start_$service" "clear"
+                    "start_$service"
                 fi
             else
 
@@ -125,7 +130,7 @@ case $PHASE in
 
                 #call install hooks on all modules
                 if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
-                continue $? "[$(date)] FAILED TO INSTALL SERVICE $servie"
+                continue $? "[$(date)] FAILED TO INSTALL SERVICE $service"
 
                 #finally start the services
                 if [ "$(type -t start_$service)" == "function" ]; then
