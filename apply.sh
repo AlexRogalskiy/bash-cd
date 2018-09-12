@@ -1,30 +1,30 @@
 #!/usr/bin/env bash
 
-# THIS SCRIPTS EXPECTS env/var.sh TO PROVIDE CORRECT CONFIGURATION, SEE EXAMPLE FOR DOCUMENTATION
+PHASE="$1"; shift
+VAR="var"
+function usage() {
+    fail "Usage: (setup|build|install) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
+}
+if [ -z "$PHASE" ] ; then usage; fi
 
-PHASE="$1"
-shift;
-if [ $1 == "--rebuild" ]; then
-    REBUILD="true"
-    shift;
-else
-    REBUILD="false"
-fi
-
-if [ $1 == "--host" ]; then
-    HOST="$2"
-fi
-
-
-if [ -z "$PHASE" ] ; then
-    fail "Usage: (build|install) [--rebuild] [--host <host>]"
-fi
-
+while [ ! -z "$1" ]; do
+    cmd="$1"; shift
+    case $cmd in
+        --rebuild*) REBUILD="true";;
+        --host*) HOST=$1; shift;;
+        --service*) SERVICE=$1; shift;;
+        --var*) VAR=$1; shift;;
+        *) usage;;
+    esac
+done
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $DIR/lib/tools.sh
-source $DIR/env/var.sh
+source $DIR/env/${VAR}.sh
 BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
+if [ ! -z "$SERVICE" ]; then
+    SERVICES=($SERVICE)
+fi
 
 export PRIMARY_IP
 if [ -z "$HOST" ]; then
@@ -32,7 +32,9 @@ if [ -z "$HOST" ]; then
 elif [ -z "$PRIMARY_IP" ]; then
     PRIMARY_IP="${!HOST}"
 fi
+
 checkvar PRIMARY_IP
+highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"
 
 checkvar SERVICES
 for service in "${SERVICES[@]}"
@@ -50,7 +52,6 @@ fi
 DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
 
-highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"
 
 echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
