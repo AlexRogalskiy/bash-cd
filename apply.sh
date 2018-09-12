@@ -3,11 +3,21 @@
 # THIS SCRIPTS EXPECTS env/var.sh TO PROVIDE CORRECT CONFIGURATION, SEE EXAMPLE FOR DOCUMENTATION
 
 PHASE="$1"
-OPTION="$2"
-HOST="$3"
+shift;
+if [ $1 == "--rebuild" ]; then
+    REBUILD="true"
+    shift;
+else
+    REBUILD="false"
+fi
+
+if [ $1 == "--host" ]; then
+    HOST="$2"
+fi
+
 
 if [ -z "$PHASE" ] ; then
-    fail "Usage: (build|install) [--host <host>] [--rebuild]"
+    fail "Usage: (build|install) [--rebuild] [--host <host>]"
 fi
 
 
@@ -53,7 +63,7 @@ case $PHASE in
         mkdir -p $BUILD_DIR
         for service in "${APPLICABLE_SERVICES[@]}"
         do
-            if (func_modified "setup_$service") ; then
+            if (func_modified "setup_$service") || [ "$REBUILD" == "true" ]; then
                 warn "[$(date)] SERVICE SETUP MODIFIED: $service"
                 setup_$service
                 continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
@@ -62,7 +72,7 @@ case $PHASE in
         done
     ;;
     build*)
-        if [ "$OPTION" == "--rebuild" ] && [ "$BUILD_DIR" != "/" ]; then
+        if [ "$REBUILD" == "true" ] && [ "$BUILD_DIR" != "/" ]; then
             echo "--REBUILD PURGING $BUILD_DIR"
             rm -rf $BUILD_DIR/**
         fi

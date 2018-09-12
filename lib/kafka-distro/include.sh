@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+check KAFKA_VERSION
+
 required "openjdk8"
 
-KAFKA_VERSION="2.0.0"
 KAFKA_PACKAGE="kafka_2.11-$KAFKA_VERSION"
 APPLICABLE_SERVICES+=("kafka-distro")
 
