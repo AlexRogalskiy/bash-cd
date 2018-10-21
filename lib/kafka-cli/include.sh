@@ -3,8 +3,6 @@
 required "zookeeper"    ZOOKEEPER_CONNECTION
 required "kafka"        KAFKA_CONNECTION
 
-export AFFINITY_HOME="/opt/affinity"
-
 for i in "${!KAFKA_SERVERS[@]}"
 do
    server="${KAFKA_SERVERS[$i]}"
@@ -14,11 +12,11 @@ do
 done
 
 function install_kafka-cli() {
-    git_clone_or_update https://github.com/amient/affinity.git "$AFFINITY_HOME" "master"
-    cd $AFFINITY_HOME
-    echo "installing affinity avro formatter.."
-    ./gradlew --no-daemon :kafka:avro-formatter-kafka:clean
-    ./gradlew --no-daemon :kafka:avro-formatter-kafka:build --exclude-task test
+    checkvar KAFKA_VERSION
+    KV="${KAFKA_VERSION:0:3}"
+    #TODO https://github.com/amient/bash-cd/issues/18
     rm  /opt/kafka/current/libs/avro-formatter-kafka-*
-    cp ./kafka/avro-formatter-kafka/build/lib/avro-formatter-kafka-*-all.jar /opt/kafka/current/libs/
+    URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/avro-formatter-kafka_${KV}-scala_2.11/0.8.2-SNAPSHOT/avro-formatter-kafka_$KV-scala_2.11-0.8.2-20180925.150459-3-all.jar"
+    download "$URL" "/opt/kafka/current/libs/"
+    continue $? "failed to install avro formatter jar"
 }

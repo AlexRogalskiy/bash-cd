@@ -2,6 +2,11 @@
 
 APPLICABLE_SERVICES+=("cd")
 
+setup_cd() {
+    apt-get -y update
+    apt-get -y install curl
+}
+
 install_cd() {
     systemctl daemon-reload
     systemctl enable cd.service
