@@ -2,15 +2,17 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-C="bash-cd-ubuntu"
+C="bash-cd-centos"
 if [ ! $(docker inspect -f {{.State.Running}} $C) ]; then
-    docker run  -d --privileged=true \
+    docker run  -e=container=docker  \
+                -d --rm --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+                -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
                 -v $DIR/env:/opt/bash-cd/env \
                 -v $DIR/lib:/opt/bash-cd/lib \
                 -p 8082:8082 \
                 -p 9092:9092 \
                 -p 8881:8881 \
-                --name $C ubuntu:16.04 /sbin/init
+                --name $C centos:7 /sbin/init
 fi
 
 docker cp $DIR/apply.sh $C:/opt/bash-cd/
