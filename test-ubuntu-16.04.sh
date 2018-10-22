@@ -10,6 +10,7 @@ if [ ! $(docker inspect -f {{.State.Running}} $C) ]; then
                 -p 8082:8082 \
                 -p 9092:9092 \
                 -p 8881:8881 \
+                -p 3000:3000 \
                 --name $C ubuntu:16.04 /sbin/init
 fi
 
