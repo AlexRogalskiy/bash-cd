@@ -18,7 +18,6 @@ fi
 setup_schema-registry() {
     curl -s https://packages.confluent.io/deb/$CF/archive.key | apt-key add -
     continue $? "could not add confluent repo key"
-    #wget -qO - https://packages.confluent.io/deb/$CF/archive.key | sudo apt-key add -
     add-apt-repository -y "deb [arch=amd64] https://packages.confluent.io/deb/$CF stable main"
     add-apt-repository -y ppa:openjdk-r/ppa
     apt-get -y update
@@ -26,7 +25,7 @@ setup_schema-registry() {
 }
 
 install_schema-registry() {
-    apt-get -y install confluent-schema-registry
+    apt-get -y -o Dpkg::Options::=--force-confdef install confluent-schema-registry
     continue $? "Could not install schema-registry"
     systemctl daemon-reload
     systemctl enable schema-registry.service
