@@ -133,7 +133,6 @@ case $PHASE in
                 if [ "$(type -t stop_$service)" == "function" ]; then
                     warn "[$(date)] STOPPING $service"
                     "stop_$service"
-                    continue $? "[$(date)] FAILED TO STOP $service"
                     func_modified "stop_$service" "clear"
                 fi
 
