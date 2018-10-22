@@ -13,7 +13,6 @@ if [ ! $(docker inspect -f {{.State.Running}} $C) ]; then
                 --name $C ubuntu:16.04 /sbin/init
 fi
 
-docker cp $DIR/apply.sh /opt/bash-cd/
-
-docker exec -it $C /bin/bash -c "cd /opt/bash-cd && /bin/bash"
+docker cp $DIR/apply.sh $C:/opt/bash-cd/
+docker exec -it $C /bin/bash -c "cd /opt/bash-cd && ./apply.sh setup && /bin/bash"
 
