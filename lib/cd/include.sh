@@ -4,7 +4,7 @@ APPLICABLE_SERVICES+=("cd")
 
 setup_cd() {
     apt-get -y update
-    apt-get -y install curl
+    apt-get -y install curl software-properties-common apt-transport-https
 }
 
 install_cd() {

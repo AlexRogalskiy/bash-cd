@@ -93,6 +93,9 @@ case $PHASE in
         let num_services_affected=0
         for service in "${APPLICABLE_SERVICES[@]}"
         do
+            should_restart=0
+            should_install=0
+
             #build and determine the whether the service was affected
             info "BUILDING SERVICE: $service"
             chk1=$(checksum $BUILD_DIR)
@@ -101,55 +104,58 @@ case $PHASE in
             continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
 
             func_modified "build_$service" "clear"
-            func_modified "install_$service" "clear"
+
 
             if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
             continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
 
             chk2=$(checksum $BUILD_DIR)
             if [ "$chk1" == "$chk2" ]; then
-                info "- no diff: $chk2"
-                should_restart=0
+                info "- no diff in build: $chk2"
                 if [ "$(type -t stop_$service)" == "function" ]; then
                     if (func_modified "stop_$service") ; then should_restart=1; fi
                 fi
                 if [ "$(type -t start_$service)" == "function" ]; then
                     if (func_modified "start_$service") ; then should_restart=1; fi
                 fi
-                if [ $should_restart -eq 1 ]; then
-                    let num_services_affected=(num_services_affected+1)
-                    warn "stop_$service"
-                    func_modified "stop_$service" "clear"
-                    "stop_$service"
-                    warn "start_$service"
-                    func_modified "start_$service" "clear"
-                    "start_$service"
+                if [ "$(type -t install_$service)" == "function" ]; then
+                    if (func_modified "install_$service") ; then should_restart=1; should_install=1; fi
                 fi
             else
+                should_restart=1
+                should_install=1
+            fi
 
+            if [ $should_restart -eq 1 ]; then
                 let num_services_affected=(num_services_affected+1)
-                warn "[$(date)] INSTALLING SERVICE $service ($chk1 -> $chk2)"
 
                 #service must be stopped before the real build into / becuase jars or other runtime artifact may be modified
                 if [ "$(type -t stop_$service)" == "function" ]; then
+                    warn "[$(date)] STOPPING $service"
+                    "stop_$service"
+                    continue $? "[$(date)] FAILED TO STOP $service"
                     func_modified "stop_$service" "clear"
-                    "stop_$service";
                 fi
 
-                #now apply the build result to the root of the filesystem
-                diff_cp "$BUILD_DIR" "/" "warn"
-
-                #call install hooks on all modules
-                if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
-                continue $? "[$(date)] FAILED TO INSTALL SERVICE $service"
+                #now apply the build result to the root of the filesystem and call install_
+                if [ $should_install -eq 1 ]; then
+                    diff_cp "$BUILD_DIR" "/" "warn"
+                    warn "[$(date)] INSTALLING SERVICE $service ($chk1 -> $chk2)"
+                    if [ "$(type -t install_$service)" == "function" ]; then "install_$service"; fi
+                    continue $? "[$(date)] FAILED TO INSTALL SERVICE $service"
+                    func_modified "install_$service" "clear"
+                fi
 
                 #finally start the services
                 if [ "$(type -t start_$service)" == "function" ]; then
+                    warn "[$(date)] STARTING $service"
+                    "start_$service"
+                    continue $? "[$(date)] FAILED TO START $service"
                     func_modified "start_$service" "clear"
-                    "start_$service";
                 fi
-                continue $? "[$(date)] FAILED TO START $service"
             fi
+
+
         done
         if [ "$num_services_affected" == "0" ]; then
             success "[$(date)] NO SERVICES ON THIS HOST WERE AFFECTED"

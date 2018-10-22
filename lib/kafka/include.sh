@@ -41,6 +41,7 @@ build_kafka() {
 install_kafka() {
     systemctl daemon-reload
     systemctl enable kafka.service
+    #TODO wait for port
 }
 
 start_kafka() {

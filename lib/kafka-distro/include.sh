@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-check KAFKA_VERSION
+checkvar KAFKA_VERSION
 
 required "openjdk8"
 
