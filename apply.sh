@@ -21,9 +21,12 @@ done
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $DIR/lib/tools.sh
 source $DIR/env/${VAR}.sh
-BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
-if [ ! -z "$SERVICE" ]; then
-    SERVICES=($SERVICE)
+
+if [ ! -z $(which git) ]; then
+    BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
+    if [ ! -z "$SERVICE" ]; then
+        SERVICES=($SERVICE)
+    fi
 fi
 
 export PRIMARY_IP
