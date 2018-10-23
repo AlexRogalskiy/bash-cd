@@ -7,6 +7,11 @@ SERVICES=(
     "kafka-cli"
     "kafka-topics"
     "schema-registry"
+    #
+    "librdkafka"
+    #
+    "grafana"
+    "prometheus"
 )
 
 HOST1="172.17.0.2"
@@ -29,7 +34,9 @@ export KAFKA_REPL_FACTOR=1
 export KAFKA_PORT="9092"
 #export KAFKA_SASL_MECHANISM=PLAIN
 #export KAFKA_AUTHORIZER_CLASS_NAME=kafka.security.auth.SimpleAclAuthorizer
-
 export SCHEMA_REGISTRY_HOST=$HOST1
 export SCHEMA_REGISTRY_PORT="8082"
 export AVRO_COMPATIBILITY_LEVEL=full_transitive
+
+GRAFANA_SERVERS=($HOST1)
+PROMETHEUS_SERVERS=($HOST1)

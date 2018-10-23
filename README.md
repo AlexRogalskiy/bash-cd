@@ -1,6 +1,9 @@
 # BASH-CD
 
-Incremental Continuous Deployment server which listens on port 7480 for HTTP webhook events.
+Incremental Continuous Deployment server which can be executed on the target system:
+ 1. by listening on port 7480 for HTTP webhook events
+ 2. by polling a git repository at regular intervals
+ 3. manually over ssh
 
 https://github.com/amient/bash-cd
 
