@@ -12,17 +12,14 @@ export SCHEMA_REGISTRY_URL="http://$SCHEMA_REGISTRY_HOST:$SCHEMA_REGISTRY_PORT"
 if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "openjdk8"
     required "kafka" KAFKA_CONNECTION
+    required "cftools" CF_VERSION
     APPLICABLE_SERVICES+=("schema-registry")
 fi
 
-setup_schema-registry() {
-    curl -s https://packages.confluent.io/deb/$CF/archive.key | apt-key add -
-    continue $? "could not add confluent repo key"
-    add-apt-repository -y "deb [arch=amd64] https://packages.confluent.io/deb/$CF stable main"
-    add-apt-repository -y ppa:openjdk-r/ppa
-    apt-get -y update
-    continue $? "could not add confluent repository"
-}
+#setup_schema-registry() {
+#    add-apt-repository -y ppa:openjdk-r/ppa
+#    apt-get -y update
+#}
 
 install_schema-registry() {
     apt-get -y -o Dpkg::Options::=--force-confdef install confluent-schema-registry
