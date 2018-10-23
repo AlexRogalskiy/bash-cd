@@ -20,7 +20,10 @@ done
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $DIR/lib/tools.sh
+source $DIR/env/${VAR}-hosts.sh
+continue $? "Missing env/${VAR}-hosts.sh"
 source $DIR/env/${VAR}.sh
+continue $? "Missing env/${VAR}.sh"
 
 if [ ! -z $(which git) ]; then
     BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
@@ -30,11 +33,16 @@ if [ ! -z $(which git) ]; then
 fi
 
 export PRIMARY_IP
-if [ -z "$HOST" ]; then
-    PRIMARY_IP="$(hostname --ip-address)"
-elif [ -z "$PRIMARY_IP" ]; then
-    PRIMARY_IP="${!HOST}"
+PRIMARY_IP="$(hostname --ip-address)"
+if [ ! -z "$HOST" ]; then
+    if [ -z "$PRIMARY_IP" ]; then
+        PRIMARY_IP="${!HOST}"
+    else
+        declare "${HOST}"="$PRIMARY_IP"
+        source $DIR/env/${VAR}.sh
+    fi
 fi
+
 
 checkvar PRIMARY_IP
 highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"

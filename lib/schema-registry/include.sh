@@ -12,7 +12,7 @@ export SCHEMA_REGISTRY_URL="http://$SCHEMA_REGISTRY_HOST:$SCHEMA_REGISTRY_PORT"
 if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "openjdk8"
     required "kafka" KAFKA_CONNECTION
-    required "cftools" CF_VERSION
+    required "cftools"
     APPLICABLE_SERVICES+=("schema-registry")
 fi
 

@@ -276,12 +276,13 @@ wait_for_ports() {
             Y=(${address//\// })
             address=${Y[1]}
         fi
+        echo $address
         IN=(${address//:/ })
         host=${IN[0]}
         port=${IN[1]}
         WAIT=30
         while ! nc -z $host $port 1>/dev/null 2>&1; do
-            echo -en "\rWaiting for HOST:$host PORT:$port ... $WAIT";
+            echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT";
             sleep 1
             let WAIT=WAIT-1
             if [ $WAIT -eq 0 ]; then

@@ -2,6 +2,8 @@
 
 checkvar CF_VERSION
 
+APPLICABLE_SERVICES+=("cftools")
+
 CF="${CF_VERSION:0:3}"
 
 setup_cftools() {

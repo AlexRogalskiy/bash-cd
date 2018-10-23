@@ -1,0 +1,3 @@
+#!/bin/bash
+
+kafka-consumer --formatter io.amient.kafka.metrics.MeasurementFormatter --topic _metrics "$@"
