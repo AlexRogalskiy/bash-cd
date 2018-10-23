@@ -8,6 +8,7 @@ setup_cd() {
 }
 
 install_cd() {
+    #timedatectl set-ntp true
     systemctl daemon-reload
     systemctl enable cd.service
 }
