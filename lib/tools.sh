@@ -198,7 +198,7 @@ function download() {
     if [ ! -f "$local" ]; then
         info "Downloading $(basename $url)..."
         mkdir -p $(dirname $local)
-        curl -s "$url" > "${local}.tmp"
+        curl -Ls "$url" > "${local}.tmp"
         mv "${local}.tmp" "$local"
     fi
 }
@@ -268,23 +268,47 @@ function git_clone_or_update() {
     fi
 }
 
+wait_for_ports() {
+    addresses=$1
+    for address in "${addresses[@]}"
+    do
+        if [[ $address == *"://"* ]]; then
+            Y=(${address//\// })
+            address=${Y[1]}
+        fi
+        IN=(${address//:/ })
+        host=${IN[0]}
+        port=${IN[1]}
+        WAIT=30
+        while ! nc -z $host $port 1>/dev/null 2>&1; do
+            echo -en "\rWaiting for HOST:$host PORT:$port ... $WAIT";
+            sleep 1
+            let WAIT=WAIT-1
+            if [ $WAIT -eq 0 ]; then
+                fail "Failed waiting for HOST:$host PORT:$port"
+            fi
+        done
+        echo -en "\r"
+    done
+}
+
 wait_for_endpoint() {
     URL=$1
     EXPECTED=$2
     MAX_WAIT=$3
     while [  $MAX_WAIT -gt 0 ]; do
          echo -en "\r$URL $MAX_WAIT";
-         RESPONSE_STATUS=$(curl --stderr /dev/null -X GET -i "$URL" | head -1 | cut -d' ' -f2)
+         RESPONSE_STATUS=$(curl --stderr /dev/null GET -i "$URL" | head -1 | cut -d' ' -f2)
          if [ ! -z $RESPONSE_STATUS ] ; then
-            if [ $RESPONSE_STATUS == $EXPECTED ]; then
-                return 1
+            if [ "$RESPONSE_STATUS" != "$EXPECTED" ]; then
+                fail "\rUNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
             else
-                echo "UNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
-                return 0
+                echo -en "\r"
+                return 0;
             fi
          fi
          let MAX_WAIT=MAX_WAIT-1
          sleep 1
     done
-    return 2
+    fail "TIMEOUT WHILE WAITING FOR ENDPOINT: $URL"
 }
