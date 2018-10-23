@@ -2,9 +2,9 @@
 
 checkvar GRAFANA_SERVERS
 
-for i in "${!KAFKA_SERVERS[@]}"
+for i in "${!GRAFANA_SERVERS[@]}"
 do
-   server="${KAFKA_SERVERS[$i]}"
+   server="${GRAFANA_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
     APPLICABLE_SERVICES+=("grafana")
    fi
@@ -25,6 +25,7 @@ install_grafana() {
 
 start_grafana() {
     systemctl start grafana-server
+    wait_for_endpoint http://localhost:3000 302 30
 }
 
 stop_grafana() {

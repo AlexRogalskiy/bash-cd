@@ -2,6 +2,7 @@
 
 checkvar PRIMARY_IP
 checkvar KAFKA_SERVERS
+checkvar KAFKA_CONNECTION
 
 server="${KAFKA_SERVERS[${#KAFKA_SERVERS[@]}-1]}"
 if [ "$server" == "$PRIMARY_IP" ]; then
@@ -10,6 +11,7 @@ if [ "$server" == "$PRIMARY_IP" ]; then
 fi
 
 install_kafka-topics() {
+    wait_for_ports $KAFKA_CONNECTION
     /opt/kafka/topics.sh
     continue $? "could not apply kafka topics.sh"
     /opt/kafka/acls.sh

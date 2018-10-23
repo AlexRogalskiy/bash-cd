@@ -9,6 +9,7 @@ SERVICES=(
     "schema-registry"
     #
     "grafana"
+    "prometheus"
 )
 
 HOST1="172.17.0.2"
@@ -36,3 +37,4 @@ export SCHEMA_REGISTRY_PORT="8082"
 export AVRO_COMPATIBILITY_LEVEL=full_transitive
 
 GRAFANA_SERVERS=($HOST1)
+PROMETHEUS_SERVERS=($HOST1)
