@@ -16,25 +16,18 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     APPLICABLE_SERVICES+=("schema-registry")
 fi
 
-#setup_schema-registry() {
-#    add-apt-repository -y ppa:openjdk-r/ppa
-#    apt-get -y update
-#}
-
 install_schema-registry() {
-    apt-get -y -o Dpkg::Options::=--force-confdef install confluent-schema-registry
+    yum -y -o Dpkg::Options::=--force-confdef install confluent-schema-registry
     continue $? "Could not install schema-registry"
     systemctl daemon-reload
     systemctl enable schema-registry.service
 }
 
 start_schema-registry() {
-    #start -q schema-registry
     systemctl start schema-registry.service
 }
 
 stop_schema-registry() {
-    #stop -q schema-registry
     systemctl stop schema-registry.service
 }
 
