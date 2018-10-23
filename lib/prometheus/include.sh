@@ -10,17 +10,6 @@ do
    fi
 done
 
-setup_prometheus() {
-    id -u prometheus
-    if [ $? -ne 0 ]; then
-        useradd --no-create-home --shell /bin/false prometheus
-        useradd --no-create-home --shell /bin/false node_exporter
-    fi
-    mkdir -p /var/lib/prometheus
-    chown -R prometheus:prometheus /var/lib/prometheus
-    continue $? "failed to create prometheus user"
-}
-
 build_prometheus() {
     VERSION=2.4.3
     DOWNLOAD="prometheus-$VERSION.linux-amd64"
@@ -40,6 +29,14 @@ build_prometheus() {
 }
 
 install_prometheus() {
+    id -u prometheus > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        useradd --no-create-home --shell /bin/false prometheus
+        useradd --no-create-home --shell /bin/false node_exporter
+    fi
+    mkdir -p /var/lib/prometheus
+    chown -R prometheus:prometheus /var/lib/prometheus
+    continue $? "failed to create prometheus user"
     chown prometheus:prometheus /opt/prometheus/prometheus
     chown prometheus:prometheus /opt/prometheus/promtool
     cp -r /opt/prometheus/consoles /opt/etc/prometheus
