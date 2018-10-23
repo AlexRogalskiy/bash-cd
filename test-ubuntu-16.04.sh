@@ -7,12 +7,12 @@ if [ -z $(docker ps -aq -f name=$C) ]; then
     docker run  --rm -d --privileged=true \
                 -v $DIR/env:/opt/bash-cd/env \
                 -v $DIR/lib:/opt/bash-cd/lib \
-                -p 8082:8082 \
-                -p 9092:9092 \
-                -p 8881:8881 \
-                -p 8086:8086 \
-                -p 9090:9090 \
-                -p 3000:3000 \
+                -p 18082:8082 \
+                -p 19092:9092 \
+                -p 18881:8881 \
+                -p 18086:8086 \
+                -p 19090:9090 \
+                -p 13000:3000 \
                 --name $C ubuntu:16.04 /sbin/init
 fi
 

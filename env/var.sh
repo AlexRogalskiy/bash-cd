@@ -8,6 +8,8 @@ SERVICES=(
     "kafka-topics"
     "schema-registry"
     #
+    "librdkafka"
+    #
     "grafana"
     "prometheus"
 )
