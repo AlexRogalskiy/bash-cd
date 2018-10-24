@@ -6,6 +6,7 @@ checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
+checkvar KAFKA_JMX_PORT
 checkvar KAFKA_VERSION
 
 export KAFKA_BROKER_ID
