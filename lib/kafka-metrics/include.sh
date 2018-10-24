@@ -19,7 +19,7 @@ function build_kafka-metrics() {
     mkdir -p $KAFKA_METRICS_HOME
     download https://github.com/amient/kafka-metrics/archive/$KM_BRANCH.zip $KAFKA_METRICS_HOME
     cd $KAFKA_METRICS_HOME
-    if [ ! -d src ]; then
+    if [ ! -d metrics-reporter ]; then
         unzip $KM_BRANCH.zip -d ../
         continue $? "Failed to unzip kafka-metrics archive"
         cd $KAFKA_METRICS_HOME
