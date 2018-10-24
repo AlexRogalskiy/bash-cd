@@ -12,6 +12,7 @@ SERVICES=(
     "schema-registry"
     #
     "grafana"
+    "influxdb"
     "prometheus"
 )
 
@@ -33,4 +34,5 @@ export KAFKA_PORT="9092"
 #export KAFKA_AUTHORIZER_CLASS_NAME=kafka.security.auth.SimpleAclAuthorizer
 
 GRAFANA_SERVERS=($HOST1)
-PROMETHEUS_SERVERS=($HOST1)
+INFLUXDB_SERVERS=($HOST1)
+PROMETHEUS_SERVERS=()
