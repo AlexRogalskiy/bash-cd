@@ -50,7 +50,7 @@ install_kafka() {
     rm /opt/kafka/current/libs/metrics-reporter*.jar
     cp $KAFKA_METRICS_HOME/metrics-reporter/build/lib/metrics-reporter*.jar /opt/kafka/current/libs
 
-    chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
+    #chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
     systemctl daemon-reload
     systemctl enable kafka.service
 }
