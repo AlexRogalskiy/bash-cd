@@ -130,7 +130,10 @@ case $PHASE in
                     if (func_modified "start_$service") ; then should_restart=1; fi
                 fi
                 if [ "$(type -t install_$service)" == "function" ]; then
-                    if (func_modified "install_$service") ; then should_restart=1; should_install=1; fi
+                    if (func_modified "install_$service") ; then
+                        should_restart=1
+                        should_install=1
+                    fi
                 fi
             else
                 should_restart=1

@@ -4,7 +4,7 @@ APPLICABLE_SERVICES+=("cd")
 
 setup_cd() {
     apt-get -y update
-    apt-get -y install curl software-properties-common apt-transport-https netcat
+    apt-get -y install unzip curl software-properties-common apt-transport-https netcat
 }
 
 install_cd() {

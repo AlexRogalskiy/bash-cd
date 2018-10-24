@@ -20,6 +20,7 @@ do
    server="${KAFKA_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
+    required "kafka-metrics"
     APPLICABLE_SERVICES+=("kafka")
     let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
    fi
@@ -35,22 +36,30 @@ build_kafka() {
     checkvar KAFKA_BROKER_ID
     checkvar KAFKA_REPL_FACTOR
     checkvar KAFKA_PACKAGE
+    checkvar KAFKA_METRICS_HOME
     export KAFKA_PACKAGE
+    checksum "$KAFKA_METRICS_HOME/metrics-reporter" > "$BUILD_DIR/kafka-metrics-reporter.checksum"
+    checksum "$KAFKA_METRICS_HOME/core" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
+    checksum "$KAFKA_METRICS_HOME/build.gradle" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
+
 }
 
 install_kafka() {
+    cd $KAFKA_METRICS_HOME
+    ./gradlew --no-daemon -q :metrics-reporter:build
+    rm /opt/kafka/current/libs/metrics-reporter*.jar
+    cp $KAFKA_METRICS_HOME/metrics-reporter/build/lib/metrics-reporter*.jar /opt/kafka/current/libs
+
+    chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
     systemctl daemon-reload
     systemctl enable kafka.service
-    #TODO wait for port
 }
 
 start_kafka() {
-    #start -q kafka
     systemctl start kafka.service
 }
 
 stop_kafka() {
-    #stop -q kafka
     systemctl stop kafka.service
 }
 

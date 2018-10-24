@@ -39,7 +39,7 @@ install_prometheus() {
     continue $? "failed to create prometheus user"
     chown prometheus:prometheus /opt/prometheus/prometheus
     chown prometheus:prometheus /opt/prometheus/promtool
-    cp -r /opt/prometheus/consoles /opt/etc/prometheus
+    cp -r /opt/prometheus/consoles /etc/prometheus
     cp -r /opt/prometheus/console_libraries /etc/prometheus
     chown -R prometheus:prometheus /etc/prometheus
     systemctl daemon-reload
