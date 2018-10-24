@@ -20,8 +20,6 @@ done
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $DIR/lib/tools.sh
-source $DIR/env/${VAR}-hosts.sh
-continue $? "Missing env/${VAR}-hosts.sh"
 source $DIR/env/${VAR}.sh
 continue $? "Missing env/${VAR}.sh"
 
@@ -38,8 +36,7 @@ if [ ! -z "$HOST" ]; then
     if [ -z "$PRIMARY_IP" ]; then
         PRIMARY_IP="${!HOST}"
     else
-        declare "${HOST}"="$PRIMARY_IP"
-        source $DIR/env/${VAR}.sh
+        fail "The system doesn't provide hostname ip-address"
     fi
 fi
 

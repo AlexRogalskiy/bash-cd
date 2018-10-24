@@ -18,6 +18,10 @@ KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 for i in "${!KAFKA_SERVERS[@]}"
 do
    server="${KAFKA_SERVERS[$i]}"
+   export KAFKA_ADVERTISED_HOST="${KAFKA_ADVERTISED_HOSTS[$i]}"
+   if [ -z "$KAFKA_ADVERTISED_HOST" ] ; then
+       KAFKA_ADVERTISED_HOST=$server
+   fi
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
     required "kafka-metrics"
