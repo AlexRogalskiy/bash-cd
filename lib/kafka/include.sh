@@ -7,10 +7,17 @@ checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
 checkvar KAFKA_JMX_PORT
+checkvar KAFKA_JMX_PROMETHEUS_PORT
 checkvar KAFKA_VERSION
 
 export KAFKA_BROKER_ID
-export KAFKA_CONNECTION=""
+export KAFKA_LOG_DIRS
+export KAFKA_PROTOCOL
+export KAFKA_REPL_FACTOR
+export KAFKA_SASL_MECHANISM
+export KAFKA_AUTHORIZER_CLASS_NAME
+
+export KAFKA_CONNECTION
 export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
 export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION:0:3}
 
@@ -28,6 +35,10 @@ do
     required "kafka-metrics"
     APPLICABLE_SERVICES+=("kafka")
     let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
+    export KAFKA_BROKER_ID
+    export KAFKA_PORT
+    export KAFKA_JMX_PORT
+    export KAFKA_JMX_PROMETHEUS_PORT
    fi
    listener="$KAFKA_PROTOCOL://$server:$KAFKA_PORT"
    if [ -z "$KAFKA_CONNECTION" ]; then
@@ -46,16 +57,28 @@ build_kafka() {
     checksum "$KAFKA_METRICS_HOME/metrics-reporter" > "$BUILD_DIR/kafka-metrics-reporter.checksum"
     checksum "$KAFKA_METRICS_HOME/core" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
     checksum "$KAFKA_METRICS_HOME/build.gradle" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
-
 }
 
 install_kafka() {
-    cd $KAFKA_METRICS_HOME
-    ./gradlew --no-daemon -q :metrics-reporter:build
-    rm /opt/kafka/current/libs/metrics-reporter*.jar
-    cp $KAFKA_METRICS_HOME/metrics-reporter/build/lib/metrics-reporter*.jar /opt/kafka/current/libs
+    download https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar /opt/
 
-    #chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
+    checkvar KAFKA_VERSION
+    KV="${KAFKA_VERSION:0:3}"
+    rm -f /opt/kafka/current/libs/metrics-reporter-kafka-*
+    URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/metrics-reporter-kafka_${KV}-0.8.2-20181025.155900-1-all.jar"
+    download "$URL" "/opt/kafka/current/libs/"
+    continue $? "failed to download metrics reporter jar"
+    MD5_FILE="metrics-reporter-kafka_$KV-0.8.2-20181025.155900-1-all.jar.md5"
+    MD5_URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/$MD5_FILE"
+    download "$MD5_URL" "/opt/kafka/current/libs/"
+    continue $? "failed to download metrics reporter checksum file"
+    local="$(checksum "/opt/kafka/current/libs/metrics-reporter-kafka_$KV-0.8.2-20181025.155900-1-all.jar")"
+    remote=$(cat "/opt/kafka/current/libs/$MD5_FILE")
+    if [[ "$local"  != $remote* ]]; then
+     fail "metrics reporter checksum failed"
+    fi
+
+    chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
     systemctl daemon-reload
     systemctl enable kafka.service
 }
@@ -66,5 +89,6 @@ start_kafka() {
 
 stop_kafka() {
     systemctl stop kafka.service
+    systemctl stop kafka-influxdb-loader
 }
 

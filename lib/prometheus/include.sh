@@ -2,13 +2,25 @@
 
 checkvar PROMETHEUS_SERVERS
 
-for i in "${!PROMETHEUS_SERVERS[@]}"
-do
-   server="${PROMETHEUS_SERVERS[$i]}"
-   if [ "$server" == "$PRIMARY_IP" ]; then
-    APPLICABLE_SERVICES+=("prometheus")
-   fi
-done
+export PROMETHEUS_URL
+
+if [ ! -z "$KAFKA_JMX_PROMETHEUS_PORT" ]; then
+    for i in "${!PROMETHEUS_SERVERS[@]}"
+    do
+       server="${PROMETHEUS_SERVERS[$i]}"
+       if [ "$server" == "$PRIMARY_IP" ]; then
+        APPLICABLE_SERVICES+=("prometheus")
+        if [ ! -z "$KAFKA_SERVERS" ]; then
+            export KAFKA_PROMETHEUS_TARGETS
+            for i in "${!KAFKA_SERVERS[@]}"
+            do
+               kafka_host="${KAFKA_ADVERTISED_HOSTS[$i]}"
+               export KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:$KAFKA_JMX_PROMETHEUS_PORT,"
+            done
+        fi
+       fi
+    done
+fi
 
 build_prometheus() {
     VERSION=2.4.3

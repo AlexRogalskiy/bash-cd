@@ -4,6 +4,7 @@ checkvar PRIMARY_IP
 checkvar ZK_SERVERS
 checkvar ZOOKEEPER_PORT
 
+export ZOOKEEPER_PORT
 export ZOOKEEPER_CONNECTION=""
 export ZK_MY_ID
 export ZK_PEERS
