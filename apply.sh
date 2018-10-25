@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 
-PHASE="$1"; shift
-VAR="var"
-function usage() {
-    fail "Usage: (setup|build|install) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
-}
-if [ -z "$PHASE" ] ; then usage; fi
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/lib/tools.sh
 
+function usage() {
+    fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
+}
+
+VAR="var"
+doSetup=1
+PHASE="install";
 while [ ! -z "$1" ]; do
     cmd="$1"; shift
     case $cmd in
+        help*) usage;;
+        setup*) PHASE="setup";;
+        build*) PHASE="build"; doSetup=0;;
+        install*) PHASE="install"; doSetup=0;;
         --rebuild*) REBUILD="true";;
         --host*) HOST=$1; shift;;
         --service*) SERVICE=$1; shift;;
@@ -18,8 +25,6 @@ while [ ! -z "$1" ]; do
     esac
 done
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $DIR/lib/tools.sh
 source $DIR/env/${VAR}.sh
 continue $? "Missing env/${VAR}.sh"
 
@@ -42,7 +47,7 @@ fi
 
 
 checkvar PRIMARY_IP
-highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"
+highlight "APPLYING BRANCH '$BRANCH' TO HOST $PRIMARY_IP, PHASE: $PHASE"
 
 checkvar SERVICES
 for service in "${SERVICES[@]}"
@@ -67,18 +72,25 @@ declare BUILD_DIR="$DIR/build"
 mkdir -p $BUILD_DIR
 continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
 
+
+if [ $doSetup -eq 1 ]; then
+    info "SETTING UP ALL SERVICES"
+    mkdir -p $BUILD_DIR
+    for service in "${APPLICABLE_SERVICES[@]}"
+    do
+        if (func_modified "setup_$service") || [ "$REBUILD" == "true" ]; then
+            warn "[$(date)] SERVICE SETUP MODIFIED: $service"
+            setup_$service
+            continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
+            func_modified "setup_$service" "clear"
+        fi
+    done
+fi
+
+
 case $PHASE in
     setup*)
-        mkdir -p $BUILD_DIR
-        for service in "${APPLICABLE_SERVICES[@]}"
-        do
-            if (func_modified "setup_$service") || [ "$REBUILD" == "true" ]; then
-                warn "[$(date)] SERVICE SETUP MODIFIED: $service"
-                setup_$service
-                continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
-                func_modified "setup_$service" "clear"
-            fi
-        done
+        #this has already happened above
     ;;
     build*)
         if [ "$REBUILD" == "true" ] && [ "$BUILD_DIR" != "/" ]; then
@@ -174,7 +186,7 @@ case $PHASE in
         fi
     ;;
     *)
-        fail "POSSIBLE PHASES: build, install"
+        usage;
     ;;
 esac
 
