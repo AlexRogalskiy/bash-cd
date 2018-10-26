@@ -15,9 +15,10 @@ build_kafka-distro() {
     if [ ! -d "/opt/kafka/$KAFKA_PACKAGE" ]; then
         tar -xzf "/opt/kafka/$KAFKA_PACKAGE.tgz" -C "/opt/kafka"
     fi
-    gpg --verify "/opt/kafka$KAFKA_PACKAGE.asc" "/opt/kafka$KAFKA_PACKAGE"
-    if [ "$result" -ne 0 ]; then
-        rm $KAFKA_PACKAGE
+    gpg --verify "/opt/kafka/$KAFKA_PACKAGE.tgz.asc" "/opt/kafka/$KAFKA_PACKAGE.tgz"
+    if [ $? -ne 0 ]; then
+        rm "/opt/kafka/$KAFKA_PACKAGE.tgz"
+        rm "/opt/kafka/$KAFKA_PACKAGE.tgz.asc"
         fail "signature verification failed for: $KAFKA_PACKAGE"
     fi
 }
