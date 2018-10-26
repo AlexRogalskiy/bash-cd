@@ -61,7 +61,6 @@ build_kafka() {
 
 install_kafka() {
     download https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar /opt/
-
     checkvar KAFKA_VERSION
     KV="${KAFKA_VERSION:0:3}"
     rm -f /opt/kafka/current/libs/metrics-reporter-kafka-*
@@ -89,6 +88,5 @@ start_kafka() {
 
 stop_kafka() {
     systemctl stop kafka.service
-    systemctl stop kafka-influxdb-loader
 }
 

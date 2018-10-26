@@ -139,7 +139,7 @@ function expand() {
 
 function expand_dir() {
     shells=(".sh" ".bat" ".bash" ".zsh")
-    artifacts=(".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx")
+    artifacts=(".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
     for file in $1/$2/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then

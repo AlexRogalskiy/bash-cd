@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 
 checkvar PROMETHEUS_SERVERS
-
-export PROMETHEUS_URL
-
+checkvar PROMETHEUS_DATA_DIR
+checkvar PROMETHEUS_RETENTION
+export KAFKA_PROMETHEUS_TARGETS=""
 if [ ! -z "$KAFKA_JMX_PROMETHEUS_PORT" ]; then
     for i in "${!PROMETHEUS_SERVERS[@]}"
     do
        server="${PROMETHEUS_SERVERS[$i]}"
        if [ "$server" == "$PRIMARY_IP" ]; then
         APPLICABLE_SERVICES+=("prometheus")
+        export PROMETHEUS_URL="http://localhost:9090"
         if [ ! -z "$KAFKA_SERVERS" ]; then
             export KAFKA_PROMETHEUS_TARGETS
+            export PROMETHEUS_DATA_DIR
+            export PROMETHEUS_RETENTION
             for i in "${!KAFKA_SERVERS[@]}"
             do
                kafka_host="${KAFKA_ADVERTISED_HOSTS[$i]}"
-               export KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:$KAFKA_JMX_PROMETHEUS_PORT,"
+               KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:$KAFKA_JMX_PROMETHEUS_PORT,"
             done
         fi
        fi
@@ -46,8 +49,8 @@ install_prometheus() {
         useradd --no-create-home --shell /bin/false prometheus
         useradd --no-create-home --shell /bin/false node_exporter
     fi
-    mkdir -p /var/lib/prometheus
-    chown -R prometheus:prometheus /var/lib/prometheus
+    mkdir -p $PROMETHEUS_DATA_DIR
+    chown -R prometheus:prometheus $PROMETHEUS_DATA_DIR
     continue $? "failed to create prometheus user"
     chown prometheus:prometheus /opt/prometheus/prometheus
     chown prometheus:prometheus /opt/prometheus/promtool

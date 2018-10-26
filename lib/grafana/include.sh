@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-checkvar GRAFANA_SERVERS
 #FIXME disable grafana password on install
 export GRAFANA_URL="http://admin:admin@localhost:3000"
 
@@ -26,18 +25,37 @@ install_grafana() {
 }
 
 start_grafana() {
+    checkvar GRAFANA_SERVERS
     systemctl start grafana-server
-    wait_for_endpoint http://localhost:3000 302 30
+    wait_for_endpoint http://admin:admin@localhost:3000 200 30
     if [ ! -z "$INFLUXDB_URL" ]; then
         curl -s "$GRAFANA_URL/api/datasources" -s -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{"name": "InfluxDB", "type": "influxdb", "access": "proxy", "url": "'$INFLUXDB_URL'", "password": "none", "user": "kafka-metrics", "database": "metrics", "isDefault": true}'
+        continue $? "failed to configure default metrics datasource in grafana 1"
+        echo ""
     fi
     if [ ! -z "$PROMETHEUS_URL" ]; then
-        curl -s "$GRAFANA_URL/api/datasources" -s -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{"name": "InfluxDB", "type": "prometheus", "access": "proxy", "url": "'$INFLUXDB_URL'", "password": "none", "user": "kafka-metrics", "database": "metrics", "isDefault": true}'
+        curl -s "$GRAFANA_URL/api/datasources" -s -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{"name": "Kafka", "type": "prometheus", "access": "proxy", "url": "'$PROMETHEUS_URL'", "password": "none", "user": "none", "isDefault": false, "tlsSkipVerify": true}'
+        continue $? "failed to configure default kafka datasource in grafana 1"
+        echo ""
     fi
-    continue $? "failed to configure default metrics datasource in grafana 1"
+
+    update_grafana_dashboard "/data/grafana/kafka-groups.static.json"
+    update_grafana_dashboard "/data/grafana/kafka-topics.static.json"
 }
 
 stop_grafana() {
     systemctl stop grafana-server
 }
 
+update_grafana_dashboard() {
+    echo "{\"dashboard\":" > /tmp/dashboard.json
+    cat "$1" >> /tmp/dashboard.json
+    echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
+    curl -s --data-binary "@/tmp/dashboard.json" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
+    -X POST "$GRAFANA_URL/api/dashboards/db"
+    cat /tmp/dashboard.json
+    continue $? "failed to upload grafana dashboard: $1"
+    echo ""
+}
