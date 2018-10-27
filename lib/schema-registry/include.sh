@@ -5,6 +5,7 @@ checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 checkvar AVRO_COMPATIBILITY_LEVEL
 
+
 CF="${CF_VERSION:0:3}"
 
 export SCHEMA_REGISTRY_URL="http://$SCHEMA_REGISTRY_HOST:$SCHEMA_REGISTRY_PORT"
@@ -14,6 +15,7 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "kafka" KAFKA_CONNECTION
     required "cftools"
     APPLICABLE_SERVICES+=("schema-registry")
+    export AVRO_COMPATIBILITY_LEVEL
 fi
 
 #setup_schema-registry() {
@@ -31,6 +33,7 @@ install_schema-registry() {
 start_schema-registry() {
     #start -q schema-registry
     systemctl start schema-registry.service
+    wait_for_endpoint $SCHEMA_REGISTRY_URL 200 30
 }
 
 stop_schema-registry() {

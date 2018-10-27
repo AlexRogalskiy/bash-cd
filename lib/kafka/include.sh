@@ -6,8 +6,6 @@ checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
-checkvar KAFKA_JMX_PORT
-checkvar KAFKA_JMX_PROMETHEUS_PORT
 checkvar KAFKA_VERSION
 
 export KAFKA_BROKER_ID
@@ -37,8 +35,8 @@ do
     let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
     export KAFKA_BROKER_ID
     export KAFKA_PORT
+    let KAFKA_JMX_PORT=KAFKA_PORT+20000
     export KAFKA_JMX_PORT
-    export KAFKA_JMX_PROMETHEUS_PORT
    fi
    listener="$KAFKA_PROTOCOL://$server:$KAFKA_PORT"
    if [ -z "$KAFKA_CONNECTION" ]; then

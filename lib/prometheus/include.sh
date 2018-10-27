@@ -4,26 +4,25 @@ checkvar PROMETHEUS_SERVERS
 checkvar PROMETHEUS_DATA_DIR
 checkvar PROMETHEUS_RETENTION
 export KAFKA_PROMETHEUS_TARGETS=""
-if [ ! -z "$KAFKA_JMX_PROMETHEUS_PORT" ]; then
-    for i in "${!PROMETHEUS_SERVERS[@]}"
-    do
-       server="${PROMETHEUS_SERVERS[$i]}"
-       if [ "$server" == "$PRIMARY_IP" ]; then
-        APPLICABLE_SERVICES+=("prometheus")
-        export PROMETHEUS_URL="http://localhost:9090"
-        if [ ! -z "$KAFKA_SERVERS" ]; then
-            export KAFKA_PROMETHEUS_TARGETS
-            export PROMETHEUS_DATA_DIR
-            export PROMETHEUS_RETENTION
-            for i in "${!KAFKA_SERVERS[@]}"
-            do
-               kafka_host="${KAFKA_ADVERTISED_HOSTS[$i]}"
-               KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:$KAFKA_JMX_PROMETHEUS_PORT,"
-            done
-        fi
-       fi
-    done
-fi
+
+for i in "${!PROMETHEUS_SERVERS[@]}"
+do
+   server="${PROMETHEUS_SERVERS[$i]}"
+   if [ "$server" == "$PRIMARY_IP" ]; then
+    APPLICABLE_SERVICES+=("prometheus")
+    export PROMETHEUS_URL="http://localhost:9090"
+    if [ ! -z "$KAFKA_SERVERS" ]; then
+        export KAFKA_PROMETHEUS_TARGETS
+        export PROMETHEUS_DATA_DIR
+        export PROMETHEUS_RETENTION
+        for i in "${!KAFKA_SERVERS[@]}"
+        do
+           kafka_host="${KAFKA_ADVERTISED_HOSTS[$i]}"
+           KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:$KAFKA_JMX_PROMETHEUS_PORT,"
+        done
+    fi
+   fi
+done
 
 build_prometheus() {
     VERSION=2.4.3
