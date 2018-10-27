@@ -22,6 +22,7 @@ setup_grafana() {
 
 install_grafana() {
     apt-get -y install grafana
+    chown -R grafana:grafana /data/grafana
 }
 
 start_grafana() {
@@ -49,13 +50,12 @@ stop_grafana() {
 
 update_grafana_dashboard() {
     echo "{\"dashboard\":" > /tmp/dashboard.json
-    cat "$1" >> /tmp/dashboard.json
+    cat "$1" | jq .id=null >> /tmp/dashboard.json
     echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
     curl -s --data-binary "@/tmp/dashboard.json" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
     -X POST "$GRAFANA_URL/api/dashboards/db"
-    cat /tmp/dashboard.json
     continue $? "failed to upload grafana dashboard: $1"
     echo ""
 }
