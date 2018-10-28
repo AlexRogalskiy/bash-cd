@@ -30,7 +30,8 @@ do
    fi
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
-    required "kafka-metrics"
+    checkvar KAFKA_PACKAGE
+    export KAFKA_PACKAGE
     APPLICABLE_SERVICES+=("kafka")
     let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
     export KAFKA_BROKER_ID
