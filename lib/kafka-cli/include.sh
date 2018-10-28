@@ -3,16 +3,12 @@
 required "zookeeper"    ZOOKEEPER_CONNECTION
 required "kafka"        KAFKA_CONNECTION
 
-for i in "${!KAFKA_SERVERS[@]}"
-do
-   server="${KAFKA_SERVERS[$i]}"
-   if [ "$server" == "$PRIMARY_IP" ]; then
-    APPLICABLE_SERVICES+=("kafka-cli")
-   fi
-done
+checkvar KAFKA_VERSION
+
+APPLICABLE_SERVICES+=("kafka-cli")
+export AFFINITY_HOME="/opt/affinity"
 
 function install_kafka-cli() {
-    #TODO download affinity cli tools
     checkvar KAFKA_VERSION
     KV="${KAFKA_VERSION:0:3}"
     rm -f /opt/kafka/current/libs/avro-formatter-kafka-*
@@ -28,4 +24,7 @@ function install_kafka-cli() {
     if [[ "$local"  != $remote* ]]; then
      fail "avro formatter checksum failed"
     fi
+
+    #TODO replace this with dwonloaded affinity-cli.jar
+    git_clone_or_update https://github.com/amient/affinity.git "$AFFINITY_HOME" "master"
 }

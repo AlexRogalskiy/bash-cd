@@ -32,6 +32,7 @@ do
     required "kafka-distro"
     checkvar KAFKA_PACKAGE
     export KAFKA_PACKAGE
+    required "kafka-cli"
     APPLICABLE_SERVICES+=("kafka")
     let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
     export KAFKA_BROKER_ID

@@ -14,6 +14,7 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "openjdk8"
     required "kafka" KAFKA_CONNECTION
     required "cftools"
+    required "kafka-cli"
     APPLICABLE_SERVICES+=("schema-registry")
     export AVRO_COMPATIBILITY_LEVEL
 fi
