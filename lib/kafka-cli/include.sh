@@ -12,6 +12,7 @@ do
 done
 
 function install_kafka-cli() {
+    #TODO download affinity cli tools
     checkvar KAFKA_VERSION
     KV="${KAFKA_VERSION:0:3}"
     rm -f /opt/kafka/current/libs/avro-formatter-kafka-*
