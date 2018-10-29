@@ -1,0 +1,18 @@
+[Unit]
+Description=Git Daemon
+
+[Service]
+ExecStart=/usr/bin/git daemon --base-path=$GIT_SERVER_DATA_DIR --verbose --export-all --enable=receive-pack $GIT_SERVER_DATA_DIR
+
+Restart=always
+RestartSec=500ms
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=git-daemon
+
+User=git
+Group=git
+
+[Install]
+WantedBy=multi-user.target

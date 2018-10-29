@@ -18,6 +18,8 @@ setup_grafana() {
     apt-get -y update
     continue $? "could not add grafana debian repository"
     apt-cache policy grafana
+    apt-get -y install jq
+    continue $? "could not install jq tool for processing grafana dashboards"
 }
 
 install_grafana() {

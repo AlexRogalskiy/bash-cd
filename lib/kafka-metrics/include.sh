@@ -12,6 +12,10 @@ else
 fi
 export KAFKA_METRICS_HOME="/opt/kafka-metrics-$KM_BRANCH"
 
+function setup_kafka-mterics() {
+    apt-get -y install unzip
+}
+
 function build_kafka-metrics() {
 #    if [[ $KM_BRANCH == master* ]]; then
 #        rm -r $KAFKA_METRICS_HOME

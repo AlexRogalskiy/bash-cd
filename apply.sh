@@ -40,8 +40,9 @@ PRIMARY_IP="$(hostname --ip-address)"
 if [ ! -z "$HOST" ]; then
     if [ -z "$PRIMARY_IP" ]; then
         PRIMARY_IP="${!HOST}"
-    else
-        fail "The system doesn't provide hostname ip-address"
+        highlight "USING $HOST AS $PRIMARY_IP"
+    elif [ "$PRIMARY_IP" != "${!HOST}" ]; then
+        fail "$HOST's IP ${!HOST} doesn't match the actual hosts's primary ip: $PRIMARY_IP"
     fi
 fi
 
@@ -53,6 +54,7 @@ checkvar SERVICES
 for service in "${SERVICES[@]}"
 do
     if [ -f "$DIR/lib/$service/include.sh" ]; then
+     echo "Loading Service Defintion: $service"
      source "$DIR/lib/$service/include.sh"
     fi
 done
@@ -64,8 +66,6 @@ fi
 
 DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
-
-
 echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
 declare BUILD_DIR="$DIR/build"

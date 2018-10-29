@@ -70,14 +70,23 @@ function get_stack() {
    STACK="${message}${STACK}"
 }
 
+_LOADED_MODULES_BASH_CD=()
 function required() {
     module="$1"
-    if [ ! -z "$2" ]; then
-        expr="echo \$$2"
-        value="$(eval $expr)"
-        if [ ! -z "$value" ]; then module=""; fi
-    fi
+#    if [ ! -z "$2" ]; then
+#        expr="echo \$$2"
+#        value="$(eval $expr)"
+#        if [ ! -z "$value" ]; then module=""; fi
+#    fi
+    for loaded in "${_LOADED_MODULES_BASH_CD[@]}"; do
+        if [ "$loaded" == "$module" ]; then
+            info "Already loaded: $module"
+            module="";
+        fi
+    done
+
     if [ ! -z "$module" ]; then
+        _LOADED_MODULES_BASH_CD+=($module)
         source "$( dirname "${BASH_SOURCE[0]}" )/$module/include.sh"
     fi
 }

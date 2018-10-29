@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
-required "zookeeper"    ZOOKEEPER_CONNECTION
-required "kafka"        KAFKA_CONNECTION
+required "zookeeper"
+required "kafka"
 
+checkvar ZOOKEEPER_CONNECTION
+checkvar KAFKA_CONNECTION
 checkvar KAFKA_VERSION
 
 APPLICABLE_SERVICES+=("kafka-cli")
-export AFFINITY_HOME="/opt/affinity"
+#export AFFINITY_HOME="/opt/affinity"
 
 function install_kafka-cli() {
     checkvar KAFKA_VERSION
@@ -26,5 +28,5 @@ function install_kafka-cli() {
     fi
 
     #TODO replace this with dwonloaded affinity-cli.jar
-    git_clone_or_update https://github.com/amient/affinity.git "$AFFINITY_HOME" "master"
+#    git_clone_or_update https://github.com/amient/affinity.git "$AFFINITY_HOME" "master"
 }

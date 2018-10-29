@@ -24,10 +24,6 @@ KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 for i in "${!KAFKA_SERVERS[@]}"
 do
    server="${KAFKA_SERVERS[$i]}"
-   export KAFKA_ADVERTISED_HOST="${KAFKA_ADVERTISED_HOSTS[$i]}"
-   if [ -z "$KAFKA_ADVERTISED_HOST" ] ; then
-       KAFKA_ADVERTISED_HOST=$server
-   fi
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
     checkvar KAFKA_PACKAGE
@@ -40,6 +36,12 @@ do
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
     export KAFKA_JMX_PORT
    fi
+
+   export KAFKA_ADVERTISED_HOST="${KAFKA_ADVERTISED_HOSTS[$i]}"
+   if [ -z "$KAFKA_ADVERTISED_HOST" ] ; then
+       KAFKA_ADVERTISED_HOST=$server
+   fi
+
    listener="$KAFKA_PROTOCOL://$server:$KAFKA_PORT"
    if [ -z "$KAFKA_CONNECTION" ]; then
     KAFKA_CONNECTION="$listener"
@@ -52,12 +54,12 @@ build_kafka() {
     checkvar KAFKA_BROKER_ID
     checkvar KAFKA_REPL_FACTOR
     checkvar KAFKA_PACKAGE
-    checkvar KAFKA_METRICS_HOME
+#    checkvar KAFKA_METRICS_HOME
     export KAFKA_PACKAGE
-    checksum "$KAFKA_METRICS_HOME/metrics-reporter" > "$BUILD_DIR/kafka-metrics-reporter.checksum"
-    checksum "$KAFKA_METRICS_HOME/core" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
-    checksum "$KAFKA_METRICS_HOME/build.gradle" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
-}
+#    checksum "$KAFKA_METRICS_HOME/metrics-reporter" > "$BUILD_DIR/kafka-metrics-reporter.checksum"
+#    checksum "$KAFKA_METRICS_HOME/core" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
+#    checksum "$KAFKA_METRICS_HOME/build.gradle" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
+#}
 
 install_kafka() {
     download https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar /opt/
@@ -89,4 +91,3 @@ start_kafka() {
 stop_kafka() {
     systemctl stop kafka.service
 }
-

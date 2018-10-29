@@ -5,16 +5,23 @@ CF_VERSION=5.0.0
 
 SERVICES=(
     "cd"
+    "gitd"
     "zookeeper"
     "kafka"
-    "kafka-cli"
     "kafka-topics"
     "schema-registry"
     "grafana"
     "prometheus"
 )
 
+HOST0=172.17.0.3
 HOST1=172.17.0.2
+
+#Get Server
+GIT_SERVER=$HOST0
+GIT_SERVER_DATA_DIR=/data/git
+
+
 
 #Zookeeper
 ZK_SERVERS=($HOST1)
