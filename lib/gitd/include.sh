@@ -16,7 +16,7 @@ setup_gitd() {
 install_gitd() {
     id -u git > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        adduser --no-create-home --shell /bin/false git
+        useradd --no-create-home --shell /bin/false git
     fi
     mkdir -p "$GIT_SERVER_DATA_DIR"
     chown -R git:git $GIT_SERVER_DATA_DIR

@@ -9,6 +9,7 @@ checkvar AVRO_COMPATIBILITY_LEVEL
 CF="${CF_VERSION:0:3}"
 
 export SCHEMA_REGISTRY_URL="http://$SCHEMA_REGISTRY_HOST:$SCHEMA_REGISTRY_PORT"
+export AVRO_COMPATIBILITY_LEVEL
 
 if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "openjdk8"
@@ -17,7 +18,6 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "kafka-cli"
     checkvar KAFKA_CONNECTION
     APPLICABLE_SERVICES+=("schema-registry")
-    export AVRO_COMPATIBILITY_LEVEL
 fi
 
 #setup_schema-registry() {

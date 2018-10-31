@@ -54,18 +54,14 @@ build_kafka() {
     checkvar KAFKA_BROKER_ID
     checkvar KAFKA_REPL_FACTOR
     checkvar KAFKA_PACKAGE
-#    checkvar KAFKA_METRICS_HOME
     export KAFKA_PACKAGE
-#    checksum "$KAFKA_METRICS_HOME/metrics-reporter" > "$BUILD_DIR/kafka-metrics-reporter.checksum"
-#    checksum "$KAFKA_METRICS_HOME/core" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
-#    checksum "$KAFKA_METRICS_HOME/build.gradle" >> "$BUILD_DIR/kafka-metrics-reporter.checksum"
-#}
+    download https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar $BUILD_DIR/opt/
+    #TODO checksum the prometheus agent download
+}
 
 install_kafka() {
-    download https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar /opt/
     checkvar KAFKA_VERSION
     KV="${KAFKA_VERSION:0:3}"
-    rm -f /opt/kafka/current/libs/metrics-reporter-kafka-*
     URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/metrics-reporter-kafka_${KV}-0.8.2-20181025.155900-1-all.jar"
     download "$URL" "/opt/kafka/current/libs/"
     continue $? "failed to download metrics reporter jar"
@@ -76,6 +72,7 @@ install_kafka() {
     local="$(checksum "/opt/kafka/current/libs/metrics-reporter-kafka_$KV-0.8.2-20181025.155900-1-all.jar")"
     remote=$(cat "/opt/kafka/current/libs/$MD5_FILE")
     if [[ "$local"  != $remote* ]]; then
+     rm -f /opt/kafka/current/libs/metrics-reporter-kafka*
      fail "metrics reporter checksum failed"
     fi
 

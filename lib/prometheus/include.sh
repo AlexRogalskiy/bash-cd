@@ -18,7 +18,7 @@ do
         for i in "${!KAFKA_SERVERS[@]}"
         do
            kafka_host="${KAFKA_ADVERTISED_HOSTS[$i]}"
-           KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:$KAFKA_JMX_PROMETHEUS_PORT,"
+           KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:7071,"
         done
     fi
    fi
