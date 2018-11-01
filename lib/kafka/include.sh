@@ -55,27 +55,17 @@ build_kafka() {
     checkvar KAFKA_REPL_FACTOR
     checkvar KAFKA_PACKAGE
     export KAFKA_PACKAGE
-    download https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar $BUILD_DIR/opt/
-    #TODO checksum the prometheus agent download
+    checkvar KAFKA_VERSION
+    KV="${KAFKA_VERSION:0:3}"
+
+    URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/metrics-reporter-kafka_${KV}-0.8.2-20181025.155900-1-all.jar"
+    download "$URL" "$BUILD_DIR/opt/kafka/current/libs/" md5
+
+    URL="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar"
+    download $URL "$BUILD_DIR/opt/" md5
 }
 
 install_kafka() {
-    checkvar KAFKA_VERSION
-    KV="${KAFKA_VERSION:0:3}"
-    URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/metrics-reporter-kafka_${KV}-0.8.2-20181025.155900-1-all.jar"
-    download "$URL" "/opt/kafka/current/libs/"
-    continue $? "failed to download metrics reporter jar"
-    MD5_FILE="metrics-reporter-kafka_$KV-0.8.2-20181025.155900-1-all.jar.md5"
-    MD5_URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/$MD5_FILE"
-    download "$MD5_URL" "/opt/kafka/current/libs/"
-    continue $? "failed to download metrics reporter checksum file"
-    local="$(checksum "/opt/kafka/current/libs/metrics-reporter-kafka_$KV-0.8.2-20181025.155900-1-all.jar")"
-    remote=$(cat "/opt/kafka/current/libs/$MD5_FILE")
-    if [[ "$local"  != $remote* ]]; then
-     rm -f /opt/kafka/current/libs/metrics-reporter-kafka*
-     fail "metrics reporter checksum failed"
-    fi
-
     chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
     systemctl daemon-reload
     systemctl enable kafka.service

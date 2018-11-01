@@ -205,10 +205,28 @@ function download() {
     local_tarball="$dest_dir/$(basename $url)"
     local="$dest_dir/$file_name"
     if [ ! -f "$local" ]; then
-        info "Downloading $(basename $url)..."
+        info "Downloading $(basename $url)"
         mkdir -p $(dirname $local)
         curl -Ls "$url" > "${local}.tmp"
         mv "${local}.tmp" "$local"
+        if [ "$3" == "md5" ]; then
+            info "Downloading $(basename $url).md5"
+            curl -Ls "$url.md5" > "$local.md5"
+            if [ $? -ne 0 ]; then
+                rm $local
+                fail "md5 checksum download failed: $url.md5"
+            fi
+            local="$(checksum "$dest_dir/$file_name")"
+            remote=$(cat "$dest_dir/$file_name.md5")
+            if [[ "$local" != $remote* ]]; then
+        #     rm -f /opt/kafka/current/libs/metrics-reporter-kafka*
+             echo $local
+             echo $remote
+             rm $local
+             fail "download checksum failed for $url"
+
+            fi
+        fi
     fi
 }
 

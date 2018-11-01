@@ -2,11 +2,12 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-C="bash-cd-ubuntu-1"
+C="bash-cd-ubuntu"
 if [ -z "$(docker ps -aq -f name=$C)" ]; then
     docker run  --rm -d --privileged=true \
                 -v $DIR/env:/opt/bash-cd/env \
                 -v $DIR/lib:/opt/bash-cd/lib \
+                -p 9418:9418 \
                 -p 8082:8081 \
                 -p 9092:9092 \
                 -p 29092:29092 \
