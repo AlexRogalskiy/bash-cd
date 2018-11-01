@@ -8,21 +8,22 @@ KAFKA_PACKAGE="kafka_2.11-$KAFKA_VERSION"
 APPLICABLE_SERVICES+=("kafka-distro")
 
 build_kafka-distro() {
-    download "http://www.mirrorservice.org/sites/ftp.apache.org/kafka/$KAFKA_VERSION/$KAFKA_PACKAGE.tgz" "/opt/kafka"
+    download "http://www.mirrorservice.org/sites/ftp.apache.org/kafka/$KAFKA_VERSION/$KAFKA_PACKAGE.tgz" "$BUILD_DIR/opt/kafka"
     continue $? "could not fetch kafka distro"
-    download "https://www.apache.org/dist/kafka/$KAFKA_VERSION/kafka_2.11-$KAFKA_VERSION.tgz.asc" "/opt/kafka"
+    download "https://www.apache.org/dist/kafka/$KAFKA_VERSION/kafka_2.11-$KAFKA_VERSION.tgz.asc" "$BUILD_DIR/opt/kafka"
     continue $? "could not fetch checksum file for kafka distro"
-    if [ ! -d "/opt/kafka/$KAFKA_PACKAGE" ]; then
-        tar -xzf "/opt/kafka/$KAFKA_PACKAGE.tgz" -C "/opt/kafka"
-    fi
-    gpg --verify "/opt/kafka$KAFKA_PACKAGE.asc" "/opt/kafka$KAFKA_PACKAGE"
-    if [ "$result" -ne 0 ]; then
-        rm $KAFKA_PACKAGE
+    gpg --verify "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz.asc" "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz"
+    if [ $? -ne 0 ]; then
+        rm "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz"
+        rm "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz.asc"
         fail "signature verification failed for: $KAFKA_PACKAGE"
     fi
 }
 
 install_kafka-distro() {
+    if [ ! -d "/opt/kafka/$KAFKA_PACKAGE" ]; then
+        tar -xzf "/opt/kafka/$KAFKA_PACKAGE.tgz" -C "/opt/kafka"
+    fi
     ln -fsn "/opt/kafka/$KAFKA_PACKAGE" "/opt/kafka/current"
 }
 

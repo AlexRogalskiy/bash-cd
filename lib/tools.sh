@@ -70,14 +70,23 @@ function get_stack() {
    STACK="${message}${STACK}"
 }
 
+_LOADED_MODULES_BASH_CD=()
 function required() {
     module="$1"
-    if [ ! -z "$2" ]; then
-        expr="echo \$$2"
-        value="$(eval $expr)"
-        if [ ! -z "$value" ]; then module=""; fi
-    fi
+#    if [ ! -z "$2" ]; then
+#        expr="echo \$$2"
+#        value="$(eval $expr)"
+#        if [ ! -z "$value" ]; then module=""; fi
+#    fi
+    for loaded in "${_LOADED_MODULES_BASH_CD[@]}"; do
+        if [ "$loaded" == "$module" ]; then
+            info "Already loaded: $module"
+            module="";
+        fi
+    done
+
     if [ ! -z "$module" ]; then
+        _LOADED_MODULES_BASH_CD+=($module)
         source "$( dirname "${BASH_SOURCE[0]}" )/$module/include.sh"
     fi
 }
@@ -139,7 +148,7 @@ function expand() {
 
 function expand_dir() {
     shells=(".sh" ".bat" ".bash" ".zsh")
-    artifacts=(".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx")
+    artifacts=(".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
     for file in $1/$2/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then
@@ -196,10 +205,28 @@ function download() {
     local_tarball="$dest_dir/$(basename $url)"
     local="$dest_dir/$file_name"
     if [ ! -f "$local" ]; then
-        info "Downloading $(basename $url)..."
+        info "Downloading $(basename $url)"
         mkdir -p $(dirname $local)
         curl -Ls "$url" > "${local}.tmp"
         mv "${local}.tmp" "$local"
+        if [ "$3" == "md5" ]; then
+            info "Downloading $(basename $url).md5"
+            curl -Ls "$url.md5" > "$local.md5"
+            if [ $? -ne 0 ]; then
+                rm $local
+                fail "md5 checksum download failed: $url.md5"
+            fi
+            local="$(checksum "$dest_dir/$file_name")"
+            remote=$(cat "$dest_dir/$file_name.md5")
+            if [[ "$local" != $remote* ]]; then
+        #     rm -f /opt/kafka/current/libs/metrics-reporter-kafka*
+             echo $local
+             echo $remote
+             rm $local
+             fail "download checksum failed for $url"
+
+            fi
+        fi
     fi
 }
 
@@ -269,9 +296,9 @@ function git_clone_or_update() {
 }
 
 wait_for_ports() {
-    addresses=$1
-    for address in "${addresses[@]}"
+    IFS=','; for address in $1
     do
+        IFS=' '
         if [[ $address == *"://"* ]]; then
             Y=(${address//\// })
             address=${Y[1]}
@@ -281,7 +308,7 @@ wait_for_ports() {
         port=${IN[1]}
         WAIT=30
         while ! nc -z $host $port 1>/dev/null 2>&1; do
-            echo -en "\rWaiting for HOST:$host PORT:$port ... $WAIT";
+            echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
             sleep 1
             let WAIT=WAIT-1
             if [ $WAIT -eq 0 ]; then
@@ -289,7 +316,9 @@ wait_for_ports() {
             fi
         done
         echo -en "\r"
+        IFS=','
     done
+    IFS=' '
 }
 
 wait_for_endpoint() {

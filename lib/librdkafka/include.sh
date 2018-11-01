@@ -2,9 +2,9 @@
 
 checkvar CF_VERSION
 
-APPLICABLE_SERVICES+=("librdkafka")
+required "cftools"
 
-required "cftools" CF_VERSION
+APPLICABLE_SERVICES+=("librdkafka")
 
 CF="${CF_VERSION:0:3}"
 

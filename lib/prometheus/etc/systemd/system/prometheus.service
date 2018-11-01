@@ -12,7 +12,8 @@ Type=simple
 #Enivornment=<VAR>=value
 ExecStart=/opt/prometheus/prometheus \
     --config.file /etc/prometheus/prometheus.yml \
-    --storage.tsdb.path /var/lib/prometheus/ \
+    --storage.tsdb.path $PROMETHEUS_DATA_DIR \
+    --storage.tsdb.retention $PROMETHEUS_RETENTION \
     --web.console.templates=/etc/prometheus/consoles \
     --web.console.libraries=/etc/prometheus/console_libraries
 

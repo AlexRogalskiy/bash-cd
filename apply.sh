@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 
-PHASE="$1"; shift
-VAR="var"
-function usage() {
-    fail "Usage: (setup|build|install) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
-}
-if [ -z "$PHASE" ] ; then usage; fi
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/lib/tools.sh
 
+function usage() {
+    fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
+}
+
+VAR="var"
+doSetup=1
+PHASE="install";
 while [ ! -z "$1" ]; do
     cmd="$1"; shift
     case $cmd in
+        help*) usage;;
+        setup*) PHASE="setup";;
+        build*) PHASE="build"; doSetup=0;;
+        install*) PHASE="install"; doSetup=0;;
         --rebuild*) REBUILD="true";;
         --host*) HOST=$1; shift;;
         --service*) SERVICE=$1; shift;;
@@ -18,9 +25,8 @@ while [ ! -z "$1" ]; do
     esac
 done
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $DIR/lib/tools.sh
 source $DIR/env/${VAR}.sh
+continue $? "Missing env/${VAR}.sh"
 
 if [ ! -z $(which git) ]; then
     BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
@@ -30,19 +36,25 @@ if [ ! -z $(which git) ]; then
 fi
 
 export PRIMARY_IP
-if [ -z "$HOST" ]; then
-    PRIMARY_IP="$(hostname --ip-address)"
-elif [ -z "$PRIMARY_IP" ]; then
-    PRIMARY_IP="${!HOST}"
+PRIMARY_IP="$(hostname --ip-address)"
+if [ ! -z "$HOST" ]; then
+    if [ -z "$PRIMARY_IP" ]; then
+        PRIMARY_IP="${!HOST}"
+        highlight "USING $HOST AS $PRIMARY_IP"
+    elif [ "$PRIMARY_IP" != "${!HOST}" ]; then
+        fail "$HOST's IP ${!HOST} doesn't match the actual hosts's primary ip: $PRIMARY_IP"
+    fi
 fi
 
+
 checkvar PRIMARY_IP
-highlight "APPLYING BRANCH $BRANCH TO HOST $PRIMARY_IP: $PHASE"
+highlight "APPLYING BRANCH '$BRANCH' TO HOST $PRIMARY_IP, PHASE: $PHASE"
 
 checkvar SERVICES
 for service in "${SERVICES[@]}"
 do
     if [ -f "$DIR/lib/$service/include.sh" ]; then
+     echo "Loading Service Defintion: $service"
      source "$DIR/lib/$service/include.sh"
     fi
 done
@@ -54,26 +66,31 @@ fi
 
 DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
-
-
 echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
 declare BUILD_DIR="$DIR/build"
 mkdir -p $BUILD_DIR
 continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
 
+
+if [ $doSetup -eq 1 ]; then
+    info "SETTING UP ALL SERVICES"
+    mkdir -p $BUILD_DIR
+    for service in "${APPLICABLE_SERVICES[@]}"
+    do
+        if (func_modified "setup_$service") || [ "$REBUILD" == "true" ]; then
+            warn "[$(date)] SERVICE SETUP MODIFIED: $service"
+            setup_$service
+            continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
+            func_modified "setup_$service" "clear"
+        fi
+    done
+fi
+
+
 case $PHASE in
     setup*)
-        mkdir -p $BUILD_DIR
-        for service in "${APPLICABLE_SERVICES[@]}"
-        do
-            if (func_modified "setup_$service") || [ "$REBUILD" == "true" ]; then
-                warn "[$(date)] SERVICE SETUP MODIFIED: $service"
-                setup_$service
-                continue $? "[$(date)] SETUP FAILED, SERVICE: $service"
-                func_modified "setup_$service" "clear"
-            fi
-        done
+        #this has already happened above
     ;;
     build*)
         if [ "$REBUILD" == "true" ] && [ "$BUILD_DIR" != "/" ]; then
@@ -122,7 +139,10 @@ case $PHASE in
                     if (func_modified "start_$service") ; then should_restart=1; fi
                 fi
                 if [ "$(type -t install_$service)" == "function" ]; then
-                    if (func_modified "install_$service") ; then should_restart=1; should_install=1; fi
+                    if (func_modified "install_$service") ; then
+                        should_restart=1
+                        should_install=1
+                    fi
                 fi
             else
                 should_restart=1
@@ -166,7 +186,7 @@ case $PHASE in
         fi
     ;;
     *)
-        fail "POSSIBLE PHASES: build, install"
+        usage;
     ;;
 esac
 
