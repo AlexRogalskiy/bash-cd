@@ -14,6 +14,8 @@ export KAFKA_PROTOCOL
 export KAFKA_REPL_FACTOR
 export KAFKA_SASL_MECHANISM
 export KAFKA_AUTHORIZER_CLASS_NAME
+export KAFKA_JMX_PORT
+export KAFKA_PORT
 
 export KAFKA_CONNECTION
 export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
@@ -23,31 +25,31 @@ KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 
 for i in "${!KAFKA_SERVERS[@]}"
 do
-   server="${KAFKA_SERVERS[$i]}"
-   if [ "$server" == "$PRIMARY_IP" ]; then
-    required "kafka-distro"
-    checkvar KAFKA_PACKAGE
-    export KAFKA_PACKAGE
-    required "kafka-cli"
-    APPLICABLE_SERVICES+=("kafka")
-    let KAFKA_BROKER_ID=i+1+KAFKA_BROKER_ID_OFFSET
-    export KAFKA_BROKER_ID
-    export KAFKA_PORT
-    let KAFKA_JMX_PORT=KAFKA_PORT+20000
-    export KAFKA_JMX_PORT
-   fi
+   kafka_server="${KAFKA_SERVERS[$i]}"
+   let this_broker_id=i+1+KAFKA_BROKER_ID_OFFSET
 
    export KAFKA_ADVERTISED_HOST="${KAFKA_ADVERTISED_HOSTS[$i]}"
    if [ -z "$KAFKA_ADVERTISED_HOST" ] ; then
-       KAFKA_ADVERTISED_HOST=$server
+       KAFKA_ADVERTISED_HOST=$kafka_server
    fi
 
-   listener="$KAFKA_PROTOCOL://$server:$KAFKA_PORT"
+   listener="$KAFKA_PROTOCOL://$kafka_server:$KAFKA_PORT"
    if [ -z "$KAFKA_CONNECTION" ]; then
     KAFKA_CONNECTION="$listener"
    else
     KAFKA_CONNECTION="$KAFKA_CONNECTION,$listener"
    fi
+
+   if [ "$kafka_server" = "$PRIMARY_IP" ]; then
+    let KAFKA_BROKER_ID=this_broker_id
+    let KAFKA_JMX_PORT=KAFKA_PORT+20000
+    required "kafka-distro"
+    required "kafka-cli"
+    APPLICABLE_SERVICES+=("kafka")
+    checkvar KAFKA_PACKAGE
+    export KAFKA_PACKAGE
+   fi
+
 done
 
 build_kafka() {

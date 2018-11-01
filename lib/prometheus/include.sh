@@ -7,8 +7,7 @@ export KAFKA_PROMETHEUS_TARGETS=""
 
 for i in "${!PROMETHEUS_SERVERS[@]}"
 do
-   server="${PROMETHEUS_SERVERS[$i]}"
-   if [ "$server" == "$PRIMARY_IP" ]; then
+   if [ "${PROMETHEUS_SERVERS[$i]}" == "$PRIMARY_IP" ]; then
     APPLICABLE_SERVICES+=("prometheus")
     export PROMETHEUS_URL="http://localhost:9090"
     if [ ! -z "$KAFKA_SERVERS" ]; then
