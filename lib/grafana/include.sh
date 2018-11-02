@@ -43,6 +43,7 @@ start_grafana() {
 
     update_grafana_dashboard "/data/grafana/kafka-groups.static.json"
     update_grafana_dashboard "/data/grafana/kafka-topics.static.json"
+    update_grafana_dashboard "/data/grafana/kafka-overview.static.json"
 }
 
 stop_grafana() {

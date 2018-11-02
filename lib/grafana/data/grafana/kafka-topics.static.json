@@ -91,7 +91,7 @@
       ],
       "targets": [
         {
-          "expr": "sum (avg_over_time(kafka_log_Log_Value{name=\"Size\", topic=~\"$Topic\"}[$__interval])) by (topic, partition)",
+          "expr": "sum (avg_over_time(kafka_log_Log_Value{name=\"Size\", topic=~\"$Topic\"}[15m])) by (topic, partition)",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -257,7 +257,7 @@
     ]
   },
   "timezone": "",
-  "title": "Kafka Topics",
+  "title": "Topics",
   "uid": "RvS2tXbik",
   "version": 8
 }
