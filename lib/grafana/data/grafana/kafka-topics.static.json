@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 2,
-  "iteration": 1541170668636,
+  "iteration": 1541179392240,
   "links": [],
   "panels": [
     {
@@ -30,7 +30,7 @@
       "fill": 5,
       "grid": {},
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 9,
         "x": 0,
         "y": 0
@@ -42,7 +42,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -129,7 +129,7 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 3,
         "x": 9,
         "y": 0
@@ -171,7 +171,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(sum(kafka_consumer_Group_Value{topic=\"test\"}) by (group))",
+          "expr": "count(sum(kafka_consumer_Group_Value{topic=~\"$Topic\"}) by (group))",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -233,7 +233,7 @@
           "format": "time_series",
           "instant": false,
           "interval": "",
-          "intervalFactor": 10,
+          "intervalFactor": 2,
           "legendFormat": "{{topic}}-{{partition}}",
           "refId": "A"
         }
@@ -259,6 +259,97 @@
       "yaxes": [
         {
           "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Kafka",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 10,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum (round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "IN:{{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum (-1 * round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesOutPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "OUT:{{instance}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Total Bytes IN/OUT per Second",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -411,18 +502,18 @@
       "datasource": "Kafka",
       "fill": 1,
       "gridPos": {
-        "h": 9,
+        "h": 5,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 9
       },
-      "id": 10,
+      "id": 11,
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -440,14 +531,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum (round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
+          "expr": "sum (round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"ReplicationBytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "IN:{{instance}}",
           "refId": "A"
         },
         {
-          "expr": "sum (-1 * round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
+          "expr": "sum (-1 * round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"ReplicationBytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "OUT:{{instance}}",
@@ -457,7 +548,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Bytes IN/OUT per Second",
+      "title": "Replication Bytes IN/OUT per Second",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -473,7 +564,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "bytes",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -495,6 +586,7 @@
       }
     }
   ],
+  "refresh": "5s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -560,5 +652,5 @@
   "timezone": "",
   "title": "Topics",
   "uid": "RvS2tXbik",
-  "version": 15
+  "version": 22
 }
