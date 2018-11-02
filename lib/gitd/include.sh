@@ -19,8 +19,23 @@ install_gitd() {
         useradd --no-create-home --shell /bin/false git
     fi
     mkdir -p "$GIT_SERVER_DATA_DIR"
+    continue $? "could not create git data root directory: $GIT_SERVER_DATA_DIR"
     chown -R git:git $GIT_SERVER_DATA_DIR
+
+    function create_gitd_repo() {
+        name="$1"
+        dir="$GIT_SERVER_DATA_DIR/$name.git"
+        if [ ! -d $dir ]; then
+            echo "initializing git repository: $dir"
+            mkdir -p $dir
+            chown -R git:git $dir
+            cd $dir
+            git init --bare --shared
+        fi
+    }
+
     create_gitd_repo project
+#    create_gitd_repo test
 }
 
 start_gitd() {
@@ -31,13 +46,3 @@ function stop_gitd() {
     systemctl stop git-daemon
 }
 
-function create_gitd_repo() {
-    name="$1"
-    dir="$GIT_SERVER_DATA_DIR/$name.git"
-    if [ -d $dir ]; then
-        mkdir -p $dir
-        chown -R git:git $dir
-        cd $dir
-        git init --bare --shared
-    fi
-}
