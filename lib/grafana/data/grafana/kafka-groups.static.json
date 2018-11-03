@@ -17,7 +17,7 @@
   "gnetId": 721,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1541177897736,
+  "iteration": 1541260826953,
   "links": [],
   "panels": [
     {
@@ -26,6 +26,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Kafka",
+      "editable": true,
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -102,7 +103,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Consumer Lag",
+      "title": "Consumer Lag per Partition",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -149,6 +150,7 @@
         "#d44a3a"
       ],
       "datasource": "Kafka",
+      "editable": true,
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -180,8 +182,8 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
+      "postfix": "messages",
+      "postfixFontSize": "30%",
       "prefix": "",
       "prefixFontSize": "50%",
       "rangeMaps": [
@@ -195,19 +197,20 @@
         "fillColor": "rgba(31, 118, 189, 0.18)",
         "full": false,
         "lineColor": "rgb(31, 120, 193)",
-        "show": true
+        "show": false
       },
       "tableColumn": "",
       "targets": [
         {
-          "expr": "max (kafka_consumer_Group_Value{name=\"ConsumerLag\", group=\"$Group\", job=\"kafka\",topic=~\"$Topics\"})   ",
+          "expr": "sum (kafka_consumer_Group_Value{name=\"ConsumerLag\", group=\"$Group\", job=\"kafka\",topic=~\"$Topics\"})   ",
           "format": "time_series",
+          "instant": true,
           "intervalFactor": 1,
           "refId": "A"
         }
       ],
       "thresholds": "",
-      "title": "Consumer Max Lag",
+      "title": "Consumer Cumulative Lag",
       "type": "singlestat",
       "valueFontSize": "120%",
       "valueMaps": [
@@ -225,6 +228,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Kafka",
+      "editable": true,
       "fill": 1,
       "gridPos": {
         "h": 4,
@@ -351,6 +355,7 @@
       },
       "dataFormat": "timeseries",
       "datasource": "Kafka",
+      "editable": true,
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -403,6 +408,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Kafka",
+      "editable": true,
       "fill": 1,
       "gridPos": {
         "h": 4,
@@ -584,7 +590,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -615,5 +621,5 @@
   "timezone": "browser",
   "title": "Consumer Groups",
   "uid": "GEKWKUbiz",
-  "version": 12
+  "version": 2
 }

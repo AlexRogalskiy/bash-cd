@@ -44,7 +44,7 @@ function start_grafana() {
     update_grafana_dashboard() {
 
         echo "{\"dashboard\":" > /tmp/dashboard.json
-        cat "$1" | jq ".id=null|.editable=$GRAFANA_EDITABLE|.panels[].editable=$GRAFANA_EDITABLE" >> /tmp/dashboard.json
+        cat "$1" | jq ".id=null|.time.from=\"now-1h\"|.time.to=\"now\"|.refresh=\"5s\"|.editable=$GRAFANA_EDITABLE|.panels[].editable=$GRAFANA_EDITABLE" >> /tmp/dashboard.json
         echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
         curl -s --data-binary "@/tmp/dashboard.json" \
         -H "Content-Type: application/json" \
