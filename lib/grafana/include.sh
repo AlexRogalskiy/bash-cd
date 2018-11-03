@@ -5,7 +5,7 @@ checkvar GRAFANA_SERVER
 checkvar GRAFANA_EDITABLE
 
 export GRAFANA_PORT
-export GRAFANA_URL="http://localhost:$GRAFANA_PORT"
+export GRAFANA_URL="http://$GRAFANA_SERVER:$GRAFANA_PORT"
 ADMIN_URL="http://admin:admin@localhost:$GRAFANA_PORT"
 
 if [ "$GRAFANA_SERVER" == "$PRIMARY_IP" ]; then
