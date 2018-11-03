@@ -7,7 +7,7 @@ if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
 fi
 
 setup_apache() {
-    sudo apt-get -y install apache2
+    apt-get -y install apache2
     a2enmod ssl
     a2enmod proxy
     a2enmod proxy_http
