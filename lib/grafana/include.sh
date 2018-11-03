@@ -16,11 +16,11 @@ function setup_grafana() {
     curl -s https://packagecloud.io/gpg.key | apt-key add -
     continue $? "could not add packagecloud repo key"
     add-apt-repository "deb https://packagecloud.io/grafana/stable/debian/ stretch main"
+    continue $? "could not add grafana debian repository"
 }
 
 function install_grafana() {
     apt-get -y update
-    continue $? "could not add grafana debian repository"
     apt-cache policy grafana
     apt-get -y install jq
     continue $? "could not install jq tool for processing grafana dashboards"
