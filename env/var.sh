@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 KAFKA_VERSION=2.0.0
-CF_VERSION=5.0.0
+
 
 SERVICES=(
     "cd"

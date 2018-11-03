@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 
-checkvar CF_VERSION
+checkvar KAFKA_VERSION
+checkvar KAFKA_MINOR_VERSION
+
+export CF_VERSION
+case $KAFKA_MINOR_VERSION in
+    2.0*)
+        CF_VERSION="5.0.0"
+    ;;
+    1.1*)
+        CF_VERSION="4.1.1"
+    ;;
+    1.0*)
+        CF_VERSION="4.0.0"
+    ;;
+    *)
+        fail "unsupported kafka version $KAFKA_VERSION"
+    ;;
+esac
+
 
 APPLICABLE_SERVICES+=("cftools")
 
