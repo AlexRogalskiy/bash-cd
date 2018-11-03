@@ -22,7 +22,7 @@ build_apache() {
 }
 
 install_apache() {
-    mkdir -p /data/log
+    mkdir -p /data/log/apache2
     mkdir -p /data/www
 }
 
