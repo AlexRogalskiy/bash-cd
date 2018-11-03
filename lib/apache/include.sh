@@ -3,16 +3,11 @@
 checkvar WEB_SERVER
 
 if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
-    APPLICABLE_SERVICES+=("web-server")
+    APPLICABLE_SERVICES+=("apache")
 fi
 
-setup_web-server() {
+setup_apache() {
     sudo apt-get -y install apache2
-    apt-get -y install libapache2-mod-php
-    apt-get install php-gd
-    apt-get install php-curl
-    apt-get install libssh2-php
-    apt-get install php-ssh2
     a2enmod ssl
     a2enmod proxy
     a2enmod proxy_http
@@ -21,18 +16,16 @@ setup_web-server() {
     a2enmod lbmethod_byrequests
 }
 
-build_web-server() {
+build_apache() {
     mkdir -p $BUILD_DIR/etc/apache2/sites-enabled
     ln -sfn $BUILD_DIR/etc/apache2/sites-available/default.conf $BUILD_DIR/etc/apache2/sites-enabled/
 }
 
-start_web-server() {
-    #start -q apache2
+start_apache() {
     systemctl start apache2
 }
 
-stop_web-server() {
-    #stop -q apache2
+stop_apache() {
     systemctl stop apache2.service
 }
 
