@@ -21,6 +21,11 @@ build_apache() {
     ln -sfn $BUILD_DIR/etc/apache2/sites-available/default.conf $BUILD_DIR/etc/apache2/sites-enabled/
 }
 
+install_apache() {
+    mkdir -p /data/log
+    mkdir -p /data/www
+}
+
 start_apache() {
     systemctl start apache2
 }
