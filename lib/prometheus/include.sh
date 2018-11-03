@@ -26,8 +26,11 @@ done
 build_prometheus() {
     VERSION=2.4.3
     DOWNLOAD="prometheus-$VERSION.linux-amd64"
-    download "https://github.com/prometheus/prometheus/releases/download/v$VERSION/$DOWNLOAD.tar.gz" /opt/
+    download "https://github.com/prometheus/prometheus/releases/download/v$VERSION/$DOWNLOAD.tar.gz" $BUILD_DIR/opt/
     continue $? "failed to download prometheus"
+}
+
+install_prometheus() {
     SHA256="$(sha256sum "/opt/$DOWNLOAD.tar.gz")"
     if [[ "$SHA256"  != 3aa063498ab3b4d1bee103d80098ba33d02b3fed63cb46e47e1d16290356db8a* ]]; then
      rm "/opt/$DOWNLOAD.tar.gz"
@@ -39,9 +42,7 @@ build_prometheus() {
             continue $? "could not untar prometheus download"
     fi
     ln -sf /opt/$DOWNLOAD prometheus
-}
 
-install_prometheus() {
     id -u prometheus > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         useradd --no-create-home --shell /bin/false prometheus

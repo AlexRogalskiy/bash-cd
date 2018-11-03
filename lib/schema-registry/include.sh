@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-checkvar CF_VERSION
 checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 checkvar AVRO_COMPATIBILITY_LEVEL
@@ -22,6 +21,7 @@ fi
 #}
 
 build_schema-registry() {
+    checkvar CF_VERSION
     checkvar KAFKA_CONNECTION
     checkvar ZOOKEEPER_CONNECTION
 }
