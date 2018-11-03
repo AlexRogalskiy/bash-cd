@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-checkvar PRIMARY_IP
 checkvar WEB_SERVER
 
 if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then

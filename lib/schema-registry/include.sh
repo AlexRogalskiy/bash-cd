@@ -5,9 +5,6 @@ checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 checkvar AVRO_COMPATIBILITY_LEVEL
 
-
-CF="${CF_VERSION:0:3}"
-
 export SCHEMA_REGISTRY_URL="http://$SCHEMA_REGISTRY_HOST:$SCHEMA_REGISTRY_PORT"
 export AVRO_COMPATIBILITY_LEVEL
 
@@ -16,7 +13,6 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "kafka"
     required "cftools"
     required "kafka-cli"
-    checkvar KAFKA_CONNECTION
     APPLICABLE_SERVICES+=("schema-registry")
 fi
 
@@ -24,6 +20,11 @@ fi
 #    add-apt-repository -y ppa:openjdk-r/ppa
 #    apt-get -y update
 #}
+
+build_schema-registry() {
+    checkvar KAFKA_CONNECTION
+    checkvar ZOOKEEPER_CONNECTION
+}
 
 install_schema-registry() {
     apt-get -y -o Dpkg::Options::=--force-confdef install confluent-schema-registry

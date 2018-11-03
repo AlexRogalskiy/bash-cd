@@ -149,6 +149,13 @@ function expand() {
 function expand_dir() {
     shells=(".sh" ".bat" ".bash" ".zsh")
     artifacts=(".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
+    env=`printenv | cut -d= -f1 | paste -sd "," -`
+    params=$(echo $env | tr "," "\n")
+    for varname in ${params[@]}; do
+        if [ -z "${!varname}" ]; then
+            warn "undefined variable: $varname"
+        fi
+    done;
     for file in $1/$2/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then
@@ -216,15 +223,11 @@ function download() {
                 rm $local
                 fail "md5 checksum download failed: $url.md5"
             fi
-            local="$(checksum "$dest_dir/$file_name")"
-            remote=$(cat "$dest_dir/$file_name.md5")
-            if [[ "$local" != $remote* ]]; then
-        #     rm -f /opt/kafka/current/libs/metrics-reporter-kafka*
-             echo $local
-             echo $remote
+            local_md5="$(checksum "$dest_dir/$file_name")"
+            remote_md5=$(cat "$dest_dir/$file_name.md5")
+            if [[ "$local_md5" != $remote_md5* ]]; then
              rm $local
              fail "download checksum failed for $url"
-
             fi
         fi
     fi
@@ -296,9 +299,8 @@ function git_clone_or_update() {
 }
 
 wait_for_ports() {
-    IFS=','; for address in $1
+    while IFS=',' read -r address
     do
-        IFS=' '
         if [[ $address == *"://"* ]]; then
             Y=(${address//\// })
             address=${Y[1]}
@@ -315,10 +317,9 @@ wait_for_ports() {
                 fail "Failed waiting for HOST:$host PORT:$port"
             fi
         done
-        echo -en "\r"
-        IFS=','
-    done
-    IFS=' '
+        echo -en "\n"
+
+    done <<< "$1"
 }
 
 wait_for_endpoint() {

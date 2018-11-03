@@ -21,25 +21,23 @@ install_gitd() {
     mkdir -p "$GIT_SERVER_DATA_DIR"
     continue $? "could not create git data root directory: $GIT_SERVER_DATA_DIR"
     chown -R git:git $GIT_SERVER_DATA_DIR
+}
 
+start_gitd() {
+    systemctl start git-daemon
+    wait_for_ports localhost:9418
     function create_gitd_repo() {
         name="$1"
         dir="$GIT_SERVER_DATA_DIR/$name.git"
         if [ ! -d $dir ]; then
             echo "initializing git repository: $dir"
             mkdir -p $dir
-            chown -R git:git $dir
             cd $dir
             git init --bare --shared
+            chown -R git:git $dir
         fi
     }
-
-    create_gitd_repo project
-#    create_gitd_repo test
-}
-
-start_gitd() {
-    systemctl start git-daemon
+    create_gitd_repo bash-cd
 }
 
 function stop_gitd() {

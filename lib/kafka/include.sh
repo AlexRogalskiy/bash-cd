@@ -1,25 +1,12 @@
 #!/usr/bin/env bash
 
-checkvar PRIMARY_IP
-checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_PORT
-checkvar KAFKA_VERSION
 checkvar KAFKA_MEMORY_BUFFER
 
-export KAFKA_BROKER_ID
-export KAFKA_LOG_DIRS
-export KAFKA_PROTOCOL
-export KAFKA_REPL_FACTOR
-export KAFKA_MEMORY_BUFFER
-export KAFKA_SASL_MECHANISM
-export KAFKA_AUTHORIZER_CLASS_NAME
-export KAFKA_JMX_PORT
-export KAFKA_PORT
-
-export KAFKA_CONNECTION
+export KAFKA_CONNECTION=""
 export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
 export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION:0:3}
 
@@ -46,22 +33,28 @@ do
     let KAFKA_BROKER_ID=this_broker_id
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
     required "kafka-distro"
-    required "kafka-cli"
-    APPLICABLE_SERVICES+=("kafka")
     checkvar KAFKA_PACKAGE
-    export KAFKA_PACKAGE
+    checkvar KAFKA_MINOR_VERSION
+    required "kafka-cli"
+    require "zookeeper"
+    checkvar ZOOKEEPER_CONNECTION
+    APPLICABLE_SERVICES+=("kafka")
+    export KAFKA_BROKER_ID
+    export KAFKA_LOG_DIRS
+    export KAFKA_PROTOCOL
+    export KAFKA_REPL_FACTOR
+    export KAFKA_MEMORY_BUFFER
+    export KAFKA_SASL_MECHANISM
+    export KAFKA_AUTHORIZER_CLASS_NAME
+    export KAFKA_JMX_PORT
+    export KAFKA_PORT
    fi
 
 done
 
 build_kafka() {
-    checkvar KAFKA_BROKER_ID
-    checkvar KAFKA_REPL_FACTOR
-    checkvar KAFKA_PACKAGE
-    export KAFKA_PACKAGE
-    checkvar KAFKA_VERSION
-    KV="${KAFKA_VERSION:0:3}"
 
+    KV=$KAFKA_MINOR_VERSION
     URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/metrics-reporter-kafka_${KV}-0.8.2-20181025.155900-1-all.jar"
     download "$URL" "$BUILD_DIR/opt/kafka/current/libs/" md5
 

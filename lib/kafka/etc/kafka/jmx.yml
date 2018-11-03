@@ -1,4 +1,0 @@
-startDelaySeconds: 5
-jmxUrl: service:jmx:rmi:///jndi/rmi://127.0.0.1:$KAFKA_JMX_PORT/jmxrmi
-ssl: false
-whitelistObjectNames: ["kafka.*:*"]

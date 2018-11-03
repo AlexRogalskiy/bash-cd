@@ -2,6 +2,7 @@
 
 checkvar GRAFANA_PORT
 checkvar GRAFANA_SERVER
+checkvar GRAFANA_EDITABLE
 
 export GRAFANA_PORT
 export GRAFANA_URL="http://localhost:$GRAFANA_PORT"
@@ -11,7 +12,7 @@ if [ "$GRAFANA_SERVER" == "$PRIMARY_IP" ]; then
     APPLICABLE_SERVICES+=("grafana")
 fi
 
-setup_grafana() {
+function setup_grafana() {
     curl -s https://packagecloud.io/gpg.key | apt-key add -
     continue $? "could not add packagecloud repo key"
     add-apt-repository "deb https://packagecloud.io/grafana/stable/debian/ stretch main"
@@ -22,12 +23,12 @@ setup_grafana() {
     continue $? "could not install jq tool for processing grafana dashboards"
 }
 
-install_grafana() {
+function install_grafana() {
     apt-get -y install grafana
     chown -R grafana:grafana /data/grafana
 }
 
-start_grafana() {
+function start_grafana() {
     systemctl start grafana-server
     wait_for_endpoint "$GRAFANA_URL" 200 30
     if [ ! -z "$INFLUXDB_URL" ]; then
@@ -40,25 +41,24 @@ start_grafana() {
         continue $? "failed to configure default kafka datasource in grafana 1"
         echo ""
     fi
+    update_grafana_dashboard() {
 
+        echo "{\"dashboard\":" > /tmp/dashboard.json
+        cat "$1" | jq ".id=null|.editable=$GRAFANA_EDITABLE|.panels[].editable=$GRAFANA_EDITABLE" >> /tmp/dashboard.json
+        echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
+        curl -s --data-binary "@/tmp/dashboard.json" \
+        -H "Content-Type: application/json" \
+        -H "Accept: application/json" \
+        -X POST "$ADMIN_URL/api/dashboards/db"
+        continue $? "failed to upload grafana dashboard: $1"
+        echo ""
+    }
     update_grafana_dashboard "/data/grafana/kafka-groups.static.json"
     update_grafana_dashboard "/data/grafana/kafka-topics.static.json"
     update_grafana_dashboard "/data/grafana/kafka-overview.static.json"
 }
 
-stop_grafana() {
+function stop_grafana() {
     systemctl stop grafana-server
 }
 
-update_grafana_dashboard() {
-
-    echo "{\"dashboard\":" > /tmp/dashboard.json
-    cat "$1" | jq .id=null >> /tmp/dashboard.json
-    echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
-    curl -s --data-binary "@/tmp/dashboard.json" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json" \
-    -X POST "$ADMIN_URL/api/dashboards/db"
-    continue $? "failed to upload grafana dashboard: $1"
-    echo ""
-}

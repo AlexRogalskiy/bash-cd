@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 2,
-  "iteration": 1541179392240,
+  "iteration": 1541253945812,
   "links": [],
   "panels": [
     {
@@ -120,6 +120,7 @@
         "#d44a3a"
       ],
       "datasource": "Kafka",
+      "editable": true,
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -196,6 +197,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Kafka",
+      "editable": true,
       "fill": 1,
       "gridPos": {
         "h": 4,
@@ -285,6 +287,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Kafka",
+      "editable": true,
       "fill": 1,
       "gridPos": {
         "h": 5,
@@ -316,17 +319,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum (round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
+          "expr": "sum (round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesInPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (topic,instance)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "IN:{{instance}}",
+          "legendFormat": "IN:{{topic}}:{{instance}}",
           "refId": "A"
         },
         {
-          "expr": "sum (-1 * round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesOutPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (instance)",
+          "expr": "sum (-1 * round(kafka_server_BrokerTopicMetrics_OneMinuteRate{name=\"BytesOutPerSec\", job=\"kafka\", topic=~\"$Topic\"})) by (topic,instance)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "OUT:{{instance}}",
+          "legendFormat": "OUT:{{topic}}:{{instance}}",
           "refId": "B"
         }
       ],
@@ -373,6 +376,7 @@
     {
       "columns": [],
       "datasource": "Kafka",
+      "editable": true,
       "fontSize": "100%",
       "gridPos": {
         "h": 10,
@@ -500,6 +504,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Kafka",
+      "editable": true,
       "fill": 1,
       "gridPos": {
         "h": 5,
@@ -595,9 +600,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "test",
+          "text": "_schemas",
           "value": [
-            "test"
+            "_schemas"
           ]
         },
         "datasource": "Kafka",
@@ -621,7 +626,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -652,5 +657,5 @@
   "timezone": "",
   "title": "Topics",
   "uid": "RvS2tXbik",
-  "version": 22
+  "version": 1
 }

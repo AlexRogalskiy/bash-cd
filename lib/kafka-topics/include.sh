@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-checkvar PRIMARY_IP
 checkvar KAFKA_SERVERS
 checkvar KAFKA_CONNECTION
 
