@@ -15,7 +15,7 @@ if [ -z "$(docker ps -aq -f name=$C)" ]; then
                 -p 8881:8881 \
                 -p 8300:8300 \
                 -p 8400:8400 \
-                --name "$C" ubuntu:16.04 /sbin/init
+                --name "$C" amient/ubuntu-ci:16.04 /sbin/init
 fi
 
 
