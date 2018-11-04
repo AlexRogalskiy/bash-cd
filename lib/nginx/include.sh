@@ -6,8 +6,11 @@ if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
     APPLICABLE_SERVICES+=("nginx")
 fi
 
-install_nginx() {
+setup_nginx() {
     apt-get -y -o Dpkg::Options::=--force-confdef install nginx
+}
+
+install_nginx() {
     mkdir -p /data/log/nginx
     chown -R www-data:www-data /data/log/nginx
 }
