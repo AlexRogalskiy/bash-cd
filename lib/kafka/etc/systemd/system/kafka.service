@@ -8,7 +8,7 @@ User=root
 Type=simple
 Restart=always
 RestartSec=3
-Environment=KAFKA_OPTS='-Djava.security.auth.login.config=/etc/kafka/jaas.conf -javaagent:/opt/jmx_prometheus_javaagent-0.3.1.jar=7071:/etc/kafka/jmx_$KAFKA_MINOR_VERSION.yml'
+Environment='KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/jaas.conf -javaagent:/opt/jmx_prometheus_javaagent-0.3.1.jar=7071:/etc/kafka/jmx_$KAFKA_MINOR_VERSION.yml'
 Environment=JMX_PORT=$KAFKA_JMX_PORT
 #Environment='KAFKA_JMX_OPTS=-Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_JMX_PORT -Dcom.sun.management.jmxremote.port=$KAFKA_JMX_PORT -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
 ExecStart=/bin/bash /opt/kafka/current/bin/kafka-server-start.sh /etc/kafka/server.properties
