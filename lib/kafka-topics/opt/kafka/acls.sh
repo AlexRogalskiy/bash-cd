@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 #Admin
+kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
 kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
 kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
 kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
