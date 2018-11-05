@@ -15,6 +15,7 @@ KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 for i in "${!KAFKA_SERVERS[@]}"
 do
    kafka_server="${KAFKA_SERVERS[$i]}"
+   kafka_rolling_restart_wait=$(($i * 15))
    let this_broker_id=i+1+KAFKA_BROKER_ID_OFFSET
 
    export KAFKA_ADVERTISED_HOST="${KAFKA_ADVERTISED_HOSTS[$i]}"
@@ -73,5 +74,6 @@ start_kafka() {
 }
 
 stop_kafka() {
+    sleep $kafka_rolling_restart_wait
     systemctl stop kafka.service
 }
