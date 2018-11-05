@@ -7,6 +7,7 @@ checkvar KAFKA_PORT
 checkvar KAFKA_MEMORY_BUFFER
 
 export KAFKA_CONNECTION=""
+export KAFKA_INTERNAL_CONNECTION=""
 export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
 export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION:0:3}
 
@@ -23,11 +24,17 @@ do
        KAFKA_ADVERTISED_HOST=$kafka_server
    fi
 
-   listener="$KAFKA_PROTOCOL://$kafka_server:$KAFKA_PORT"
+   listener="$KAFKA_PROTOCOL://$KAFKA_ADVERTISED_HOST:$KAFKA_PORT"
    if [ -z "$KAFKA_CONNECTION" ]; then
     KAFKA_CONNECTION="$listener"
    else
     KAFKA_CONNECTION="$KAFKA_CONNECTION,$listener"
+   fi
+
+   if [ -z "$KAFKA_INTERNAL_CONNECTION" ]; then
+    KAFKA_INTERNAL_CONNECTION="PLAINTEXT://$kafka_server:19092"
+   else
+    KAFKA_CONNECTION=KAFKA_INTERNAL_CONNECTION="$KAFKA_INTERNAL_CONNECTION,PLAINTEXT://$kafka_server:19092"
    fi
 
    if [ "$kafka_server" = "$PRIMARY_IP" ]; then

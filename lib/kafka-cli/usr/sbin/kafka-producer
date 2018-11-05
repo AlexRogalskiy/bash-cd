@@ -2,4 +2,4 @@
 
 /opt/kafka/current/bin/kafka-console-producer.sh \
     --producer.config /usr/sbin/kafka.properties \
-    --bootstrap-server $KAFKA_CONNECTION "$@"
+    --bootstrap-server $KAFKA_INTERNAL_CONNECTION "$@"
