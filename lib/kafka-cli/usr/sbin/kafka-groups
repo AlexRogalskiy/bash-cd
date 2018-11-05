@@ -1,5 +1,5 @@
 #!/bin/bash
 
 /opt/kafka/current/bin/kafka-consumer-groups.sh --bootstrap-server $KAFKA_CONNECTION \
-    --command-config /usr/sbin/consumer.properties \
+    --command-config /usr/sbin/kafka.properties \
     "$@"
