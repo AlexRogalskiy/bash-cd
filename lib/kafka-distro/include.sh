@@ -6,7 +6,7 @@ required "openjdk8"
 
 export KAFKA_VERSION
 export KAFKA_PACKAGE="kafka_2.11-$KAFKA_VERSION"
-export KAFKA_MINOR_VERSION="${KAFKA_VERSION:0:3}"
+export KAFKA_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $KAFKA_VERSION)
 APPLICABLE_SERVICES+=("kafka-distro")
 
 build_kafka-distro() {

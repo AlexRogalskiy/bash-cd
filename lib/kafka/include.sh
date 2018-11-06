@@ -9,8 +9,8 @@ checkvar ADMIN_PASSWORD
 
 export KAFKA_CONNECTION=""
 export KAFKA_INTERNAL_CONNECTION=""
-export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
-export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION:0:3}
+export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION%.*}
+export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION%.*}
 
 KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 
@@ -69,8 +69,8 @@ done
 build_kafka() {
     KV=$KAFKA_MINOR_VERSION
     AV="0.9.0"
-    URL="https://oss.sonatype.org/content/repositories/releases/io/amient/affinity/metrics-reporter-kafka_${KV}/${AV}/metrics-reporter-kafka_${KV}-${AV}-all.jar"
-    download "$URL" "$BUILD_DIR/opt/kafka/current/libs/" md5
+#    URL="https://oss.sonatype.org/content/repositories/releases/io/amient/affinity/metrics-reporter-kafka_${KV}/${AV}/metrics-reporter-kafka_${KV}-${AV}-all.jar"
+#    download "$URL" "$BUILD_DIR/opt/kafka/current/libs/" md5
 
     URL="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar"
     download $URL "$BUILD_DIR/opt/" md5

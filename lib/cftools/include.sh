@@ -14,15 +14,18 @@ case $KAFKA_MINOR_VERSION in
     1.0*)
         CF_VERSION="4.0.0"
     ;;
+    0.11*)
+        CF_VERSION="3.3.1"
+    ;;
     *)
-        fail "unsupported kafka version $KAFKA_VERSION"
+        fail "unsupported kafka minor version $KAFKA_MINOR_VERSION"
     ;;
 esac
 
 
 APPLICABLE_SERVICES+=("cftools")
 
-CF_MINOR_VERSION="${CF_VERSION:0:3}"
+CF_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $CF_VERSION)
 
 setup_cftools() {
     curl -s https://packages.confluent.io/deb/$CF_MINOR_VERSION/archive.key | apt-key add -

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 checkvar KAFKA_VERSION
+checkvar KAFKA_MINOR_VERSION
 
 APPLICABLE_SERVICES+=("kafka-metrics")
 
-KV="${KAFKA_VERSION:0:3}"
-if [ "$KV" == "2.0" ]; then
+if [ "$KAFKA_MINOR_VERSION" == "2.0" ]; then
     KM_BRANCH="master";
 else
-    KM_BRANCH="master-$KV"
+    KM_BRANCH="master-$KAFKA_MINOR_VERSION"
 fi
 export KAFKA_METRICS_HOME="/opt/kafka-metrics-$KM_BRANCH"
 
