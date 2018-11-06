@@ -375,7 +375,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "kafka_controller_KafkaController_Value{name=\"ActiveControllerCount\"}",
+          "expr": "max(kafka_controller_KafkaController_Value{name=\"ActiveControllerCount\"})",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,

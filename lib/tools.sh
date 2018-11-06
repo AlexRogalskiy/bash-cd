@@ -299,25 +299,27 @@ function git_clone_or_update() {
 }
 
 wait_for_ports() {
-    while IFS=',' read -r address
+    while IFS=, read -ra addresses
     do
-        if [[ $address == *"://"* ]]; then
-            Y=(${address//\// })
-            address=${Y[1]}
-        fi
-        IN=(${address//:/ })
-        host=${IN[0]}
-        port=${IN[1]}
-        WAIT=30
-        while ! nc -z $host $port 1>/dev/null 2>&1; do
-            echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
-            sleep 1
-            let WAIT=WAIT-1
-            if [ $WAIT -eq 0 ]; then
-                fail "Failed waiting for HOST:$host PORT:$port"
+        for address in "${addresses[@]}"; do
+            if [[ $address == *"://"* ]]; then
+                Y=(${address//\// })
+                address=${Y[1]}
             fi
+            IN=(${address//:/ })
+            host=${IN[0]}
+            port=${IN[1]}
+            WAIT=30
+            while ! nc -z $host $port 1>/dev/null 2>&1; do
+                echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
+                sleep 1
+                let WAIT=WAIT-1
+                if [ $WAIT -eq 0 ]; then
+                    fail "Failed waiting for HOST:$host PORT:$port"
+                fi
+            done
+            echo -en "\n"
         done
-        echo -en "\n"
 
     done <<< "$1"
 }

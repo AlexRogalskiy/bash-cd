@@ -10,7 +10,7 @@ if [ "$server" == "$PRIMARY_IP" ]; then
 fi
 
 install_kafka-topics() {
-    wait_for_ports $KAFKA_CONNECTION
+    wait_for_ports $KAFKA_INTERNAL_CONNECTION
     /opt/kafka/topics.sh
     continue $? "could not apply kafka topics.sh"
     /opt/kafka/acls.sh

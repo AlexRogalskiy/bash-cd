@@ -74,6 +74,18 @@ install_kafka() {
     chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
     systemctl daemon-reload
     systemctl enable kafka.service
+
+    #Admin
+    kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
+    kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
+    kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
+    kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
+
+    #Schema Registry
+    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --consumer --group '*'
+    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --producer --group '*'
+    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --operation DescribeConfigs
+    kafka-acls --add --allow-principal 'User:schemaregistry' --topic __consumer_offsets --operation Describe
 }
 
 start_kafka() {
