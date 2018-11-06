@@ -5,6 +5,8 @@ checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_MEMORY_BUFFER
 
+checkvar ADMIN_PASSWORD
+
 export KAFKA_CONNECTION=""
 export KAFKA_INTERNAL_CONNECTION=""
 export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION:0:3}
@@ -41,6 +43,7 @@ do
     let KAFKA_BROKER_ID=this_broker_id
     let KAFKA_PORT=this_kafka_port
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
+    export KAFKA_ADVERTISED_HOST=${KAFKA_ADVERTISED_HOSTS[$i]}
     required "k2ssl"
     required "kafka-distro"
     checkvar KAFKA_PACKAGE
@@ -49,6 +52,7 @@ do
     required "zookeeper"
     checkvar ZOOKEEPER_CONNECTION
     APPLICABLE_SERVICES+=("kafka")
+    export ADMIN_PASSWORD
     export KAFKA_BROKER_ID
     export KAFKA_LOG_DIRS
     export KAFKA_PROTOCOL

@@ -3,11 +3,10 @@
 checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 checkvar AVRO_COMPATIBILITY_LEVEL
-checkvar PUBLIC_FQN
 checkvar ADMIN_PASSWORD
 checkvar KAFKA_SASL_MECHANISM
 
-export SCHEMA_REGISTRY_PUBLIC_URL="https://$PUBLIC_FQN:$SCHEMA_REGISTRY_PORT"
+#export SCHEMA_REGISTRY_PUBLIC_URL="https://$PUBLIC_FQN:$SCHEMA_REGISTRY_PORT"
 let schema_registry_internal_port=SCHEMA_REGISTRY_PORT+1
 export SCHEMA_REGISTRY_INTERNAL_URL="http://$SCHEMA_REGISTRY_HOST:$schema_registry_internal_port"
 export AVRO_COMPATIBILITY_LEVEL
@@ -19,7 +18,7 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "cftools"
     required "kafka-cli"
     APPLICABLE_SERVICES+=("schema-registry")
-    export PUBLIC_FQN
+#    export PUBLIC_FQN
     export ADMIN_PASSWORD
     export SCHEMA_REGISTRY_PORT
     export KAFKA_SASL_MECHANISM

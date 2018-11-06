@@ -3,6 +3,7 @@
 checkvar GRAFANA_PORT
 checkvar GRAFANA_SERVER
 checkvar GRAFANA_EDITABLE
+checkvar ADMIN_PASSWORD
 
 export GRAFANA_PORT
 export GRAFANA_URL="http://$GRAFANA_SERVER:$GRAFANA_PORT"
@@ -31,6 +32,15 @@ function install_grafana() {
 function start_grafana() {
     systemctl start grafana-server
     wait_for_endpoint "$GRAFANA_URL" 200 30
+
+    #first change admin password
+    curl -s --data "{\"oldPassword\": \"admin\",\"newPassword\": \"$ADMIN_PASSWORD\",\"confirmNew\": \"$ADMIN_PASSWORD\"}" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
+    -X PUT "http://admin:admin@localhost:$GRAFANA_PORT/api/user/password"
+    continue $? "failed to set default grafana admin password"
+
+
     if [ ! -z "$INFLUXDB_URL" ]; then
         curl -s "$ADMIN_URL/api/datasources" -s -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{"name": "InfluxDB", "type": "influxdb", "access": "proxy", "url": "'$INFLUXDB_URL'", "password": "none", "user": "kafka-metrics", "database": "metrics", "isDefault": true}'
         continue $? "failed to configure default metrics datasource in grafana 1"

@@ -13,8 +13,7 @@ if [ -z "$(docker ps -aq -f name=$C)" ]; then
                 -p 9091:9091 \
                 -p 9090:9090 \
                 -p 8881:8881 \
-                -p 8300:8300 \
-                -p 8400:8400 \
+                -p 3000:3000 \
                 --name "$C" amient/ubuntu-ci:16.04 /sbin/init
 fi
 
