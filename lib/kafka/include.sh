@@ -3,7 +3,6 @@
 checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
-checkvar KAFKA_PORT
 checkvar KAFKA_MEMORY_BUFFER
 
 export KAFKA_CONNECTION=""
@@ -13,18 +12,15 @@ export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION:0:3}
 
 KAFKA_BROKER_ID_OFFSET="${KAFKA_BROKER_ID_OFFSET:-0}"
 
+is_last_node=0
 for i in "${!KAFKA_SERVERS[@]}"
 do
    kafka_server="${KAFKA_SERVERS[$i]}"
-   kafka_rolling_restart_wait=$(($i * 15))
+
    let this_broker_id=i+1+KAFKA_BROKER_ID_OFFSET
+   let this_kafka_port=9091+i
 
-   export KAFKA_ADVERTISED_HOST="${KAFKA_ADVERTISED_HOSTS[$i]}"
-   if [ -z "$KAFKA_ADVERTISED_HOST" ] ; then
-       KAFKA_ADVERTISED_HOST=$kafka_server
-   fi
-
-   listener="$KAFKA_PROTOCOL://$KAFKA_ADVERTISED_HOST:$KAFKA_PORT"
+   listener="$KAFKA_PROTOCOL://$KAFKA_ADVERTISED_HOST:$this_kafka_port"
    if [ -z "$KAFKA_CONNECTION" ]; then
     KAFKA_CONNECTION="$listener"
    else
@@ -38,13 +34,19 @@ do
    fi
 
    if [ "$kafka_server" = "$PRIMARY_IP" ]; then
+    if [ "$kafka_server" == "${KAFKA_SERVERS[${#KAFKA_SERVERS[@]}-1]}" ]; then
+        is_last_node=1
+    fi
+    kafka_rolling_restart_wait=$(($i * 10))
     let KAFKA_BROKER_ID=this_broker_id
+    let KAFKA_PORT=this_kafka_port
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
+    required "k2ssl"
     required "kafka-distro"
     checkvar KAFKA_PACKAGE
     checkvar KAFKA_MINOR_VERSION
     required "kafka-cli"
-    require "zookeeper"
+    required "zookeeper"
     checkvar ZOOKEEPER_CONNECTION
     APPLICABLE_SERVICES+=("kafka")
     export KAFKA_BROKER_ID
@@ -61,7 +63,6 @@ do
 done
 
 build_kafka() {
-
     KV=$KAFKA_MINOR_VERSION
     URL="https://oss.sonatype.org/content/repositories/snapshots/io/amient/affinity/metrics-reporter-kafka_${KV}/0.8.2-SNAPSHOT/metrics-reporter-kafka_${KV}-0.8.2-20181025.155900-1-all.jar"
     download "$URL" "$BUILD_DIR/opt/kafka/current/libs/" md5
@@ -74,22 +75,26 @@ install_kafka() {
     chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
     systemctl daemon-reload
     systemctl enable kafka.service
-
-    #Admin
-    kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
-    kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
-    kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
-    kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
-
-    #Schema Registry
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --consumer --group '*'
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --producer --group '*'
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --operation DescribeConfigs
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic __consumer_offsets --operation Describe
 }
 
 start_kafka() {
     systemctl start kafka.service
+    wait_for_ports $PRIMARY_IP:19092
+
+    if [ $is_last_node -eq 1 ];then
+        #Default Admin Account
+        kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
+        kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
+        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
+        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
+
+        #Default Schema Registry Account
+        kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --consumer --group '*'
+        kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --producer --group '*'
+        kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --operation DescribeConfigs
+        kafka-acls --add --allow-principal 'User:schemaregistry' --topic __consumer_offsets --operation Describe
+    fi
+
 }
 
 stop_kafka() {
