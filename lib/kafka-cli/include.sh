@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+required "zookeeper"
+required "kafka"
 checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_CONNECTION
 checkvar KAFKA_VERSION
