@@ -28,6 +28,10 @@ done
 source $DIR/env/${VAR}.sh
 continue $? "Missing env/${VAR}.sh"
 
+
+
+source $DIR/lib/fix.sh
+
 if [ ! -z $(which git) ]; then
     BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
     if [ ! -z "$SERVICE" ]; then
@@ -38,12 +42,8 @@ fi
 export PRIMARY_IP
 PRIMARY_IP="$(hostname --ip-address)"
 if [ ! -z "$HOST" ]; then
-    if [ -z "$PRIMARY_IP" ]; then
-        PRIMARY_IP="${!HOST}"
-        highlight "USING $HOST AS $PRIMARY_IP"
-    elif [ "$PRIMARY_IP" != "${!HOST}" ]; then
-        fail "$HOST's IP ${!HOST} doesn't match the actual hosts's primary ip: $PRIMARY_IP"
-    fi
+    PRIMARY_IP="${!HOST}"
+    highlight "USING $HOST AS $PRIMARY_IP"
 fi
 
 
