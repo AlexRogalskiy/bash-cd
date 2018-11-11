@@ -148,14 +148,7 @@ function expand() {
 
 function expand_dir() {
     shells=(".sh" ".bat" ".bash" ".zsh")
-    artifacts=(".crt" ".pem" ".p12" ".key" ".jks" ".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
-    env=`printenv | cut -d= -f1 | paste -sd "," -`
-    params=$(echo $env | tr "," "\n")
-    for varname in ${params[@]}; do
-        if [ -z "${!varname}" ]; then
-            warn "undefined variable: $varname"
-        fi
-    done;
+    artifacts=(".crt" ".pem" ".p12" ".key" ".jks" ".jar" ".class" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".js" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
     for file in $1/$2/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then
