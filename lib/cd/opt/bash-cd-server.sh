@@ -39,14 +39,14 @@ handle() {
     fi
 }
 
-highlight "[$(date)] BASH-CD SERVER LISTENING ON PORT: $CD_PORT"
-echo "POST /push" | handle # trigger initial build that may need resuming after reboot
-RESPONSE="HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n\r\n${2:-"OK"}\r\n"
-while { echo -en "$RESPONSE"; } | nc -l "${1:-$CD_PORT}" | handle; do sleep 3; done
+#highlight "[$(date)] BASH-CD SERVER LISTENING ON PORT: $CD_PORT"
+#echo "POST /push" | handle # trigger initial build that may need resuming after reboot
+#RESPONSE="HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n\r\n${2:-"OK"}\r\n"
+#while { echo -en "$RESPONSE"; } | nc -l "${1:-$CD_PORT}" | handle; do sleep 3; done
 
-## use the following code instead of the 4-lines above if you don't have a way of receiving webhook HTTP POST requests
-#highlight "[$(date)] BASH-CD SERVER WATCHING REMOTE GIT REPO"
-#while [ 1 ]; do
-#    echo "POST /push BASH/LOOP" | handle
-#    sleep 15
-#done
+# use the following code instead of the 4-lines above if you don't have a way of receiving webhook HTTP POST requests
+highlight "[$(date)] BASH-CD SERVER WATCHING REMOTE GIT REPO"
+while [ 1 ]; do
+    echo "POST /push BASH/LOOP" | handle
+    sleep 5
+done
