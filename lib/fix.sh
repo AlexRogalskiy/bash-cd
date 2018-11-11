@@ -4,7 +4,6 @@ KAFKA_VERSION=2.0.0
 
 SERVICES=(
     "cd"
-    "gitd"
     "zookeeper"
     "kafka"
     "kafka-topics"
