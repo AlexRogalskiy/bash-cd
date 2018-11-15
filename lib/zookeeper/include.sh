@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
 
-checkvar PRIMARY_IP
 checkvar ZK_SERVERS
 checkvar ZOOKEEPER_PORT
 
-export ZOOKEEPER_PORT
 export ZOOKEEPER_CONNECTION=""
-export ZK_MY_ID
-export ZK_PEERS
 
 for z in "${!ZK_SERVERS[@]}"
 do
@@ -22,7 +18,9 @@ do
    if [ "$zk_server" == "$PRIMARY_IP" ]; then
     required "kafka-distro"
     APPLICABLE_SERVICES+=("zookeeper")
-    ZK_MY_ID="$server_id"
+    export ZK_MY_ID="$server_id"
+    export ZOOKEEPER_PORT
+    export ZK_PEERS
    fi
 done
 

@@ -3,23 +3,23 @@
 
 ## Connection URL
 
-    $SCHEMA_REGISTRY_URL
+    $SCHEMA_REGISTRY_PUBLIC_URL
 
 ## Schema Registry Queries
 
 Check all registered subjects
 
-    curl -X GET $SCHEMA_REGISTRY_URL/subjects
+    curl -X GET $SCHEMA_REGISTRY_PUBLIC_URL/subjects
 
 List versions of a subject
 
-    curl -X GET $SCHEMA_REGISTRY_URL/subjects/null/versions
+    curl -X GET $SCHEMA_REGISTRY_PUBLIC_URL/subjects/null/versions
 
 Get subject version
 
-    curl -X GET $SCHEMA_REGISTRY_URL/subjects/null/versions/1
+    curl -X GET $SCHEMA_REGISTRY_PUBLIC_URL/subjects/null/versions/1
 
 Get schmea by id
 
-    curl -X GET $SCHEMA_REGISTRY_URL/schemas/ids/61
+    curl -X GET $SCHEMA_REGISTRY_PUBLIC_URL/schemas/ids/61
 

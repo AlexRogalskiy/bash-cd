@@ -148,7 +148,7 @@ function expand() {
 
 function expand_dir() {
     shells=(".sh" ".bat" ".bash" ".zsh")
-    artifacts=(".jar" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
+    artifacts=(".crt" ".pem" ".p12" ".key" ".jks" ".jar" ".class" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".js" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
     for file in $1/$2/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then
@@ -216,15 +216,11 @@ function download() {
                 rm $local
                 fail "md5 checksum download failed: $url.md5"
             fi
-            local="$(checksum "$dest_dir/$file_name")"
-            remote=$(cat "$dest_dir/$file_name.md5")
-            if [[ "$local" != $remote* ]]; then
-        #     rm -f /opt/kafka/current/libs/metrics-reporter-kafka*
-             echo $local
-             echo $remote
+            local_md5="$(checksum "$dest_dir/$file_name")"
+            remote_md5=$(cat "$dest_dir/$file_name.md5")
+            if [[ "$local_md5" != $remote_md5* ]]; then
              rm $local
              fail "download checksum failed for $url"
-
             fi
         fi
     fi
@@ -296,29 +292,29 @@ function git_clone_or_update() {
 }
 
 wait_for_ports() {
-    IFS=','; for address in $1
+    while IFS=, read -ra addresses
     do
-        IFS=' '
-        if [[ $address == *"://"* ]]; then
-            Y=(${address//\// })
-            address=${Y[1]}
-        fi
-        IN=(${address//:/ })
-        host=${IN[0]}
-        port=${IN[1]}
-        WAIT=30
-        while ! nc -z $host $port 1>/dev/null 2>&1; do
-            echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
-            sleep 1
-            let WAIT=WAIT-1
-            if [ $WAIT -eq 0 ]; then
-                fail "Failed waiting for HOST:$host PORT:$port"
+        for address in "${addresses[@]}"; do
+            if [[ $address == *"://"* ]]; then
+                Y=(${address//\// })
+                address=${Y[1]}
             fi
+            IN=(${address//:/ })
+            host=${IN[0]}
+            port=${IN[1]}
+            WAIT=30
+            while ! nc -z $host $port 1>/dev/null 2>&1; do
+                echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
+                sleep 1
+                let WAIT=WAIT-1
+                if [ $WAIT -eq 0 ]; then
+                    fail "Failed waiting for HOST:$host PORT:$port"
+                fi
+            done
+            echo -en "\n"
         done
-        echo -en "\r"
-        IFS=','
-    done
-    IFS=' '
+
+    done <<< "$1"
 }
 
 wait_for_endpoint() {

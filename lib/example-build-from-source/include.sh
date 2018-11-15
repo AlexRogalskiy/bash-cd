@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-checkvar PRIMARY_IP
 checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_CONNECTION
 checkvar EXAMPLE_APP_SERVERS

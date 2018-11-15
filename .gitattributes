@@ -1,3 +1,4 @@
 env/* merge=ours
+lib/fix.sh merge=ours
 
 # git config --global merge.ours.driver true

@@ -7,7 +7,7 @@ User=root
 Type=simple
 Restart=always
 RestartSec=3
-#Environment=SCHEMA_REGISTRY_OPTS=-Djava.security.auth.login.config=/etc/schema-registry/jaas.conf
+Environment=SCHEMA_REGISTRY_OPTS=-Djava.security.auth.login.config=/etc/schema-registry/jaas.conf
 ExecStart=/bin/bash /usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
 
 [Install]

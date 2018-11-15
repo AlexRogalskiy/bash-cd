@@ -4,7 +4,9 @@ checkvar KAFKA_VERSION
 
 required "openjdk8"
 
-KAFKA_PACKAGE="kafka_2.11-$KAFKA_VERSION"
+export KAFKA_VERSION
+export KAFKA_PACKAGE="kafka_2.11-$KAFKA_VERSION"
+export KAFKA_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $KAFKA_VERSION)
 APPLICABLE_SERVICES+=("kafka-distro")
 
 build_kafka-distro() {
@@ -12,15 +14,15 @@ build_kafka-distro() {
     continue $? "could not fetch kafka distro"
     download "https://www.apache.org/dist/kafka/$KAFKA_VERSION/kafka_2.11-$KAFKA_VERSION.tgz.asc" "$BUILD_DIR/opt/kafka"
     continue $? "could not fetch checksum file for kafka distro"
+}
+
+install_kafka-distro() {
     gpg --verify "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz.asc" "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz"
     if [ $? -ne 0 ]; then
         rm "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz"
         rm "$BUILD_DIR/opt/kafka/$KAFKA_PACKAGE.tgz.asc"
         fail "signature verification failed for: $KAFKA_PACKAGE"
     fi
-}
-
-install_kafka-distro() {
     if [ ! -d "/opt/kafka/$KAFKA_PACKAGE" ]; then
         tar -xzf "/opt/kafka/$KAFKA_PACKAGE.tgz" -C "/opt/kafka"
     fi
