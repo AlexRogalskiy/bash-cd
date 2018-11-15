@@ -4,6 +4,7 @@ checkvar ZK_SERVERS
 checkvar ZOOKEEPER_PORT
 
 export ZOOKEEPER_CONNECTION=""
+export ZK_PEERS=""
 
 for z in "${!ZK_SERVERS[@]}"
 do
