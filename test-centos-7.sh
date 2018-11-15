@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-C="bash-cd-ubuntu"
+C="bash-cd-centos"
 if [ -z $(docker ps -aq -f name=$C) ]; then
     docker run  -d --rm -e=container=docker --tmpfs /run --tmpfs /run/lock --tmpfs /tmp -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
                 -v $DIR/env:/opt/bash-cd/env \
