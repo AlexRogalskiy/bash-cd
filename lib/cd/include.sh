@@ -3,7 +3,7 @@
 APPLICABLE_SERVICES+=("cd")
 
 setup_cd() {
-    yum -y install openssh-server curl software-properties-common apt-transport-https netcat git
+    yum -y install openssh-server curl software-properties-common apt-transport-https nc git
 }
 
 install_cd() {
