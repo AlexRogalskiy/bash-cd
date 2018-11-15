@@ -86,13 +86,13 @@ start_kafka() {
     systemctl start kafka.service
     wait_for_ports $PRIMARY_IP:19092
 
-    if [ $is_last_node -eq 1 ];then
-        #Default Admin Account
-        kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
-        kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
-        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
-        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
-    fi
+#    if [ $is_last_node -eq 1 ];then
+#        #Default Admin Account
+#        kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
+#        kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
+#        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
+#        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
+#    fi
 
 }
 
