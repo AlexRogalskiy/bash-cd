@@ -150,8 +150,9 @@ function expand_dir() {
     if [ ! -z "$2" ]; then dir="$1""$2"; else dir="$1"; fi
     for nexp in "${_NO_EXPAND_BASH_CD[@]}"; do
         if [ "$nexp" == "$dir" ]; then
-            echo "[STATIC] $dir"
-            cp -r $dir ${BUILD_DIR}$2
+            echo "[STATIC] $dir "
+            target=`dirname ${BUILD_DIR}$2`/
+            cp -r $dir $target
             return
         fi
     done
