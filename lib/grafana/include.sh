@@ -25,6 +25,10 @@ function setup_grafana() {
     apt-get -y -o Dpkg::Options::=--force-confdef install grafana
 }
 
+function build_grafana() {
+    no_expand data
+}
+
 function install_grafana() {
     chown -R grafana:grafana /data/grafana
 }
