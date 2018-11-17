@@ -73,11 +73,6 @@ function get_stack() {
 _LOADED_MODULES_BASH_CD=()
 function required() {
     module="$1"
-#    if [ ! -z "$2" ]; then
-#        expr="echo \$$2"
-#        value="$(eval $expr)"
-#        if [ ! -z "$value" ]; then module=""; fi
-#    fi
     for loaded in "${_LOADED_MODULES_BASH_CD[@]}"; do
         if [ "$loaded" == "$module" ]; then
             info "Already loaded: $module"
@@ -146,10 +141,23 @@ function expand() {
     while IFS= read -r line; do expand_line; done; expand_line
 }
 
+_NO_EXPAND_BASH_CD=()
+function no_expand() {
+    _NO_EXPAND_BASH_CD+=("`dirname ${BASH_SOURCE[1]}`/$1")
+}
+
 function expand_dir() {
+    if [ ! -z "$2" ]; then dir="$1""$2"; else dir="$1"; fi
+    for nexp in "${_NO_EXPAND_BASH_CD[@]}"; do
+        if [ "$nexp" == "$dir" ]; then
+            echo "[STATIC] $dir"
+            cp -r $dir ${BUILD_DIR}$2
+            return
+        fi
+    done
     shells=(".sh" ".bat" ".bash" ".zsh")
-    artifacts=(".crt" ".pem" ".p12" ".key" ".jks" ".jar" ".class" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".js" ".gz"  ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx" ".static.json" ".static.xml")
-    for file in $1/$2/*; do
+    artifacts=(".crt" ".pem" ".p12" ".key" ".cc" ".c" ".h" ".jks" ".jar" ".java" ".scala" ".class" ".tar" ".war" ".a" ".so" ".so.1" ".bin" ".exe" ".js" ".gz" ".tgz" ".7z" ".bz2" ".rar" ".zip" ".zipx")
+    for file in $dir/*; do
         filename=$(basename "$file")
         if [ -f "$file" ] && [ ! -z "$2" ]; then
             mkdir -p "$BUILD_DIR/$2"
@@ -158,8 +166,7 @@ function expand_dir() {
             is_shell=0
             for a in "${shells[@]}"; do if [[ $filename == *"$a" ]]; then is_shell=1; break; fi; done
             if [[ is_artifact -eq 1 ]]; then
-                echo "[ARCHIVE ] $2/$filename"
-                cat "$file" > "$BUILD_DIR/$2/$filename"
+                cp "$file" "$BUILD_DIR/$2/$filename"
             elif [[ is_shell -eq 1 ]]; then
                 echo "[ SCRIPT ] $2/$filename"
                 cat "$file" | expand '\$\$' > "$BUILD_DIR/$2/$filename"
@@ -237,20 +244,26 @@ function clone() {
     git fetch
     git reset --hard
     git checkout "$branch"
-
 }
 
 function git_local_revision() {
     branch=$(git rev-parse --abbrev-ref HEAD)
-    git rev-parse $branch
+    if [ $? -eq 0 ]; then
+        git rev-parse $branch
+    else
+        echo "--"
+    fi
 }
 
 function git_remote_revision() {
-    git remote update &> /dev/null
     branch=$(git rev-parse --abbrev-ref HEAD)
-    git rev-parse origin/$branch
+    if [ $? -eq 0 ]; then
+        git remote update &> /dev/null
+        git rev-parse origin/$branch
+    else
+        echo "--"
+    fi
 }
-
 
 function git_clone_or_update() {
     git_url="$1"
