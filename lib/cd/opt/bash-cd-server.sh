@@ -15,7 +15,7 @@ handle() {
     cd /opt/bash-cd
     read in
     if [[ "$in" == "POST /push"* ]]; then
-        rollback_file="$DIR/unclean"
+        rollback_file="/tmp/bash-cd-unclean"
         declare changed=0
         if [ -f "$rollback_file" ]; then
             warn "[$(date)] RESUMING INCOMPLETE BUILD: $(cat $rollback_file)"
@@ -28,8 +28,7 @@ handle() {
         if [ $changed -eq 1 ]; then
             git pull
             continue $? "[$(date)] COULD NOT PULL THE LATEST ENVIRONMENT CHANGES"
-            ./apply.sh setup
-            ./apply.sh install
+            ./apply.sh
             rm $rollback_file
         fi
     elif [[ "$in" == "POST /install"* ]]; then
