@@ -42,7 +42,6 @@ do
     let KAFKA_PORT=this_kafka_port
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
     export KAFKA_ADVERTISED_HOST=${KAFKA_ADVERTISED_HOSTS[$i]}
-    required "k2ssl"
     required "kafka-distro"
     checkvar KAFKA_PACKAGE
     checkvar KAFKA_MINOR_VERSION

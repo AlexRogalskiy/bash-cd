@@ -11,7 +11,6 @@ export AVRO_COMPATIBILITY_LEVEL
 
 if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "openjdk8"
-    required "k2ssl"
     required "kafka"
     required "cftools"
     required "kafka-cli"
