@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -z "$2" ]; then
+    method="GET"
+else
+    method=$(echo "$2" | tr a-z A-Z)
+fi
+
+curl -X $method "$SCHEMA_REGISTRY_INTERNAL_URL/${1}"
+
+echo ""
