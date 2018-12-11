@@ -39,8 +39,9 @@ if [ ! -z $(which git) ]; then
     fi
 fi
 
+ALL_IP_ADDRESSES=($(hostname --all-ip-addresses)); echo
 export PRIMARY_IP
-PRIMARY_IP="$(hostname --ip-address)"
+PRIMARY_IP=${ALL_IP_ADDRESSES[0]}
 if [ ! -z "$HOST" ]; then
     PRIMARY_IP="${!HOST}"
     highlight "USING $HOST AS $PRIMARY_IP"
