@@ -1140,5 +1140,5 @@ DhC7tv8R7gzBhBCSn6oOMw0=
 =ekpR
 -----END PGP PUBLIC KEY BLOCK-----
 EOFGPG
-
+    continue $? "could not import kafka gpg keys"
 }
