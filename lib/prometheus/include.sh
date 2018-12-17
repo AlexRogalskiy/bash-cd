@@ -56,6 +56,7 @@ install_prometheus() {
     cp -r /opt/prometheus/console_libraries /etc/prometheus
     chown -R prometheus:prometheus /etc/prometheus
     systemctl daemon-reload
+    systemctl enable prometheus
 }
 
 start_prometheus() {

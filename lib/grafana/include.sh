@@ -31,6 +31,7 @@ function build_grafana() {
 
 function install_grafana() {
     chown -R grafana:grafana /data/grafana
+    systemctl enable grafana-server
 }
 
 function start_grafana() {
