@@ -56,18 +56,6 @@ function start_grafana() {
         continue $? "failed to configure default kafka datasource in grafana 1"
         echo ""
     fi
-    update_grafana_dashboard() {
-
-        echo "{\"dashboard\":" > /tmp/dashboard.json
-        cat "$1" | jq ".id=null|.time.from=\"now-1h\"|.time.to=\"now\"|.refresh=\"5s\"|.editable=$GRAFANA_EDITABLE|.panels[].editable=$GRAFANA_EDITABLE" >> /tmp/dashboard.json
-        echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
-        curl -s --data-binary "@/tmp/dashboard.json" \
-        -H "Content-Type: application/json" \
-        -H "Accept: application/json" \
-        -X POST "$ADMIN_URL/api/dashboards/db"
-        continue $? "failed to upload grafana dashboard: $1"
-        echo ""
-    }
     update_grafana_dashboard "/data/grafana/kafka-groups.static.json"
     update_grafana_dashboard "/data/grafana/kafka-topics.static.json"
     update_grafana_dashboard "/data/grafana/kafka-overview.static.json"
@@ -76,4 +64,18 @@ function start_grafana() {
 function stop_grafana() {
     systemctl stop grafana-server
 }
+
+update_grafana_dashboard() {
+
+    echo "{\"dashboard\":" > /tmp/dashboard.json
+    cat "$1" | jq ".id=null|.time.from=\"now-1h\"|.time.to=\"now\"|.refresh=\"5s\"|.editable=$GRAFANA_EDITABLE|.panels[].editable=$GRAFANA_EDITABLE" >> /tmp/dashboard.json
+    echo ",\"folderId\": 0, \"overwrite\": true}" >> /tmp/dashboard.json
+    curl -s --data-binary "@/tmp/dashboard.json" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
+    -X POST "$ADMIN_URL/api/dashboards/db"
+    continue $? "failed to upload grafana dashboard: $1"
+    echo ""
+}
+
 
