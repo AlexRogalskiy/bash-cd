@@ -4,8 +4,8 @@ function fail() {
     message="$1"
     red='\033[0;31m'
     nc='\033[0m'
-    echo -e "${red}$message $nc"
-    echo ""
+    echo -e "${red}$message $nc" >&2
+    echo "" >&2
     exit 1;
 }
 
@@ -13,28 +13,36 @@ function warn() {
     message="$1"
     blue='\033[93m'
     nc='\033[0m'
-    echo -e "${blue}$message $nc"
+    echo -e "${blue}$message $nc" >&2
+}
+
+function log() {
+    echo -e "$1" >&2
+}
+
+function logn() {
+    echo -en "$1" >&2
 }
 
 function info() {
     message="$1"
     blue='\033[96m'
     nc='\033[0m'
-    echo -e "${blue}$message $nc"
+    echo -e "${blue}$message $nc" >&2
 }
 
 function success() {
     message="$1"
     green='\033[92m'
     nc='\033[0m'
-    echo -e "${green}$message $nc"
+    echo -e "${green}$message $nc" >&2
 }
 
 function highlight() {
     message="$1"
     bold='\033[01m'
     nc='\033[0m'
-    echo -e "${bold}$message $nc"
+    echo -e "${bold}$message $nc" >&2
 }
 
 function continue() {
@@ -150,7 +158,7 @@ function expand_dir() {
     if [ ! -z "$2" ]; then dir="$1""$2"; else dir="$1"; fi
     for nexp in "${_NO_EXPAND_BASH_CD[@]}"; do
         if [ "$nexp" == "$dir" ]; then
-            echo "[STATIC] $dir "
+            log "[STATIC] $dir "
             target=`dirname ${BUILD_DIR}$2`/
             cp -r $dir $target
             return
@@ -169,15 +177,15 @@ function expand_dir() {
             if [[ is_artifact -eq 1 ]]; then
                 cp "$file" "$BUILD_DIR/$2/$filename"
             elif [[ is_shell -eq 1 ]]; then
-                echo "[ SCRIPT ] $2/$filename"
+                log "[ SCRIPT ] $2/$filename"
                 cat "$file" | expand '\$\$' > "$BUILD_DIR/$2/$filename"
             else
-                echo "[TEMPLATE] $2/$filename"
+                log "[TEMPLATE] $2/$filename"
                 cat "$file" | expand '\$' > "$BUILD_DIR/$2/$filename"
             fi
             continue $? "Could process file $FILE"
             #the chmod with reference file works only in POSIX so muting for OSX
-            chmod --reference="$file" "$BUILD_DIR/$2/$filename" > /dev/null 2>&1
+            chmod --reference="$file" "$BUILD_DIR/$2/$filename" > /dev/null 2>&1 || true
         elif [ -d "$file" ]; then
             expand_dir "$1" "$2/$filename"
         fi
@@ -285,10 +293,10 @@ function git_clone_or_update() {
 
     git rev-parse -q --verify "refs/tags/$branch" &> /dev/null;
     if [ $? -eq 0 ]; then
-        echo "CLONING TAG $branch INTO $local_dir"
+        log "CLONING TAG $branch INTO $local_dir"
         clone "$git_url" "$local_dir" "$branch"
     else
-        echo "CLONING BRANCH $branch INTO $local_dir"
+        log "CLONING BRANCH $branch INTO $local_dir"
         if [ ! -d "$local_dir/.git" ]; then
             mkdir -p "$local_dir"
             git clone "$git_url" "$local_dir"
@@ -296,7 +304,7 @@ function git_clone_or_update() {
             checkbranch
         else
             checkbranch
-            echo "CHECKING FOR UPDATES IN: $local_dir"
+            log "CHECKING FOR UPDATES IN: $local_dir"
             if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
                 git pull
                 continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
@@ -316,16 +324,16 @@ wait_for_ports() {
             IN=(${address//:/ })
             host=${IN[0]}
             port=${IN[1]}
-            WAIT=30
+            WAIT=45
             while ! nc -z $host $port 1>/dev/null 2>&1; do
-                echo -en "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
+                logn "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
                 sleep 1
                 let WAIT=WAIT-1
                 if [ $WAIT -eq 0 ]; then
                     fail "Failed waiting for HOST:$host PORT:$port"
                 fi
             done
-            echo -en "\n"
+            logn  "\n"
         done
 
     done <<< "$1"
@@ -336,14 +344,14 @@ wait_for_endpoint() {
     EXPECTED=$2
     MAX_WAIT=$3
     while [  $MAX_WAIT -gt 0 ]; do
-         echo -en "\r$URL $MAX_WAIT";
-         RESPONSE_STATUS=$(curl --stderr /dev/null GET -i "$URL" | head -1 | cut -d' ' -f2)
+         logn "\r$URL $MAX_WAIT";
+         RESPONSE_STATUS=$(curl --stderr /dev/null -X GET -i "$URL" | head -1 | cut -d' ' -f2)
          if [ ! -z $RESPONSE_STATUS ] ; then
-            if [ "$RESPONSE_STATUS" != "$EXPECTED" ]; then
-                fail "\rUNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
-            else
-                echo -en "\r"
+            if [[ $EXPECTED == *$RESPONSE_STATUS* ]]; then
+                logn "\r"
                 return 0;
+            else
+                fail "\rUNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
             fi
          fi
          let MAX_WAIT=MAX_WAIT-1
@@ -351,3 +359,12 @@ wait_for_endpoint() {
     done
     fail "TIMEOUT WHILE WAITING FOR ENDPOINT: $URL"
 }
+
+
+function urlDecocde() {
+  local value=${*//+/%20}                   # replace +-spaces by %20 (hex)
+  for part in ${value//%/ \\x}; do          # split at % prepend \x for printf
+    printf "%b%s" "${part:0:4}" "${part:4}" # output decoded char
+  done
+}
+
