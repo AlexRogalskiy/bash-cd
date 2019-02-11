@@ -20,7 +20,7 @@ do
    let this_broker_id=i+1+KAFKA_BROKER_ID_OFFSET
    let this_kafka_port=9091+i
 
-   listener="$KAFKA_PROTOCOL://$KAFKA_ADVERTISED_HOST:$this_kafka_port"
+   listener="$KAFKA_PROTOCOL://$kafka_server:$this_kafka_port"
    if [ -z "$KAFKA_CONNECTION" ]; then
     KAFKA_CONNECTION="$listener"
    else
@@ -41,7 +41,6 @@ do
     let KAFKA_BROKER_ID=this_broker_id
     let KAFKA_PORT=this_kafka_port
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
-    export KAFKA_ADVERTISED_HOST=${KAFKA_ADVERTISED_HOSTS[$i]}
     required "kafka-distro"
     checkvar KAFKA_PACKAGE
     checkvar KAFKA_MINOR_VERSION
