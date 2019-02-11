@@ -2,24 +2,30 @@
 
 checkvar PROMETHEUS_SERVERS
 checkvar PROMETHEUS_DATA_DIR
-checkvar PROMETHEUS_RETENTION
+checkvar PROMETHEUS_RETENTION_DAYS
+export PROMETHEUS_RETENTION="${PROMETHEUS_RETENTION_DAYS}d"
+checkvar ALL_HOSTS
 
-for i in "${!PROMETHEUS_SERVERS[@]}"
+for prom_server in "${PROMETHEUS_SERVERS[@]}"
 do
-   if [ "${PROMETHEUS_SERVERS[$i]}" == "$PRIMARY_IP" ]; then
+   export PROMETHEUS_URL="http://$prom_server:9090"
+   if [ "$prom_server" == "$PRIMARY_IP" ]; then
     APPLICABLE_SERVICES+=("prometheus")
-    export PROMETHEUS_URL="http://localhost:9090"
     if [ ! -z "$KAFKA_SERVERS" ]; then
-        export KAFKA_PROMETHEUS_TARGETS
+        export KAFKA_PROMETHEUS_TARGETS=""
         export PROMETHEUS_DATA_DIR
         export PROMETHEUS_RETENTION
-        for i in "${!KAFKA_SERVERS[@]}"
+        for kafka_host in ${KAFKA_SERVERS[@]}
         do
-           kafka_host="${KAFKA_ADVERTISED_HOSTS[$i]}"
            KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:7071,"
         done
     fi
    fi
+
+   export PROMETHEUS_NODE_TARGETS=""
+   for h in ${ALL_HOSTS[@]}; do
+    PROMETHEUS_NODE_TARGETS="${PROMETHEUS_NODE_TARGETS} ${h}:9100,"
+   done
 done
 
 build_prometheus() {
@@ -27,14 +33,14 @@ build_prometheus() {
     DOWNLOAD="prometheus-$VERSION.linux-amd64"
     download "https://github.com/prometheus/prometheus/releases/download/v$VERSION/$DOWNLOAD.tar.gz" $BUILD_DIR/opt/
     continue $? "failed to download prometheus"
+    SHA256="$(sha256sum "$BUILD_DIR/opt/$DOWNLOAD.tar.gz")"
+    if [[ "$SHA256"  != 3aa063498ab3b4d1bee103d80098ba33d02b3fed63cb46e47e1d16290356db8a* ]]; then
+     rm "$BUILD_DIR/opt/$DOWNLOAD.tar.gz"
+     fail "prometheus checksum failed"
+    fi
 }
 
 install_prometheus() {
-    SHA256="$(sha256sum "/opt/$DOWNLOAD.tar.gz")"
-    if [[ "$SHA256"  != 3aa063498ab3b4d1bee103d80098ba33d02b3fed63cb46e47e1d16290356db8a* ]]; then
-     rm "/opt/$DOWNLOAD.tar.gz"
-     fail "prometheus checksum failed"
-    fi
     cd /opt
     if [ ! -d "/opt/$DOWNLOAD" ]; then
             tar xvf "/opt/$DOWNLOAD.tar.gz"
