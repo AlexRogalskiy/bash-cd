@@ -8,6 +8,6 @@ scrape_configs:
   static_configs:
   - targets: [$KAFKA_PROMETHEUS_TARGETS]
 
-- job_name: 'node'
-  static_configs:
-  - targets: [$PROMETHEUS_NODE_TARGETS]
+#- job_name: 'node'
+#  static_configs:
+#  - targets: [$PROMETHEUS_NODE_TARGETS]

@@ -4,7 +4,7 @@ checkvar PROMETHEUS_SERVERS
 checkvar PROMETHEUS_DATA_DIR
 checkvar PROMETHEUS_RETENTION_DAYS
 export PROMETHEUS_RETENTION="${PROMETHEUS_RETENTION_DAYS}d"
-checkvar ALL_HOSTS
+#checkvar ALL_HOSTS
 
 for prom_server in "${PROMETHEUS_SERVERS[@]}"
 do
@@ -22,10 +22,10 @@ do
     fi
    fi
 
-   export PROMETHEUS_NODE_TARGETS=""
-   for h in ${ALL_HOSTS[@]}; do
-    PROMETHEUS_NODE_TARGETS="${PROMETHEUS_NODE_TARGETS} ${h}:9100,"
-   done
+#   export PROMETHEUS_NODE_TARGETS=""
+#   for h in ${ALL_HOSTS[@]}; do
+#    PROMETHEUS_NODE_TARGETS="${PROMETHEUS_NODE_TARGETS} ${h}:9100,"
+#   done
 done
 
 build_prometheus() {
