@@ -35,6 +35,8 @@ Vagrant.configure("2") do |config|
         mv /tmp/authorized_keys /root/.ssh/
         chown -R root:root /root/.ssh
         chmod -R 700 /root/.ssh
+        #apt-get update
+        #apt-get install openssh-server
       SHELL
     end
 end
