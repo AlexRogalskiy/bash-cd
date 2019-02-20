@@ -11,13 +11,27 @@ It can be used to __build__ deployment recipes on most UNIX-like systems that ca
 So, say on your development osx, you can run `./apply.sh build <HOST-VAR>` to simulate how the build will
 manifest on a particular machine and inspect `./build` directory. 
 
-The __install__ phase can run on Ubuntu 16.04 out of the box. The modules
-use systemd and aptitude. It is possible to make it run on other Linux distributions and Unix systems,
-but it requires the setup/install/stop/start functions of each module to be modified to use appropriate
-package manager and init system.
+The __install__ phase can run on Debian Stretch out of the box. It is possible to make it run on other Linux 
+distributions and Unix systems, but it requires the setup/install/stop/start functions of each module to be 
+modified to use appropriate package manager and service system. Notably, there is a centos branch which does this 
+to switch to rehl-based packaging and service mangers.
 
 
 # Quick Start
+
+To try it out, bash-cd comes with local vagrant file that can be used as a test host to be managed.
+Bash cd can be applied from your development machine using a single ssh entry point into the cluster you
+are wanting to manage.
+
+    vagrant up
+    
+The above will launch a single debian-stretch virtual machine with private addresss 172.17.0.2 and various
+ports exposed for testing of each module.
+    
+    ./apply.sh root@localhost:2222
+
+...
+
 
 To try bash-cd, fork it and modify the contents of [`/env/var.sh`](env/var.sh) file - this file describes
 your environment and which components are installed where. Remeber that forks are public so may want to mirror the repo instead.

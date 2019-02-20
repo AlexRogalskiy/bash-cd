@@ -56,7 +56,6 @@ do
     export KAFKA_REPL_FACTOR
     export KAFKA_MEMORY_BUFFER
     export KAFKA_SASL_MECHANISM
-    export KAFKA_AUTHORIZER_CLASS_NAME
     export KAFKA_JMX_PORT
     export KAFKA_PORT
    fi
