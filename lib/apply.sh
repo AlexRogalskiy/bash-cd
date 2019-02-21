@@ -2,10 +2,15 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $DIR/lib/tools.sh
+source $DIR/lib/fix.sh
 
 function usage() {
     fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
 }
+
+usage
+
+exit 6;
 
 VAR="var"
 doSetup=1
@@ -19,7 +24,7 @@ while [ ! -z "$1" ]; do
         install*) PHASE="install"; doSetup=0;;
         --rebuild*) REBUILD="true";;
         --host*) HOST=$1; shift;;
-        --service*) SERVICE=$1; shift;;
+        --service*) SERVICES=($1); shift;;
         --var*) VAR=$1; shift;;
         *) usage;;
     esac
@@ -28,15 +33,8 @@ done
 source $DIR/env/${VAR}.sh
 continue $? "Missing env/${VAR}.sh"
 
-
-
-source $DIR/lib/fix.sh
-
 if [ ! -z $(which git) ]; then
     BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
-    if [ ! -z "$SERVICE" ]; then
-        SERVICES=($SERVICE)
-    fi
 fi
 
 ALL_IP_ADDRESSES=($(hostname --all-ip-addresses)); echo
@@ -55,7 +53,7 @@ checkvar SERVICES
 for service in "${SERVICES[@]}"
 do
     if [ -f "$DIR/lib/$service/include.sh" ]; then
-     echo "Loading Service Defintion: $service"
+     echo "Loading Service Definition: $service"
      source "$DIR/lib/$service/include.sh"
     fi
 done

@@ -80,17 +80,18 @@ function get_stack() {
 
 _LOADED_MODULES_BASH_CD=()
 function required() {
-    module="$1"
+    local module="$1"
     for loaded in "${_LOADED_MODULES_BASH_CD[@]}"; do
         if [ "$loaded" == "$module" ]; then
-            info "Already loaded: $module"
+            log "Already loaded: $module"
             module="";
         fi
     done
 
     if [ ! -z "$module" ]; then
-        _LOADED_MODULES_BASH_CD+=($module)
         source "$( dirname "${BASH_SOURCE[0]}" )/$module/include.sh"
+        log "Adding module definition: $module"
+        _LOADED_MODULES_BASH_CD+=($module)
     fi
 }
 
