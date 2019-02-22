@@ -48,7 +48,7 @@ do
     required "kafka-cli"
     required "zookeeper"
     checkvar ZOOKEEPER_CONNECTION
-    APPLICABLE_SERVICES+=("kafka")
+    APPLICABLE_MODULES+=("kafka")
     export ADMIN_PASSWORD
     export KAFKA_BROKER_ID
     export KAFKA_LOG_DIRS

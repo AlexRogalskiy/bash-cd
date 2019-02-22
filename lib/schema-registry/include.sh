@@ -14,7 +14,7 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
     required "kafka"
     required "cftools"
     required "kafka-cli"
-    APPLICABLE_SERVICES+=("schema-registry")
+    APPLICABLE_MODULES+=("schema-registry")
     export PUBLIC_FQN
     export ADMIN_PASSWORD
     export SCHEMA_REGISTRY_PORT

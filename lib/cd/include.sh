@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-APPLICABLE_SERVICES+=("cd")
+APPLICABLE_MODULES+=("cd")
 
 function setup_cd() {
     apt-get -y update --fix-missing

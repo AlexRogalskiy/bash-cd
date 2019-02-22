@@ -6,11 +6,10 @@ source $DIR/lib/tools.sh
 source $DIR/lib/fix.sh
 
 function usage() {
-    fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
+    fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>]"
 }
 
 
-VAR="var"
 doSetup=1
 PHASE="install";
 while [ ! -z "$1" ]; do
@@ -23,13 +22,12 @@ while [ ! -z "$1" ]; do
         --rebuild*) REBUILD="true";;
         --host*) HOST=$1; shift;;
         --module*) MODULES=($1); shift;;
-        --var*) VAR=$1; shift;;
         *) usage;;
     esac
 done
 
-source $DIR/env/${VAR}.sh
-continue $? "Missing env/${VAR}.sh"
+source $DIR/env/var.sh
+continue $? "Missing env/var.sh"
 
 if [ ! -z "$HOST" ]; then
     PRIMARY_IP="${HOSTS[$HOST]}"
@@ -55,14 +53,14 @@ do
     required $module
 done
 
-if [ -z "$APPLICABLE_SERVICES" ]; then
-    warn "NO SERVICES APPLICABLE"
+if [ -z "$APPLICABLE_MODULES" ]; then
+    warn "NO MODULES APPLICABLE"
     exit 0;
 fi
 
-DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
-APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
-log "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
+DEDUPLICATED_APPLICABLE_MODULES=$( for i in "${!APPLICABLE_MODULES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_MODULES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
+APPLICABLE_MODULES=($DEDUPLICATED_APPLICABLE_MODULES)
+log "GOING TO APPLY IN ORDER: ${APPLICABLE_MODULES[@]}"
 
 declare BUILD_DIR="$DIR/build"
 mkdir -p $BUILD_DIR
@@ -71,7 +69,7 @@ continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
 if [ $doSetup -eq 1 ]; then
     log "SETTING UP ALL SERVICES"
     mkdir -p $BUILD_DIR
-    for service in "${APPLICABLE_SERVICES[@]}"
+    for service in "${APPLICABLE_MODULES[@]}"
     do
         if (func_modified "setup_$service") || [ "$REBUILD" == "true" ]; then
             warn "[$(date)] SERVICE SETUP MODIFIED: $service"
@@ -92,7 +90,7 @@ case $PHASE in
             log "--REBUILD PURGING $BUILD_DIR"
             rm -rf $BUILD_DIR/**
         fi
-        for service in "${APPLICABLE_SERVICES[@]}"
+        for service in "${APPLICABLE_MODULES[@]}"
         do
             info "BUILDING SERVICE $service INTO $BUILD_DIR"
 
@@ -106,7 +104,7 @@ case $PHASE in
     ;;
     install*)
         let num_services_affected=0
-        for service in "${APPLICABLE_SERVICES[@]}"
+        for service in "${APPLICABLE_MODULES[@]}"
         do
             should_restart=0
             should_install=0

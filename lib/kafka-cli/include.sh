@@ -8,7 +8,7 @@ checkvar KAFKA_CONNECTION
 checkvar KAFKA_VERSION
 checkvar SCHEMA_REGISTRY_INTERNAL_URL
 
-APPLICABLE_SERVICES+=("kafka-cli")
+APPLICABLE_MODULES+=("kafka-cli")
 #export AFFINITY_HOME="/opt/affinity"
 
 function install_kafka-cli() {

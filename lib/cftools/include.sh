@@ -23,7 +23,7 @@ case $KAFKA_MINOR_VERSION in
 esac
 
 
-APPLICABLE_SERVICES+=("cftools")
+APPLICABLE_MODULES+=("cftools")
 
 CF_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $CF_VERSION)
 

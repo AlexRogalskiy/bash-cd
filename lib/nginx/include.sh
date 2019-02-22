@@ -3,7 +3,7 @@
 checkvar WEB_SERVER
 
 if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
-    APPLICABLE_SERVICES+=("nginx")
+    APPLICABLE_MODULES+=("nginx")
 fi
 
 setup_nginx() {
