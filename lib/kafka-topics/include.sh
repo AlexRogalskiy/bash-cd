@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
+required "kafka-cli"
 checkvar KAFKA_SERVERS
 checkvar KAFKA_CONNECTION
 
 server="${KAFKA_SERVERS[${#KAFKA_SERVERS[@]}-1]}"
 if [ "$server" == "$PRIMARY_IP" ]; then
-    required "kafka-cli"
     APPLICABLE_SERVICES+=("kafka-topics")
 fi
 

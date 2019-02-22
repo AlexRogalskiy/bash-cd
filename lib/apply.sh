@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
 source $DIR/lib/tools.sh
 source $DIR/lib/fix.sh
 
@@ -8,9 +9,6 @@ function usage() {
     fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>] [--var <env-file>]"
 }
 
-usage
-
-exit 6;
 
 VAR="var"
 doSetup=1
@@ -24,7 +22,7 @@ while [ ! -z "$1" ]; do
         install*) PHASE="install"; doSetup=0;;
         --rebuild*) REBUILD="true";;
         --host*) HOST=$1; shift;;
-        --service*) SERVICES=($1); shift;;
+        --module*) MODULES=($1); shift;;
         --var*) VAR=$1; shift;;
         *) usage;;
     esac
@@ -33,29 +31,28 @@ done
 source $DIR/env/${VAR}.sh
 continue $? "Missing env/${VAR}.sh"
 
-if [ ! -z $(which git) ]; then
-    BRANCH="$(cd $DIR && git rev-parse --abbrev-ref HEAD)"
-fi
-
-ALL_IP_ADDRESSES=($(hostname --all-ip-addresses)); echo
-export PRIMARY_IP
-PRIMARY_IP=${ALL_IP_ADDRESSES[0]}
 if [ ! -z "$HOST" ]; then
-    PRIMARY_IP="${!HOST}"
+    PRIMARY_IP="${HOSTS[$HOST]}"
     highlight "USING $HOST AS $PRIMARY_IP"
+else
+    ALL_IP_ADDRESSES=($(hostname --all-ip-addresses))
+    export PRIMARY_IP
+    for IP in "${ALL_IP_ADDRESSES[@]}"; do
+        for H in "${HOSTS[@]}"; do
+            if [ "$IP" == "$H" ]; then
+                PRIMARY_IP="$IP"
+            fi
+        done
+    done
 fi
-
 
 checkvar PRIMARY_IP
-highlight "APPLYING BRANCH '$BRANCH' TO HOST $PRIMARY_IP, PHASE: $PHASE"
+highlight "APPLYING PHASE $PHASE TO HOST $PRIMARY_IP"
 
-checkvar SERVICES
-for service in "${SERVICES[@]}"
+checkvar MODULES
+for module in "${MODULES[@]}"
 do
-    if [ -f "$DIR/lib/$service/include.sh" ]; then
-     echo "Loading Service Definition: $service"
-     source "$DIR/lib/$service/include.sh"
-    fi
+    required $module
 done
 
 if [ -z "$APPLICABLE_SERVICES" ]; then
@@ -65,15 +62,14 @@ fi
 
 DEDUPLICATED_APPLICABLE_SERVICES=$( for i in "${!APPLICABLE_SERVICES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_SERVICES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_SERVICES=($DEDUPLICATED_APPLICABLE_SERVICES)
-echo "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
+log "GOING TO APPLY IN ORDER: ${APPLICABLE_SERVICES[@]}"
 
 declare BUILD_DIR="$DIR/build"
 mkdir -p $BUILD_DIR
 continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
 
-
 if [ $doSetup -eq 1 ]; then
-    info "SETTING UP ALL SERVICES"
+    log "SETTING UP ALL SERVICES"
     mkdir -p $BUILD_DIR
     for service in "${APPLICABLE_SERVICES[@]}"
     do
@@ -93,7 +89,7 @@ case $PHASE in
     ;;
     build*)
         if [ "$REBUILD" == "true" ] && [ "$BUILD_DIR" != "/" ]; then
-            echo "--REBUILD PURGING $BUILD_DIR"
+            log "--REBUILD PURGING $BUILD_DIR"
             rm -rf $BUILD_DIR/**
         fi
         for service in "${APPLICABLE_SERVICES[@]}"

@@ -62,6 +62,10 @@ do
 
 done
 
+rolling_kafka() {
+    return 1
+}
+
 build_kafka() {
     KV=$KAFKA_MINOR_VERSION
     AV="0.9.0"

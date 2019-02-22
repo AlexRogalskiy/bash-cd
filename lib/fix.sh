@@ -5,12 +5,13 @@ KAFKA_VERSION=2.0.0
 MODULES=(
     "cd"
     "zookeeper"
+    "kafka"
+    "kafka-topics"
+    "schema-registry"
 )
 
 #
-#    "kafka"
-#    "kafka-topics"
-#    "schema-registry"
+#
 #    "grafana"
 #    "prometheus"
 #
@@ -18,11 +19,12 @@ MODULES=(
 
 ZOOKEEPER_PORT=2181
 
+KAFKA_LOG_DIRS="/data/kafka"
+KAFKA_PORT=9092
+
+SCHEMA_REGISTRY_PORT=8081
+
 #
-#SCHEMA_REGISTRY_PORT=8081
-#
-#KAFKA_LOG_DIRS="/data/kafka"
-#KAFKA_PORT=9092
 #
 #GRAFANA_PORT=3000
 #

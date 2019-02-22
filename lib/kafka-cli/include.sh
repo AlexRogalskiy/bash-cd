@@ -2,9 +2,11 @@
 
 required "zookeeper"
 required "kafka"
+required "schema-registry"
 checkvar ZOOKEEPER_CONNECTION
 checkvar KAFKA_CONNECTION
 checkvar KAFKA_VERSION
+checkvar SCHEMA_REGISTRY_INTERNAL_URL
 
 APPLICABLE_SERVICES+=("kafka-cli")
 #export AFFINITY_HOME="/opt/affinity"

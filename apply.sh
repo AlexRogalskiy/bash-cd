@@ -48,22 +48,19 @@ while [ ! -z "$1" ]; do
     esac
 done
 
+H=""
 for host in "${HOSTS[@]}"
 do
     if [ ! -z "$host" ]; then
         info "$ssh_host: rsync $DIR -> ${HOSTS[@]}:~/bash-cd"
         rsync -lvzruq -e 'ssh -o StrictHostKeyChecking=no' --exclude 'build'--delete $DIR $host:~
         continue $? "$ssh_host: could not rsync from the controller into $host"
+        H="$H -H $host"
     fi
 done
 
-if [ -z $(command -v pssh) ]; then
-    warn "installing pssh on the controller"
-    apt-get -y update
-    continue $?
-    apt-get -y install pssh
-    continue $?
-fi
+source $DIR/lib/cd/include.sh
+ensure_pssh_installed
 
 checkvar MODULES
 PRIMARY_IP=""
@@ -76,13 +73,21 @@ REQUIRED_MODULES=("${_LOADED_MODULES_BASH_CD[@]}")
 for module in "${REQUIRED_MODULES[@]}"
 do
     parallel=1
-    #TODO if module defines rolling install parallel=0
+    if [ "$(type -t rolling_$module)" == "function" ]; then parallel=0; fi
     if (( parallel == 1 )); then
-        info "$module => ${HOSTS[@]}"
+        info "---------------------------------------------------------------------------------------------------------"
+        info "PARALLEL: $module => ${HOSTS[@]}"
+        info "---------------------------------------------------------------------------------------------------------"
+        pssh ${H[@]} -x "-A" -x "-T" --inline "~/bash-cd/lib/apply.sh --module $module"
+        continue $?
     else
         for host in "${HOSTS[@]}"
         do
-            warn "$module -> $host"
+            info "---------------------------------------------------------------------------------------------------------"
+            info "SERIAL: $module -> $host"
+            info "---------------------------------------------------------------------------------------------------------"
+            ssh -A -T $host "~/bash-cd/lib/apply.sh --module $module"
+            continue $?
         done
     fi
 done

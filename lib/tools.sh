@@ -68,6 +68,7 @@ function get_stack() {
    # to avoid noise we start with 1 to skip the get_stack function
    for (( i=1; i<$stack_size; i++ )); do
       local func="${FUNCNAME[$i]}"
+
       [ x$func = x ] && func=MAIN
       local linen="${BASH_LINENO[$(( i - 1 ))]}"
       local src="${BASH_SOURCE[$i]}"
@@ -78,10 +79,11 @@ function get_stack() {
    STACK="${message}${STACK}"
 }
 
+_TOUCHED_MODULES_BASH_CD=()
 _LOADED_MODULES_BASH_CD=()
 function required() {
     local module="$1"
-    for loaded in "${_LOADED_MODULES_BASH_CD[@]}"; do
+    for loaded in "${_TOUCHED_MODULES_BASH_CD[@]}"; do
         if [ "$loaded" == "$module" ]; then
             log "Already loaded: $module"
             module="";
@@ -89,6 +91,7 @@ function required() {
     done
 
     if [ ! -z "$module" ]; then
+        _TOUCHED_MODULES_BASH_CD+=($module)
         source "$( dirname "${BASH_SOURCE[0]}" )/$module/include.sh"
         log "Adding module definition: $module"
         _LOADED_MODULES_BASH_CD+=($module)
