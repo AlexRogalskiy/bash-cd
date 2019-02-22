@@ -10,7 +10,7 @@ for prom_server in "${PROMETHEUS_SERVERS[@]}"
 do
    export PROMETHEUS_URL="http://$prom_server:9090"
    if [ "$prom_server" == "$PRIMARY_IP" ]; then
-    APPLICABLE_SERVICES+=("prometheus")
+    APPLICABLE_MODULES+=("prometheus")
     if [ ! -z "$KAFKA_SERVERS" ]; then
         export KAFKA_PROMETHEUS_TARGETS=""
         export PROMETHEUS_DATA_DIR

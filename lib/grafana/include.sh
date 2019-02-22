@@ -10,7 +10,7 @@ export GRAFANA_URL="http://$GRAFANA_SERVER:$GRAFANA_PORT"
 ADMIN_URL="http://admin:admin@localhost:$GRAFANA_PORT"
 
 if [ "$GRAFANA_SERVER" == "$PRIMARY_IP" ]; then
-    APPLICABLE_SERVICES+=("grafana")
+    APPLICABLE_MODULES+=("grafana")
 fi
 
 function setup_grafana() {

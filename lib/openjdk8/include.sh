@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-APPLICABLE_SERVICES+=("openjdk8")
+APPLICABLE_MODULES+=("openjdk8")
 
 setup_openjdk8() {
     update-ca-certificates -f

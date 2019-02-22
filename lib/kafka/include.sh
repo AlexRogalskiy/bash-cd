@@ -48,7 +48,7 @@ do
     required "kafka-cli"
     required "zookeeper"
     checkvar ZOOKEEPER_CONNECTION
-    APPLICABLE_SERVICES+=("kafka")
+    APPLICABLE_MODULES+=("kafka")
     export ADMIN_PASSWORD
     export KAFKA_BROKER_ID
     export KAFKA_LOG_DIRS
@@ -56,12 +56,15 @@ do
     export KAFKA_REPL_FACTOR
     export KAFKA_MEMORY_BUFFER
     export KAFKA_SASL_MECHANISM
-    export KAFKA_AUTHORIZER_CLASS_NAME
     export KAFKA_JMX_PORT
     export KAFKA_PORT
    fi
 
 done
+
+rolling_kafka() {
+    return 1
+}
 
 build_kafka() {
     KV=$KAFKA_MINOR_VERSION

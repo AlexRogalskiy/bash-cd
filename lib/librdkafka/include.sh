@@ -2,7 +2,7 @@
 
 required "cftools"
 
-APPLICABLE_SERVICES+=("librdkafka")
+APPLICABLE_MODULES+=("librdkafka")
 
 setup_librdkafka() {
     apt-get install -y librdkafka-dev

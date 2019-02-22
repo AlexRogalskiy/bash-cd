@@ -10,7 +10,7 @@ do
    server="${EXAMPLE_APP_SERVERS[$i]}"
    if [ "$server" == "$PRIMARY_IP" ]; then
     required "openjdk8"
-    APPLICABLE_SERVICES+=("example-build-from-source")
+    APPLICABLE_MODULES+=("example-build-from-source")
    fi
 done
 

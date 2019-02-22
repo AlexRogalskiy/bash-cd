@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 
-APPLICABLE_SERVICES+=("cd")
+APPLICABLE_MODULES+=("cd")
 
-setup_cd() {
+function setup_cd() {
     apt-get -y update --fix-missing
-    apt-get -y install openssh-server curl software-properties-common apt-transport-https netcat git
+    apt-get -y install openssh-server curl software-properties-common apt-transport-https netcat git curl
 }
 
-install_cd() {
-    systemctl daemon-reload
-    systemctl enable cd.service
-}
-
-#cd service restart instead of stop-start because the running /opt/bash-cd-server.sh gets interrupted
-start_cd() {
-    systemctl restart cd.service || systemctl start cd.service
-    systemctl start ssh
+function ensure_pssh_installed() {
+    if [ -z $(command -v parallel-ssh) ]; then
+        warn "$ssh_host: installing pssh on the controller"
+        apt-get -y update
+        continue $? "$ssh_host: could not update package repos"
+        apt-get -y install pssh
+        continue $? "$ssh_host: could not install parallel-ssh"
+    fi
+    if [ -z $(command -v pssh) ]; then
+        pssh=`which parallel-ssh`
+        ln -s $pssh "$(dirname $pssh)/pssh"
+        continue $? "$ssh_host: could not create pssh alias"
+    fi
 }
