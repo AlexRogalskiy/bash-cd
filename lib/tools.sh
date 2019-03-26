@@ -283,6 +283,12 @@ function git_clone_or_update() {
     local_dir="$2"
     branch="$3"
 
+    if [ ! -d "$local_dir/.git" ]; then
+        mkdir -p "$local_dir"
+        git clone "$git_url" "$local_dir"
+        continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
+    fi
+
     cd "$local_dir"
 
     checkbranch() {
@@ -301,18 +307,11 @@ function git_clone_or_update() {
         clone "$git_url" "$local_dir" "$branch"
     else
         log "CLONING BRANCH $branch INTO $local_dir"
-        if [ ! -d "$local_dir/.git" ]; then
-            mkdir -p "$local_dir"
-            git clone "$git_url" "$local_dir"
-            continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
-            checkbranch
-        else
-            checkbranch
-            log "CHECKING FOR UPDATES IN: $local_dir"
-            if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
-                git pull
-                continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
-            fi
+        checkbranch
+        log "CHECKING FOR UPDATES IN: $local_dir"
+        if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
+            git pull
+            continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
         fi
     fi
 }
