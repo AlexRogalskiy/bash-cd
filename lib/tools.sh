@@ -159,7 +159,12 @@ function no_expand() {
 }
 
 function expand_dir() {
-    if [ ! -z "$2" ]; then dir="$1""$2"; else dir="$1"; fi
+    if [ ! -z "$2" ]; then
+        dir="$1""$2";
+        mkdir -p `dirname ${BUILD_DIR}$2`
+    else
+        dir="$1"
+    fi
     for nexp in "${_NO_EXPAND_BASH_CD[@]}"; do
         if [ "$nexp" == "$dir" ]; then
             log "[STATIC] $dir "
