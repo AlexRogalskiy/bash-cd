@@ -4,8 +4,7 @@ function fail() {
     message="$1"
     red='\033[0;31m'
     nc='\033[0m'
-    echo -e "${red}$message $nc" >&2
-    echo "" >&2
+    echo -e "${red}$message $nc"
     exit 1;
 }
 
@@ -13,36 +12,36 @@ function warn() {
     message="$1"
     blue='\033[93m'
     nc='\033[0m'
-    echo -e "${blue}$message $nc" >&2
+    echo -e "${blue}$message $nc"
 }
 
 function log() {
-    echo -e "$1" >&2
+    echo -e "$1"
 }
 
 function logn() {
-    echo -en "$1" >&2
+    echo -en "$1"
 }
 
 function info() {
     message="$1"
     blue='\033[96m'
     nc='\033[0m'
-    echo -e "${blue}$message $nc" >&2
+    echo -e "${blue}$message $nc"
 }
 
 function success() {
     message="$1"
     green='\033[92m'
     nc='\033[0m'
-    echo -e "${green}$message $nc" >&2
+    echo -e "${green}$message $nc"
 }
 
 function highlight() {
     message="$1"
     bold='\033[01m'
     nc='\033[0m'
-    echo -e "${bold}$message $nc" >&2
+    echo -e "${bold}$message $nc"
 }
 
 function continue() {
@@ -50,7 +49,7 @@ function continue() {
     message="$2"
     if [ $result -ne 0 ]; then
         get_stack
-        fail "$message in: $STACK"
+        fail "exit code: $result\n$message in: $STACK"
     fi
 }
 
@@ -68,7 +67,6 @@ function get_stack() {
    # to avoid noise we start with 1 to skip the get_stack function
    for (( i=1; i<$stack_size; i++ )); do
       local func="${FUNCNAME[$i]}"
-
       [ x$func = x ] && func=MAIN
       local linen="${BASH_LINENO[$(( i - 1 ))]}"
       local src="${BASH_SOURCE[$i]}"
@@ -85,7 +83,7 @@ function required() {
     local module="$1"
     for loaded in "${_TOUCHED_MODULES_BASH_CD[@]}"; do
         if [ "$loaded" == "$module" ]; then
-            log "Already loaded: $module"
+            #log "Already loaded: $module"
             module="";
         fi
     done
@@ -97,6 +95,34 @@ function required() {
         _LOADED_MODULES_BASH_CD+=($module)
     fi
 }
+
+function ensure() {
+    cmd=$1
+    instruction=$2
+    if [ -z "$(command -v $cmd)" ]; then
+        eval "${instruction}"
+    fi
+    continue $? "could not install command: $cmd"
+}
+
+#usage: eval $(parse_yaml filename.yaml) - will define toplevel yaml values as variables
+function parse_yaml {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+
 
 function checksum() {
     if [ -d "$1" ]; then
@@ -167,8 +193,8 @@ function expand_dir() {
     fi
     for nexp in "${_NO_EXPAND_BASH_CD[@]}"; do
         if [ "$nexp" == "$dir" ]; then
-            log "[STATIC] $dir "
             target=`dirname ${BUILD_DIR}$2`/
+            log "[STATIC] $dir"
             cp -r $dir $target
             return
         fi
@@ -230,20 +256,29 @@ function download() {
     local_tarball="$dest_dir/$(basename $url)"
     local="$dest_dir/$file_name"
     if [ ! -f "$local" ]; then
-        info "Downloading $(basename $url)"
+        info "Downloading $(basename $url) into $local"
         mkdir -p $(dirname $local)
-        curl -Ls "$url" > "${local}.tmp"
+        curl --progress-bar -Ls "$url" > "${local}.tmp"
+        continue $? "could not download: $url"
         mv "${local}.tmp" "$local"
+        continue $? "cant move download, no such file ${local}.tmp"
         if [ "$3" == "md5" ]; then
             info "Downloading $(basename $url).md5"
             curl -Ls "$url.md5" > "$local.md5"
             if [ $? -ne 0 ]; then
-                rm $local
+#                rm $local
                 fail "md5 checksum download failed: $url.md5"
             fi
             local_md5="$(checksum "$dest_dir/$file_name")"
             remote_md5=$(cat "$dest_dir/$file_name.md5")
             if [[ "$local_md5" != $remote_md5* ]]; then
+#             rm $local
+             fail "download checksum failed for $url"
+            fi
+        elif [ "$3" == "sha256" ]; then
+           local_sha256="$(sha256sum "$local")"
+           remote_sha256="$4"
+           if [[ "$local_sha256" != $remote_sha256* ]]; then
              rm $local
              fail "download checksum failed for $url"
             fi
@@ -288,18 +323,12 @@ function git_clone_or_update() {
     local_dir="$2"
     branch="$3"
 
-    if [ ! -d "$local_dir/.git" ]; then
-        mkdir -p "$local_dir"
-        git clone "$git_url" "$local_dir"
-        continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
-    fi
-
     cd "$local_dir"
 
     checkbranch() {
         checkvar branch
         git fetch
-        continue $? "COULD NOT EXECUTE: git fetch"
+        continue $? "COULD NOT EXECUTE: git fetch in $PWD"
         git reset --hard
         continue $? "COULD NOT EXECUTE: git reset --hard"
         git checkout $branch
@@ -312,16 +341,25 @@ function git_clone_or_update() {
         clone "$git_url" "$local_dir" "$branch"
     else
         log "CLONING BRANCH $branch INTO $local_dir"
-        checkbranch
-        log "CHECKING FOR UPDATES IN: $local_dir"
-        if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
-            git pull
-            continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
+        if [ ! -d "$local_dir/.git" ]; then
+            mkdir -p "$local_dir"
+            git clone "$git_url" "$local_dir"
+            continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
+            cd "$local_dir"
+            checkbranch
+        else
+            checkbranch
+            log "CHECKING FOR UPDATES IN: $local_dir"
+            if [ "$(git_local_revision)" != "$(git_remote_revision)" ]; then
+                git pull
+                continue $? "COULD NOT PULL LATEST CHANGES FROM $git_url INTO $local_dir"
+            fi
         fi
     fi
 }
 
 wait_for_ports() {
+    WAIT=$1
     while IFS=, read -ra addresses
     do
         for address in "${addresses[@]}"; do
@@ -332,7 +370,7 @@ wait_for_ports() {
             IN=(${address//:/ })
             host=${IN[0]}
             port=${IN[1]}
-            WAIT=45
+
             while ! nc -z $host $port 1>/dev/null 2>&1; do
                 logn "\rWaiting for HOST $host PORT:$port ... $WAIT    ";
                 sleep 1
@@ -344,7 +382,7 @@ wait_for_ports() {
             logn  "\n"
         done
 
-    done <<< "$1"
+    done <<< "$2"
 }
 
 wait_for_endpoint() {
@@ -358,8 +396,6 @@ wait_for_endpoint() {
             if [[ $EXPECTED == *$RESPONSE_STATUS* ]]; then
                 logn "\r"
                 return 0;
-            else
-                fail "\rUNEXPECTED RESPONSE_STATUS $RESPONSE_STATUS FOR $URL"
             fi
          fi
          let MAX_WAIT=MAX_WAIT-1
