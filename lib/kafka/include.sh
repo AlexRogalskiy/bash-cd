@@ -67,36 +67,44 @@ rolling_kafka() {
 }
 
 build_kafka() {
-    KV=$KAFKA_MINOR_VERSION
-    AV="0.9.0"
-    URL="https://oss.sonatype.org/content/repositories/releases/io/amient/affinity/metrics-reporter-kafka_${KV}/${AV}/metrics-reporter-kafka_${KV}-${AV}-all.jar"
-    download "$URL" "$BUILD_DIR/opt/kafka/current/libs/" md5
 
-    URL="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar"
-    download $URL "$BUILD_DIR/opt/" md5
+    checkvar AFFINITY_VERSION
+    checkvar KAFKA_PACKAGE
+    checkvar KAFKA_VERSION
+    checkvar KAFKA_MINOR_VERSION
+    checkvar ZOOKEEPER_CONNECTION
+
+     #export versions
+    export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION%.*}
+    export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION%.*}
+
+    #systemctl is-active --quiet kafka
 }
 
 install_kafka() {
-    chmod 0600 /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.password
+    KV=$KAFKA_MINOR_VERSION
+    AV=$AFFINITY_VERSION
+    if [ ! -d "/opt/kafka/current/libs" ]; then
+        fail "/opt/kafka/current/libs doesn't exist"
+    fi
+    URL="https://oss.sonatype.org/content/repositories/releases/io/amient/affinity/metrics-reporter-kafka_${KV}/${AV}/metrics-reporter-kafka_${KV}-${AV}-all.jar"
+    download "$URL" "/opt/kafka/current/libs/" md5
+
+    URL="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.10/jmx_prometheus_javaagent-0.10.jar"
+    download $URL "/opt/" md5
+
     systemctl daemon-reload
     systemctl enable kafka.service
+
+    mkdir -p $KAFKA_LOG_DIRS
+    continue $? "could not create $KAFKA_LOG_DIRS"
 }
 
 start_kafka() {
     systemctl start kafka.service
-    wait_for_ports $PRIMARY_IP:19092
-
-#    if [ $is_last_node -eq 1 ];then
-#        #Default Admin Account
-#        kafka-acls --add --allow-principal 'User:admin' --consumer --topic '*' --group '*'
-#        kafka-acls --add --allow-principal 'User:admin' --producer --topic '*' --group '*'
-#        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation DescribeConfigs
-#        kafka-acls --add --allow-principal 'User:admin' --topic '*' --operation Describe
-#    fi
-
+    wait_for_ports 45 $PRIMARY_IP:$KAFKA_PORT
 }
 
 stop_kafka() {
-    sleep $kafka_rolling_restart_wait
     systemctl stop kafka.service
 }
