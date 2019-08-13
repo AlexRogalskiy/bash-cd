@@ -4,7 +4,7 @@ checkvar KAFKA_VERSION
 
 required "openjdk8"
 
-export KAFKA_VERSION
+export KAFKA_VERSION=2.2.0
 export KAFKA_PACKAGE="kafka_2.11-$KAFKA_VERSION"
 export KAFKA_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $KAFKA_VERSION)
 APPLICABLE_MODULES+=("kafka-distro")

@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-
 source $DIR/lib/tools.sh
-source $DIR/lib/fix.sh
 
 function usage() {
     fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>]"
 }
 
-
 doSetup=1
+no_deps=0
 PHASE="install";
 while [ ! -z "$1" ]; do
     cmd="$1"; shift
@@ -21,13 +19,20 @@ while [ ! -z "$1" ]; do
         install*) PHASE="install"; doSetup=0;;
         --rebuild*) REBUILD="true";;
         --host*) HOST=$1; shift;;
-        --module*) MODULES=($1); shift;;
-        *) usage;;
+        --module*) MODULE=$1; shift;;
+        --skip-dependencies*) no_deps=1; shift;;
+        *)
+        warn "$cmd"
+        usage;;
     esac
 done
 
 source $DIR/env/var.sh
 continue $? "Missing env/var.sh"
+
+######################################################################################
+## DETERMINE PRIMARY IP ADDRESS
+######################################################################################
 
 if [ ! -z "$HOST" ]; then
     PRIMARY_IP="${HOSTS[$HOST]}"
@@ -47,20 +52,49 @@ fi
 checkvar PRIMARY_IP
 highlight "APPLYING PHASE $PHASE TO HOST $PRIMARY_IP"
 
+######################################################################################
+## DECLARE MODULES AND PORTS
+######################################################################################
+
+export ZOOKEEPER_PORT=2181
+export KAFKA_PORT=9092
+export KAFKA_LOG_DIRS="/data/kafka"
+export KAFKA_ADVERTISED_HOSTS=($KAFKA_SERVERS)
+export SCHEMA_REGISTRY_PORT=8081
+
+MODULES=(
+    "cd"
+    "zookeeper"
+    "kafka"
+    "schema-registry"
+)
+
 checkvar MODULES
+declare -g APPLICABLE_MODULES=()
 for module in "${MODULES[@]}"
 do
     required $module
 done
 
-if [ -z "$APPLICABLE_MODULES" ]; then
-    warn "NO MODULES APPLICABLE"
-    exit 0;
+log "----------------------------------------------"
+if [ ! -z "$MODULE" ]; then
+    for module in "${APPLICABLE_MODULES[@]}"; do
+        if [[ "$module" == "$MODULE" ]]; then
+            _TOUCHED_MODULES_BASH_CD=()
+            _LOADED_MODULES_BASH_CD=()
+            APPLICABLE_MODULES=()
+            required $module
+            if (( no_deps == 1 )); then
+                APPLICABLE_MODULES=($module)
+            fi
+            break;
+        fi
+    done
 fi
 
 DEDUPLICATED_APPLICABLE_MODULES=$( for i in "${!APPLICABLE_MODULES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_MODULES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_MODULES=($DEDUPLICATED_APPLICABLE_MODULES)
-log "GOING TO APPLY IN ORDER: ${APPLICABLE_MODULES[@]}"
+log "GOING TO APPLY IN ORDER: ${APPLICABLE_MODULES[*]}"
 
 declare BUILD_DIR="$DIR/build"
 mkdir -p $BUILD_DIR
@@ -182,4 +216,3 @@ case $PHASE in
         usage;
     ;;
 esac
-

@@ -323,6 +323,12 @@ function git_clone_or_update() {
     local_dir="$2"
     branch="$3"
 
+    if [ ! -d "$local_dir/.git" ]; then
+        mkdir -p "$local_dir"
+        git clone "$git_url" "$local_dir"
+        continue $? "COULD NOT EXECUTE: git clone \"$git_url\"  \"$local_dir\""
+    fi
+
     cd "$local_dir"
 
     checkbranch() {
@@ -411,4 +417,3 @@ function urlDecocde() {
     printf "%b%s" "${part:0:4}" "${part:4}" # output decoded char
   done
 }
-

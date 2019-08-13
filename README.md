@@ -28,7 +28,7 @@ ports exposed for testing of each module.
     
     ./apply.sh root@localhost:2222
 
-This should install all modules declared in "lib/fix.sh" with environment overrides in "env/var.sh".
+This using the provided  "env/var.sh".
 
 ## How it works
 
