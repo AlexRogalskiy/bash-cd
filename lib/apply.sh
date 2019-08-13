@@ -148,13 +148,13 @@ case $PHASE in
             chk1=$(checksum $BUILD_DIR)
 
             if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
-            continue $? "[$(date)] FAILED TO BUILD SERVICE $servie"
+            continue $? "[$(date)] FAILED TO BUILD SERVICE $service"
 
             func_modified "build_$service" "clear"
 
 
             if [ -d "$DIR/lib/$service" ]; then expand_dir "$DIR/lib/$service"; fi
-            continue $? "[$(date)] FAILED TO EXPAND SERVICE $servie"
+            continue $? "[$(date)] FAILED TO EXPAND SERVICE $service"
 
             chk2=$(checksum $BUILD_DIR)
             if [ "$chk1" == "$chk2" ]; then

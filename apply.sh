@@ -155,7 +155,7 @@ if (( quick == 0 )); then
     done
 
     info "PARALLEL: INITIALIZING SSH KEYS ON HOSTS AS ${USER}"
-    pscp $AH -x "-T" -x "-o StrictHostKeyChecking=no" $AUTHORIZED_KEYS ~/.ssh/authorized_keys2
+    pscp $AH -x "-o StrictHostKeyChecking=no" $AUTHORIZED_KEYS ~/.ssh/authorized_keys2
     continue $?
 fi
 
