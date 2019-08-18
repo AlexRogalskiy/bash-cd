@@ -12,14 +12,3 @@ EOF
     apt-get install --allow-unauthenticated -y certbot -t stretch-backports
   fi
 }
-
-#install_certbot() {
-#    systemctl daemon-reload
-#    systemctl enable cd.service
-#}
-
-#cd service restart instead of stop-start because the running /opt/bash-cd-server.sh gets interrupted
-#start_cd() {
-#    systemctl restart cd.service || systemctl start cd.service
-#    systemctl start ssh
-#}

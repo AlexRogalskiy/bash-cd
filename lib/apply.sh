@@ -75,22 +75,21 @@ for module in "${MODULES[@]}"
 do
     required $module
 done
-
-log "----------------------------------------------"
-if [ ! -z "$MODULE" ]; then
-    for module in "${APPLICABLE_MODULES[@]}"; do
-        if [[ "$module" == "$MODULE" ]]; then
-            _TOUCHED_MODULES_BASH_CD=()
-            _LOADED_MODULES_BASH_CD=()
-            APPLICABLE_MODULES=()
-            required $module
-            if (( no_deps == 1 )); then
-                APPLICABLE_MODULES=($module)
-            fi
-            break;
+for module in "${APPLICABLE_MODULES[@]}"; do
+    if [ -z "$MODULE" ]; then
+      required $module
+    elif [[ "$module" == "$MODULE" ]]; then
+        _TOUCHED_MODULES_BASH_CD=()
+        _LOADED_MODULES_BASH_CD=()
+        APPLICABLE_MODULES=()
+        required $module
+        if (( no_deps == 1 )); then
+            APPLICABLE_MODULES=($module)
         fi
-    done
-fi
+        break;
+    fi
+done
+log "----------------------------------------------"
 
 DEDUPLICATED_APPLICABLE_MODULES=$( for i in "${!APPLICABLE_MODULES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_MODULES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_MODULES=($DEDUPLICATED_APPLICABLE_MODULES)
