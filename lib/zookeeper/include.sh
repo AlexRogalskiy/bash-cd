@@ -25,6 +25,10 @@ do
    fi
 done
 
+build_zookeeper() {
+  systemctl is-active --quiet zookeeper
+}
+
 install_zookeeper() {
     systemctl daemon-reload
     systemctl enable zookeeper.service

@@ -38,6 +38,7 @@ build_prometheus() {
      rm "$BUILD_DIR/opt/$DOWNLOAD.tar.gz"
      fail "prometheus checksum failed"
     fi
+    systemctl is-active --quiet prometheus
 }
 
 install_prometheus() {

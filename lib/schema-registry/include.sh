@@ -25,6 +25,7 @@ build_schema-registry() {
     checkvar CF_VERSION
     checkvar KAFKA_CONNECTION
     checkvar ZOOKEEPER_CONNECTION
+    systemctl is-active --quiet schema-registry
 }
 
 install_schema-registry() {

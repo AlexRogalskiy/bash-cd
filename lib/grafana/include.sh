@@ -27,6 +27,7 @@ function setup_grafana() {
 
 function build_grafana() {
     no_expand data
+    systemctl is-active --quiet grafana-server
 }
 
 function install_grafana() {

@@ -78,7 +78,7 @@ build_kafka() {
     export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION%.*}
     export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION%.*}
 
-    #systemctl is-active --quiet kafka
+    systemctl is-active --quiet kafka
 }
 
 install_kafka() {

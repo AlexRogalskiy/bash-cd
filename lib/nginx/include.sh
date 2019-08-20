@@ -10,6 +10,10 @@ setup_nginx() {
     apt-get -y -o Dpkg::Options::=--force-confdef install nginx
 }
 
+build_nginx() {
+    systemctl is-active --quiet nginx
+}
+
 install_nginx() {
     mkdir -p /data/log/nginx
     chown -R www-data:www-data /data/log/nginx

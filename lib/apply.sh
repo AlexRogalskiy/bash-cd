@@ -146,7 +146,13 @@ case $PHASE in
             info "BUILDING SERVICE: $service"
             chk1=$(checksum $BUILD_DIR)
 
-            if [ "$(type -t build_$service)" == "function" ]; then "build_$service"; fi
+            if [ "$(type -t build_$service)" == "function" ]; then
+                "build_$service"
+                if [ $? -ne 0 ]; then
+                    warn "module $service is not active, marking for restart"
+                    should_restart=1
+                fi
+            fi
             continue $? "[$(date)] FAILED TO BUILD SERVICE $service"
 
             func_modified "build_$service" "clear"
