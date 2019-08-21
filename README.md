@@ -139,7 +139,7 @@ to the os that are required for the module installation.
 There are specific bash variables which must be declared globally and any variable that are used in *templates* must
 also be *exported*.
 
-The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host HOST0`
+The best way is to checkout the example [`/env/var.sh`](env/var.sh) and try running `./apply.sh build --host 0`
 and then look at the `./build` output.
 
 ### Templates
