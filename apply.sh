@@ -20,9 +20,6 @@ while [ ! -z "$1" ]; do
     case $cmd in
         --controller*) shift; controller=1;;
         --ssh*) shift; SSH=$1 shift;;
-        --org*) shift; org_id=$1; shift;;
-        --adminpwd*) shift; adminpwd=$1; shift;;
-        --fqn*) shift; publicfqn=$1; shift;;
         --branch*) shift; branch=$1; shift;;
         --module*) shift; MODULE=$1; quick=1; shift;;
         --sync-only*) shift; sync_only=1; shift;;
@@ -86,7 +83,7 @@ fi
 
 ##### FROM HERE THIS GETS EXECUTED ON THE CONTROLLER HOST #############################################################
 
-info "INITIALIZING THE CONTROLLER; BRANCH=$branch; ORG_ID=$org_id; FQN=$publicfqn"
+info "INITIALIZING THE CONTROLLER"
 
 
 if (( quick == 0 )); then
@@ -174,7 +171,8 @@ done
 function applyModule() {
     module="$1"
     parallel=1
-    if [ "$(type -t rolling_$module)" == "function" ]; then parallel=0; fi
+    if grep -q "rolling_$module" "$DIR/lib/$module/include.sh"; then parallel=0; fi
+
     if (( parallel == 1 )); then
         info "---------------------------------------------------------------------------------------------------------"
         info "PARALLEL: $module => $AH"
@@ -196,10 +194,18 @@ function applyModule() {
 if (( quick == 1 )); then
     applyModule $MODULE
 else
+#    for module in "${MODULES[@]}"
+#    do
+#        applyModule $module
+#    done
     info "========================================================================================================="
     info "PARALLEL: ALL MODULES => $AH"
     info "========================================================================================================="
-    pssh -t 100000000 $AH -x "-T" -x "-o StrictHostKeyChecking=no" --print "$SUDO ~/bash-cd/lib/apply.sh"
+    pssh -t 100000000 $AH -x "-T" -x "-o StrictHostKeyChecking=no" --inline "$SUDO ~/bash-cd/lib/apply.sh"
     continue $? "FAILURE: PARALLEL: ALL MODULES => ${APPLY_HOSTS[@]}"
 
 fi
+
+
+
+

@@ -3,8 +3,14 @@
 checkvar KAFKA_VERSION
 checkvar KAFKA_MINOR_VERSION
 
+apply "cftools"
+
 export CF_VERSION
+
 case $KAFKA_MINOR_VERSION in
+    2.2*)
+        CF_VERSION="5.2.1"
+    ;;
     2.0*)
         CF_VERSION="5.0.0"
     ;;
@@ -21,9 +27,6 @@ case $KAFKA_MINOR_VERSION in
         fail "unsupported kafka minor version $KAFKA_MINOR_VERSION"
     ;;
 esac
-
-
-APPLICABLE_MODULES+=("cftools")
 
 CF_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $CF_VERSION)
 

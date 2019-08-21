@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-APPLICABLE_SERVICES+=("certbot")
+apply "certbot"
 
 setup_certbot() {
   if [ -z $(command -v certbot) ]; then

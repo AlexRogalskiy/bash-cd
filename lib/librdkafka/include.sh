@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-required "cftools"
-
-APPLICABLE_MODULES+=("librdkafka")
+apply "cftools"
+apply "librdkafka"
 
 setup_librdkafka() {
     apt-get install -y librdkafka-dev

@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 source $DIR/lib/tools.sh
 
 function usage() {
-    fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module>]"
+    fail "Usage: (all|setup|build|install|help) [--rebuild] [--primary-ip <ip-address> ][--host <host>] [--module <module> [--skip-dependencies]]"
 }
 
 doSetup=1
@@ -31,6 +31,32 @@ source $DIR/env/var.sh
 continue $? "Missing env/var.sh"
 
 ######################################################################################
+## DECLARE MODULES AND PORTS
+######################################################################################
+
+export AFFINITY_VERSION=0.12.0
+export KAFKA_VERSION=2.2.0
+export KAFKA_MINOR_VERSION=$(cut -d '.' -f 1,2 <<< $KAFKA_VERSION)
+export CF_VERSION=5.0.0
+export ZOOKEEPER_PORT=2181
+export KAFKA_PORT=9092
+export GRAFANA_PORT=3000
+export KAFKA_LOG_DIRS="/data/kafka"
+export KAFKA_ADVERTISED_HOSTS=($KAFKA_SERVERS)
+export SCHEMA_REGISTRY_PORT=8081
+export PROMETHEUS_DATA_DIR=/data/prometheus/
+export PROMETHEUS_RETENTION_DAYS=30
+
+checkvar MODULES
+#INCLUDE DEFINITIONS OF ALL MODULES WITHOUT PRIMARY_IP
+PRIMARY_IP="-"
+for module in "${MODULES[@]}"
+do
+    required $module
+done
+PRIMARY_IP=""
+
+######################################################################################
 ## DETERMINE PRIMARY IP ADDRESS
 ######################################################################################
 
@@ -50,57 +76,40 @@ else
 fi
 
 checkvar PRIMARY_IP
-highlight "APPLYING PHASE $PHASE TO HOST $PRIMARY_IP"
+highlight "APPLYING PHASE $PHASE TO HOST $PRIMARY_IP [$MODULE]"
 
 ######################################################################################
-## DECLARE MODULES AND PORTS
+## APPLY MODUE(S) THIS TIME WITH PRIMARY_IP SET
 ######################################################################################
 
-export ZOOKEEPER_PORT=2181
-export KAFKA_PORT=9092
-export KAFKA_LOG_DIRS="/data/kafka"
-export KAFKA_ADVERTISED_HOSTS=($KAFKA_SERVERS)
-export SCHEMA_REGISTRY_PORT=8081
-
-MODULES=(
-    "cd"
-    "zookeeper"
-    "kafka"
-    "schema-registry"
-)
-
-checkvar MODULES
-declare -g APPLICABLE_MODULES=()
-for module in "${MODULES[@]}"
-do
+if [ ! -z "$MODULE" ]; then
+    # applying only specific module
+    APPLICABLE_MODULES=()
     required $module
-done
-for module in "${APPLICABLE_MODULES[@]}"; do
-    if [ -z "$MODULE" ]; then
-      required $module
-    elif [[ "$module" == "$MODULE" ]]; then
-        _TOUCHED_MODULES_BASH_CD=()
-        _LOADED_MODULES_BASH_CD=()
-        APPLICABLE_MODULES=()
-        required $module
-        if (( no_deps == 1 )); then
+    if (( no_deps == 1 )); then
+        for module in "${APPLICABLE_MODULES[@]}"; do
+          if [ "$module" == "$MODULE" ]; then
             APPLICABLE_MODULES=($module)
-        fi
-        break;
+            break;
+          fi
+        done
     fi
-done
-log "----------------------------------------------"
+else
+  # applying all modules
+  for module in "${MODULES[@]}"; do
+        required $module
+  done
+fi
 
 DEDUPLICATED_APPLICABLE_MODULES=$( for i in "${!APPLICABLE_MODULES[@]}"; do printf "%s\t%s\n" "$i" "${APPLICABLE_MODULES[$i]}"; done  | sort -k2 -k1n | uniq -f1 | sort -nk1,1 | cut -f2-  | paste -sd " " - )
 APPLICABLE_MODULES=($DEDUPLICATED_APPLICABLE_MODULES)
-log "GOING TO APPLY IN ORDER: ${APPLICABLE_MODULES[*]}"
+warn "GOING TO APPLY IN ORDER: ${APPLICABLE_MODULES[*]}"
 
 declare BUILD_DIR="$DIR/build"
 mkdir -p $BUILD_DIR
 continue $? "COULD NOT CREATE BUILD DIR: $BUILD_DIR"
 
 if [ $doSetup -eq 1 ]; then
-    log "SETTING UP ALL SERVICES"
     mkdir -p $BUILD_DIR
     for service in "${APPLICABLE_MODULES[@]}"
     do
@@ -153,7 +162,6 @@ case $PHASE in
                     should_restart=1
                 fi
             fi
-            continue $? "[$(date)] FAILED TO BUILD SERVICE $service"
 
             func_modified "build_$service" "clear"
 
@@ -221,3 +229,4 @@ case $PHASE in
         usage;
     ;;
 esac
+

@@ -3,8 +3,8 @@
 checkvar WEB_SERVER
 
 if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
-    required "apache"
-    APPLICABLE_MODULES+=("apache-php")
+    apply "apache"
+    apply "apache-php"
 fi
 
 setup_apache-php() {

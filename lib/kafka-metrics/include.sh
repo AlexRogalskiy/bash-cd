@@ -3,7 +3,7 @@
 checkvar KAFKA_VERSION
 checkvar KAFKA_MINOR_VERSION
 
-APPLICABLE_MODULES+=("kafka-metrics")
+apply "kafka-metrics"
 
 if [ "$KAFKA_MINOR_VERSION" == "2.0" ]; then
     KM_BRANCH="master";

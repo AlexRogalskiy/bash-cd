@@ -3,7 +3,7 @@
 checkvar WEB_SERVER
 
 if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
-    APPLICABLE_MODULES+=("apache")
+    apply "apache"
 fi
 
 setup_apache() {

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+checkvar KAFKA_CONNECTION
+checkvar ZOOKEEPER_CONNECTION
 checkvar SCHEMA_REGISTRY_HOST
 checkvar SCHEMA_REGISTRY_PORT
 checkvar AVRO_COMPATIBILITY_LEVEL
@@ -10,11 +12,9 @@ export SCHEMA_REGISTRY_INTERNAL_URL="http://$SCHEMA_REGISTRY_HOST:$schema_regist
 export AVRO_COMPATIBILITY_LEVEL
 
 if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
-    required "openjdk8"
-    required "kafka"
-    required "cftools"
-    required "kafka-cli"
-    APPLICABLE_MODULES+=("schema-registry")
+    apply "cftools"
+    apply "openjdk8"
+    apply "schema-registry"
     export PUBLIC_FQN
     export ADMIN_PASSWORD
     export SCHEMA_REGISTRY_PORT
@@ -22,10 +22,7 @@ if [ "$SCHEMA_REGISTRY_HOST" == "$PRIMARY_IP" ]; then
 fi
 
 build_schema-registry() {
-    checkvar CF_VERSION
-    checkvar KAFKA_CONNECTION
-    checkvar ZOOKEEPER_CONNECTION
-    systemctl is-active --quiet schema-registry
+  checkvar CF_VERSION
 }
 
 install_schema-registry() {
@@ -33,11 +30,6 @@ install_schema-registry() {
     continue $? "Could not install schema-registry"
     systemctl daemon-reload
     systemctl enable schema-registry.service
-    #Default Schema Registry Account
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --consumer --group '*'
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --producer --group '*'
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic _schemas --operation DescribeConfigs
-    kafka-acls --add --allow-principal 'User:schemaregistry' --topic __consumer_offsets --operation Describe
 }
 
 start_schema-registry() {

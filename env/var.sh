@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 
+ENV="test"
+
+MODULES=(
+  "cd"
+  "nginx"
+  "grafana"
+  "prometheus"
+  "zookeeper"
+  "kafka"
+  "kafka-cli"
+  "schema-registry"
+)
+
 HOSTS=(172.17.0.2)
+
+WEB_SERVER=${HOSTS[0]}
 
 ZK_SERVERS=(${HOSTS[0]})
 

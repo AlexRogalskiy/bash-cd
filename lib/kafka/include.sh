@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
+checkvar KAFKA_VERSION
 checkvar KAFKA_LOG_DIRS
 checkvar KAFKA_PROTOCOL
 checkvar KAFKA_SERVERS
 checkvar KAFKA_MEMORY_BUFFER
+checkvar ZOOKEEPER_CONNECTION
 
 export KAFKA_CONNECTION=""
 export KAFKA_INTERNAL_CONNECTION=""
@@ -19,6 +21,7 @@ do
 
    let this_broker_id=i+1+KAFKA_BROKER_ID_OFFSET
    let this_kafka_port=9091+i
+   export KAFKA_ADVERTISED_HOST=${KAFKA_ADVERTISED_HOSTS[$i]}
 
    listener="$KAFKA_PROTOCOL://$kafka_server:$this_kafka_port"
    if [ -z "$KAFKA_CONNECTION" ]; then
@@ -42,13 +45,9 @@ do
     let KAFKA_PORT=this_kafka_port
     let KAFKA_JMX_PORT=KAFKA_PORT+20000
 
-    required "kafka-distro"
-    checkvar KAFKA_PACKAGE
-    checkvar KAFKA_MINOR_VERSION
-    required "kafka-cli"
-    required "zookeeper"
-    checkvar ZOOKEEPER_CONNECTION
-    APPLICABLE_MODULES+=("kafka")
+    apply "kafka-distro"
+    apply "kafka"
+
     export ADMIN_PASSWORD
     export KAFKA_BROKER_ID
     export KAFKA_LOG_DIRS
@@ -70,15 +69,13 @@ build_kafka() {
 
     checkvar AFFINITY_VERSION
     checkvar KAFKA_PACKAGE
-    checkvar KAFKA_VERSION
-    checkvar KAFKA_MINOR_VERSION
     checkvar ZOOKEEPER_CONNECTION
 
      #export versions
     export KAFKA_INTER_BROKER_VERSION=${KAFKA_VERSION%.*}
     export KAFKA_LOG_FORMAT_VERSION=${KAFKA_VERSION%.*}
 
-    systemctl is-active --quiet kafka
+    #systemctl is-active --quiet kafka
 }
 
 install_kafka() {

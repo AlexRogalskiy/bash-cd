@@ -77,11 +77,35 @@ function get_stack() {
    STACK="${message}${STACK}"
 }
 
-_TOUCHED_MODULES_BASH_CD=()
+APPLICABLE_MODULES=()
+_APPLYING_MODULES_BASH_CD=()
+function apply() {
+  if [ "$PRIMARY_IP" == "-" ]; then
+    #only loading module definitions
+    return
+  fi
+  local module="$1"
+  for appplying  in "${_APPLYING_MODULE_BASH_CD[@]}"; do
+    if [ "$module" == "$appplying" ]; then
+      return
+    fi
+  done
+  _APPLYING_MODULE_BASH_CD+=("$module")
+  for applied in "${APPLICABLE_MODULES[@]}"; do
+      if [ "$applied" == "$module" ]; then
+          #log "Already applied: $module"
+          return
+      fi
+  done
+#  info "going to apply module: $module"
+  required $module
+  APPLICABLE_MODULES+=("$module")
+}
+
 _LOADED_MODULES_BASH_CD=()
 function required() {
     local module="$1"
-    for loaded in "${_TOUCHED_MODULES_BASH_CD[@]}"; do
+    for loaded in "${_LOADED_MODULES_BASH_CD[@]}"; do
         if [ "$loaded" == "$module" ]; then
             #log "Already loaded: $module"
             module="";
@@ -89,10 +113,13 @@ function required() {
     done
 
     if [ ! -z "$module" ]; then
-        _TOUCHED_MODULES_BASH_CD+=($module)
         source "$( dirname "${BASH_SOURCE[0]}" )/$module/include.sh"
-        log "Adding module definition: $module"
-        _LOADED_MODULES_BASH_CD+=($module)
+        if [ "$PRIMARY_IP" == "-" ]; then
+            log "Exporting module definitions: $module"
+        else
+#          log "Loading module definition: $module"
+          _LOADED_MODULES_BASH_CD+=($module)
+        fi
     fi
 }
 
@@ -296,7 +323,7 @@ function clone() {
     cd "$dest_dir"
     git fetch
     git reset --hard
-    git checkout "$branch"
+    git checkout "$branch" 2>&1
 }
 
 function git_local_revision() {
@@ -337,7 +364,7 @@ function git_clone_or_update() {
         continue $? "COULD NOT EXECUTE: git fetch in $PWD"
         git reset --hard
         continue $? "COULD NOT EXECUTE: git reset --hard"
-        git checkout $branch
+        git checkout $branch 2>&1
         continue $? "COULD NOT EXECUTE: git checkout \"$branch\""
     }
 
@@ -417,3 +444,4 @@ function urlDecocde() {
     printf "%b%s" "${part:0:4}" "${part:4}" # output decoded char
   done
 }
+

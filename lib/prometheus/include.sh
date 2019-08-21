@@ -4,22 +4,25 @@ checkvar PROMETHEUS_SERVERS
 checkvar PROMETHEUS_DATA_DIR
 checkvar PROMETHEUS_RETENTION_DAYS
 export PROMETHEUS_RETENTION="${PROMETHEUS_RETENTION_DAYS}d"
-#checkvar ALL_HOSTS
+checkvar ENV
 
 for prom_server in "${PROMETHEUS_SERVERS[@]}"
 do
    export PROMETHEUS_URL="http://$prom_server:9090"
    if [ "$prom_server" == "$PRIMARY_IP" ]; then
-    APPLICABLE_MODULES+=("prometheus")
+    apply "prometheus"
     if [ ! -z "$KAFKA_SERVERS" ]; then
         export KAFKA_PROMETHEUS_TARGETS=""
-        export PROMETHEUS_DATA_DIR
-        export PROMETHEUS_RETENTION
         for kafka_host in ${KAFKA_SERVERS[@]}
         do
            KAFKA_PROMETHEUS_TARGETS="${KAFKA_PROMETHEUS_TARGETS} ${kafka_host}:7071,"
         done
     fi
+    export SOME_APP_TARGETS=""
+    for some_app_host in ${SOME_APP_SERVERS[@]}
+    do
+       SOME_APP_TARGETS="${SOME_APP_TARGETS} ${some_app_host}:7081,"
+    done
    fi
 
 #   export PROMETHEUS_NODE_TARGETS=""
@@ -29,6 +32,7 @@ do
 done
 
 build_prometheus() {
+    export ENV
     VERSION=2.4.3
     DOWNLOAD="prometheus-$VERSION.linux-amd64"
     download "https://github.com/prometheus/prometheus/releases/download/v$VERSION/$DOWNLOAD.tar.gz" $BUILD_DIR/opt/
@@ -38,10 +42,26 @@ build_prometheus() {
      rm "$BUILD_DIR/opt/$DOWNLOAD.tar.gz"
      fail "prometheus checksum failed"
     fi
-    systemctl is-active --quiet prometheus
+    cat > $BUILD_DIR/etc/prometheus/$ENV.yml <<- EOM
+- job_name: '$ENV-some-app'
+  scrape_interval: 15s
+  static_configs:
+  - targets: [$SOME_APP_TARGETS]
+    labels:
+      env: $ENV
+EOM
+  systemctl is-active --quiet prometheus
 }
 
 install_prometheus() {
+    cat > /etc/prometheus/prometheus.yml <<- EOM
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+EOM
+    cat /etc/prometheus/prod1.yml >> /etc/prometheus/prometheus.yml
+    cat /etc/prometheus/stag.yml >> /etc/prometheus/prometheus.yml
     cd /opt
     if [ ! -d "/opt/$DOWNLOAD" ]; then
             tar xvf "/opt/$DOWNLOAD.tar.gz"

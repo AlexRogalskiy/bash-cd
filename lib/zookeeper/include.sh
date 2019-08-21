@@ -17,8 +17,8 @@ do
    fi
    ZK_PEERS="${ZK_PEERS}server.${server_id}=$zk_server:2888:3888\n"
    if [ "$zk_server" == "$PRIMARY_IP" ]; then
-    required "kafka-distro"
-    APPLICABLE_MODULES+=("zookeeper")
+    apply "openjdk8"
+    apply "zookeeper"
     export ZK_MY_ID="$server_id"
     export ZOOKEEPER_PORT
     export ZK_PEERS

@@ -7,16 +7,16 @@ checkvar ADMIN_PASSWORD
 
 export GRAFANA_PORT
 export GRAFANA_URL="http://$GRAFANA_SERVER:$GRAFANA_PORT"
-ADMIN_URL="http://admin:admin@localhost:$GRAFANA_PORT"
+ADMIN_URL="http://admin:$ADMIN_PASSWORD@localhost:$GRAFANA_PORT"
 
 if [ "$GRAFANA_SERVER" == "$PRIMARY_IP" ]; then
-    APPLICABLE_MODULES+=("grafana")
+    apply "grafana"
 fi
 
 function setup_grafana() {
-    curl -s https://packagecloud.io/gpg.key | apt-key add -
+    wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
     continue $? "could not add packagecloud repo key"
-    add-apt-repository "deb https://packagecloud.io/grafana/stable/debian/ stretch main"
+    sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
     continue $? "could not add grafana debian repository"
     apt-get -y update
     apt-cache policy grafana
@@ -37,7 +37,7 @@ function install_grafana() {
 
 function start_grafana() {
     systemctl start grafana-server
-    wait_for_endpoint "$GRAFANA_URL" 200 30
+    wait_for_endpoint "$GRAFANA_URL" 302 30
 
     #first change admin password
     curl -s --data "{\"oldPassword\": \"admin\",\"newPassword\": \"$ADMIN_PASSWORD\",\"confirmNew\": \"$ADMIN_PASSWORD\"}" \

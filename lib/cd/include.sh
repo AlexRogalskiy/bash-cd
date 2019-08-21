@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-APPLICABLE_MODULES+=("cd")
+apply "cd"
 
 function setup_cd() {
     apt-get -y update

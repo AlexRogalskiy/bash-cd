@@ -5,7 +5,8 @@ checkvar KAFKA_CONNECTION
 
 server="${KAFKA_SERVERS[${#KAFKA_SERVERS[@]}-1]}"
 if [ "$server" == "$PRIMARY_IP" ]; then
-    APPLICABLE_MODULES+=("kafka-cli" "kafka-topics")
+    apply "kafka-cli"
+    apply "kafka-topics"
 fi
 
 install_kafka-topics() {

@@ -3,20 +3,17 @@
 checkvar WEB_SERVER
 
 if [ "$WEB_SERVER" == "$PRIMARY_IP" ]; then
-    APPLICABLE_MODULES+=("nginx")
+    apply "nginx"
 fi
 
 setup_nginx() {
     apt-get -y -o Dpkg::Options::=--force-confdef install nginx
 }
 
-build_nginx() {
-    systemctl is-active --quiet nginx
-}
-
 install_nginx() {
     mkdir -p /data/log/nginx
     chown -R www-data:www-data /data/log/nginx
+    systemctl is-active --quiet nginx
 }
 
 start_nginx() {
