@@ -85,7 +85,7 @@ highlight "APPLYING PHASE $PHASE TO HOST $PRIMARY_IP [$MODULE]"
 if [ ! -z "$MODULE" ]; then
     # applying only specific module
     APPLICABLE_MODULES=()
-    required $module
+    required $MODULE
     if (( no_deps == 1 )); then
         for module in "${APPLICABLE_MODULES[@]}"; do
           if [ "$module" == "$MODULE" ]; then
