@@ -296,9 +296,9 @@ function download() {
 #                rm $local
                 fail "md5 checksum download failed: $url.md5"
             fi
-            local_md5="$(checksum "$dest_dir/$file_name")"
-            remote_md5=$(cat "$dest_dir/$file_name.md5")
-            if [[ "$local_md5" != $remote_md5* ]]; then
+            local_md5="$(checksum "$dest_dir/$file_name" | cut -d ' ' -f 1)"
+            remote_md5=$(cat "$dest_dir/$file_name.md5" | cut -d ' ' -f 1)
+            if [[ "$local_md5" != "$remote_md5" ]]; then
 #             rm $local
              fail "download checksum failed for $url"
             fi
